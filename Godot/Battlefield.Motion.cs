@@ -15,12 +15,15 @@ public partial class Battlefield
     }
     private bool IsMelee(Unit unit)=>(unit==actor||unit.Origin==actor)&&Battle?.LastSkill is { } skill&&skill.Scale!="essence"&&!skill.Operator.StartsWith("floral_")&&skill.Operator is not ("break" or "buff" or "heal" or "split" or "eclipse_guard");
     private Vector2 GroundPosition(Unit unit)
+        =>AkurothCameraPoint(AkurothVictimPosition(unit,RawGroundPosition(unit),(float)(clock-actionAt)));
+    private Vector2 RawGroundPosition(Unit unit)
     {
         bool friendly=Battle!.Allies.Contains(unit.Origin??unit);var home=CellFoot(friendly,unit.Column,unit.Layer);
         if(EntranceActive)return EntrancePosition(friendly,unit.Column,unit.Layer,home);
         if(unit.Origin!=null)home+=new Vector2(friendly?-70:70,62);
         if(ExitActive&&friendly&&unit.Alive)return home+new Vector2(Size.X*ExitProgress,0);
         float age=(float)(clock-actionAt);
+        if(unit.Id=="akuroth"&&Battle.LastSkill?.Id=="akuroth_chaos")return AkurothChaosPosition(unit,home,age);
         if(IsSpiral(unit))return SpiralPosition(unit,home,age);
         if(ShownFreeze(unit)>0||ShownStun(unit)>0||!IsMelee(unit)||age<0||age>=EffectDuration||Battle.LastTarget is not Unit target)return home;
         var goal=CellFoot(Battle.Allies.Contains(target.Origin??target),target.Column,target.Layer);

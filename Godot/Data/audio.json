@@ -166,5 +166,71 @@
     "Impact": "explosion",
     "Step": "leather",
     "Pitch": 1
+  },
+  "akuroth": {
+    "Cast": "akuroth-cast",
+    "Impact": "akuroth-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_cut": {
+    "Cast": "akuroth-cut-cast",
+    "Impact": "akuroth-cut-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_waves": {
+    "Cast": "akuroth-waves-cast",
+    "Impact": "akuroth-waves-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_prison": {
+    "Cast": "akuroth-prison-cast",
+    "Impact": "akuroth-prison-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_meteor": {
+    "Cast": "akuroth-meteor-cast",
+    "Impact": "akuroth-meteor-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_rift": {
+    "Cast": "akuroth-rift-cast",
+    "Impact": "akuroth-rift-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_chaos": {
+    "Cast": "akuroth-chaos-cast",
+    "Impact": "akuroth-chaos-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_collapse": {
+    "Cast": "akuroth-collapse-cast",
+    "Impact": "akuroth-collapse-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_rain": {
+    "Cast": "akuroth-rain-cast",
+    "Impact": "akuroth-rain-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_rewrite": {
+    "Cast": "akuroth-rewrite-cast",
+    "Impact": "akuroth-rewrite-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_annihilation": {
+    "Cast": "akuroth-annihilation-cast",
+    "Impact": "akuroth-annihilation-impact",
+    "Step": "soft",
+    "Pitch": 1
   }
 }

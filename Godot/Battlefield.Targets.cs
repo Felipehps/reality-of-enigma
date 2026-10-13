@@ -25,7 +25,7 @@ public partial class Battlefield
             var u=pair.Key;if(!u.Alive)continue;
             bool acting=u==DisplayActor,target=IsHighlightedTarget(u);
             if(!acting&&!target)continue;
-            float h=(pair.Value.Size.Y-32)*(1-u.Layer*.045f);
+            float h=(pair.Value.Size.Y-32)*(1-u.Layer*.045f)*(u.Id=="akuroth"?2.4f:1);
             var foot=GroundPosition(u);bool ally=Battle.Allies.Contains(u.Origin??u);
             var at=foot+new Vector2(ally?-42:42,-h-22-Mathf.Sin((float)clock*3)*3);
             if(acting)EnigmaIdentity.Icon(this,0,new Rect2(at-new Vector2(target?44:24,30),new Vector2(48,60)));

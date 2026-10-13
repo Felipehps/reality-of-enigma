@@ -3,6 +3,7 @@ namespace Vaelorn;
 public partial class Unit
 {
     public bool Ascended {get;private set;}
+    public double DamageOverTimeMultiplier=>Ascended?1-Math.Clamp(Definition.Eclipse?.DotResistance??0,0,.8):1;
     public int Carnage {get;private set;}
     public int ConsecutiveHits {get;private set;}
     public int LastSuccessfulRound {get;private set;}
@@ -15,7 +16,7 @@ public partial class Unit
     public double ProtectionFrom(Unit attacker)=>Definition.Scarlet is {} k&&Layer==0&&attacker.Hp/attacker.MaxHp>k.HealthyThreshold?k.FrontProtection:0;
     public void RegisterHit(int round){LastSuccessfulRound=round;ConsecutiveHits++;if(Definition.Eclipse is {} k)Carnage=Math.Min(Ascended?k.AscendedCap:k.StackCap,Carnage+1);}
     public void MissAttack(){ConsecutiveHits=0;}
-    private void UpdateAscension(){if(Definition.Eclipse is {} k&&Hp/MaxHp<=k.Threshold)Ascended=true;}
+    private void UpdateAscension(){if(Definition.Eclipse is {} k&&Hp/MaxHp<=k.Threshold+1e-12)Ascended=true;}
     private void EclipseRound(int round){if(Definition.Eclipse!=null&&round-LastSuccessfulRound>=2){Carnage=Math.Max(0,Carnage-2);ConsecutiveHits=0;LastSuccessfulRound=round;}if(Alive)Hp=Math.Min(MaxHp,Hp+MaxHp*StatusReduction(e=>e.Regeneration));}
 }
 

@@ -55,7 +55,7 @@ public partial class Unit
         var results=new List<(Unit,double,string)>();
         foreach(var form in TargetForms.ToArray())foreach(var stack in form.Statuses.Where(s=>s.Effect.SourceStrengthDamage>0||s.Effect.TargetHpDamage>0).ToArray()){
             if(!form.Alive)break;
-            double amount=form.LoseHp((stack.SourceStrength*stack.Effect.SourceStrengthDamage+form.MaxHp*stack.Effect.TargetHpDamage)*stack.Magnitude);results.Add((form,amount,(stack.Effect.Id=="bleed"||stack.Effect.Family=="bleed")?"bleed":"poison"));
+            double amount=form.LoseHp((stack.SourceStrength*stack.Effect.SourceStrengthDamage+form.MaxHp*stack.Effect.TargetHpDamage)*stack.Magnitude*form.DamageOverTimeMultiplier);results.Add((form,amount,(stack.Effect.Id=="bleed"||stack.Effect.Family=="bleed")?"bleed":"poison"));
             stack.RemainingTurns--;if(stack.RemainingTurns<=0){form.Statuses.Remove(stack);Statuses.Remove(stack);}
         }
         return results;

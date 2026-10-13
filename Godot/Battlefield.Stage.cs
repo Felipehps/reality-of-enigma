@@ -77,7 +77,7 @@ public partial class Battlefield
             "lyra"=>new Rect2(1025,0,511,512),"brakk"=>new Rect2(0,512,580,512),
             "varkhan"=>new Rect2(580,512,440,512),_=>new Rect2(1020,512,516,512)};
         if(u.Id is "raizen" or "solarius"||(u.Id=="kael"&&u.Path=="martial"))art=false;
-        float h=(r.Size.Y-32)*(1-u.Layer*.045f)*(u.Id=="nerathis"?2.1f:u.Id=="maltherion"?1.65f:1),w=h*region.Size.X/region.Size.Y;
+        float h=(r.Size.Y-32)*(1-u.Layer*.045f)*(u.Id=="akuroth"?2.4f:u.Id=="nerathis"?2.1f:u.Id=="maltherion"?1.65f:1)*AkurothCameraZoom,w=h*region.Size.X/region.Size.Y;
         var sprite=new Rect2(at-new Vector2(w/2,h),new Vector2(w,h));
         if(EntranceActive&&clock-entranceAt>=1.5){
             float retreat=Mathf.Clamp((float)(clock-entranceAt-1.5)/1.3f,0,1);
@@ -95,7 +95,8 @@ public partial class Battlefield
         }
         bool shattered=!visibleAlive&&frozenDefeats.Contains(u);
         bool showBody=!shattered||(u.SurvivesDefeat||friendly)&&clock-defeatedAt[u]>1.1;
-        if(DrawSpiral(u,frameAt,h,age)){}
+        if(u.Id=="akuroth")DrawAkuroth(u,at,h,friendly,visibleAlive,active,age,tint,lean,stretch);
+        else if(DrawSpiral(u,frameAt,h,age)){}
         else if(!showBody){}
         else if(DrawFrame(u,frameAt,h,friendly,visibleAlive,active,age,hitAge,tint,visibleAlive?lean:0,visibleAlive?stretch:Vector2.One)){}
         else if(art){

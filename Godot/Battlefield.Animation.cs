@@ -7,7 +7,7 @@ public partial class Battlefield
 {
     private Color PowerColor(Unit u)=>new(u.Id switch{
         "lyra"=>"80eaff","aelia"=>"bda2ff","savor"=>"ff9a42","brakk"=>"ffc971",
-        "varkhan"=>"bc75ff","solarius"=>"ffe18a","raizen"=>"ad70ff",
+        "varkhan"=>"bc75ff","solarius"=>"ffe18a","raizen"=>"ad70ff","akuroth"=>u.Ascended?"e495ff":"ff365a",
         "kael" when u.Path=="martial"=>u.Gate==8?"ff344e":u.Gate>=6?"42baff":"69f5b3",_=>"70e5d3"});
 
     // Articulated pixel silhouettes: each limb has its own combat pose.

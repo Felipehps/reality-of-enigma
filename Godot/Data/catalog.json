@@ -306,6 +306,52 @@
       },
       "CritChance": 0.15,
       "ControlResistance": 0.7
+    },
+    {
+      "Id": "akuroth",
+      "Name": "AKUROTH — O Fim das Realidades",
+      "Role": "boss",
+      "Scale": "essence",
+      "Archetypes": [
+        "swordsman",
+        "weaver"
+      ],
+      "Stats": {
+        "Hp": 36000,
+        "Strength": 180,
+        "Essence": 180,
+        "Defense": 60,
+        "Speed": 105
+      },
+      "Skills": [
+        "akuroth_cut",
+        "akuroth_waves",
+        "akuroth_prison",
+        "akuroth_meteor",
+        "akuroth_rift"
+      ],
+      "ControlResistance": 0.35,
+      "CritChance": 0.05,
+      "Eclipse": {
+        "Threshold": 0.3,
+        "Strength": 1.15,
+        "Defense": 1.35,
+        "Speed": 1.1,
+        "StackCap": 0,
+        "AscendedCap": 0,
+        "CritPerStack": 0,
+        "AscendedCritPerStack": 0,
+        "CritDamagePerStack": 0,
+        "AscendedCritDamagePerStack": 0,
+        "AscendedSkills": [
+          "akuroth_chaos",
+          "akuroth_collapse",
+          "akuroth_rain",
+          "akuroth_rewrite",
+          "akuroth_annihilation"
+        ],
+        "DotResistance": 0.65
+      }
     }
   ],
   "Skills": [
@@ -756,6 +802,135 @@
       "Description": "500% Força +15% vida máxima em todos. Por 2 turnos: -40% dano, -20% velocidade, +30% dano recebido. Ao derrotar: cura15% da vida e +1 Carnificina.",
       "TargetHpDamage": 0.15,
       "InitialCooldown": 2
+    },
+    {
+      "Id": "akuroth_cut",
+      "Name": "Corte do Vazio",
+      "Operator": "line",
+      "Scale": "strength",
+      "Multiplier": 0.52,
+      "Cooldown": 0,
+      "InitialCooldown": 0,
+      "Hits": 3,
+      "MinimumPhase": 1,
+      "Description": "Três cortes na coluna do alvo."
+    },
+    {
+      "Id": "akuroth_waves",
+      "Name": "Ondas da Escuridão",
+      "Operator": "aoe",
+      "Scale": "essence",
+      "Multiplier": 0.8,
+      "Cooldown": 3,
+      "InitialCooldown": 1,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "Slow": 0.15,
+      "Duration": 2,
+      "Description": "Onda em todos os heróis; lentidão de 15% por duas ações."
+    },
+    {
+      "Id": "akuroth_prison",
+      "Name": "Prisão das Almas",
+      "Operator": "hit",
+      "Scale": "essence",
+      "Multiplier": 0.65,
+      "Cooldown": 4,
+      "InitialCooldown": 2,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "Stun": 1,
+      "ApplyStatus": "akuroth_drain",
+      "Description": "Correntes: uma ação de stun e dreno de 2% de HP por duas ações."
+    },
+    {
+      "Id": "akuroth_meteor",
+      "Name": "Meteoro do Eclipse",
+      "Operator": "random",
+      "Scale": "essence",
+      "Multiplier": 0.65,
+      "Cooldown": 4,
+      "InitialCooldown": 3,
+      "Hits": 3,
+      "MinimumPhase": 1,
+      "Description": "Três meteoros em alvos vivos aleatórios."
+    },
+    {
+      "Id": "akuroth_rift",
+      "Name": "Rasgo na Realidade",
+      "Operator": "aoe",
+      "Scale": "essence",
+      "Multiplier": 1.15,
+      "Cooldown": 5,
+      "InitialCooldown": 4,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "ApplyStatus": "akuroth_rift_mark",
+      "Description": "Fendas em área: dano recebido +15% por duas ações."
+    },
+    {
+      "Id": "akuroth_chaos",
+      "Name": "Dança do Caos",
+      "Operator": "random",
+      "Scale": "strength",
+      "Multiplier": 0.45,
+      "Cooldown": 0,
+      "InitialCooldown": 0,
+      "Hits": 5,
+      "MinimumPhase": 2,
+      "Description": "Cinco golpes de braços de sombra em alvos aleatórios."
+    },
+    {
+      "Id": "akuroth_collapse",
+      "Name": "Colapso Dimensional",
+      "Operator": "aoe",
+      "Scale": "essence",
+      "Multiplier": 0.8,
+      "Cooldown": 3,
+      "InitialCooldown": 0,
+      "Hits": 1,
+      "MinimumPhase": 2,
+      "Slow": 0.2,
+      "Duration": 2,
+      "Description": "Dano em área e lentidão de 20% por duas ações."
+    },
+    {
+      "Id": "akuroth_rain",
+      "Name": "Chuva de Eclipses",
+      "Operator": "random",
+      "Scale": "essence",
+      "Multiplier": 0.6,
+      "Cooldown": 4,
+      "InitialCooldown": 1,
+      "Hits": 5,
+      "MinimumPhase": 2,
+      "Description": "Cinco eclipses atingem alvos vivos em sequência."
+    },
+    {
+      "Id": "akuroth_rewrite",
+      "Name": "Reescrita da Existência",
+      "Operator": "aoe",
+      "Scale": "essence",
+      "Multiplier": 0.35,
+      "Cooldown": 5,
+      "InitialCooldown": 2,
+      "Hits": 1,
+      "MinimumPhase": 2,
+      "ApplyStatus": "akuroth_erasure",
+      "Description": "Purifica debuffs de AKUROTH; bloqueia habilidades especiais dos heróis por uma ação. Ataques básicos permanecem disponíveis."
+    },
+    {
+      "Id": "akuroth_annihilation",
+      "Name": "Aniquilação Absoluta",
+      "Operator": "aoe",
+      "Scale": "essence",
+      "Multiplier": 1.6,
+      "Cooldown": 6,
+      "InitialCooldown": 1,
+      "Hits": 2,
+      "MinimumPhase": 2,
+      "TargetHpDamage": 0.06,
+      "Description": "Prepara por uma ação. Na próxima: esfera negra puxa todos os heróis e comprime (35% Essência +1% HP); explode (125% Essência +5% HP). Proteja, cure ou interrompa durante o aviso."
     }
   ],
   "StatusEffects": [
@@ -937,6 +1112,24 @@
       "MaxStacks": 3,
       "Duration": 6,
       "Regeneration": 0.03
+    },
+    {
+      "Id": "akuroth_drain",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "TargetHpDamage": 0.02
+    },
+    {
+      "Id": "akuroth_rift_mark",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "IncomingDamage": 0.15
+    },
+    {
+      "Id": "akuroth_erasure",
+      "MaxStacks": 1,
+      "Duration": 1,
+      "DamageReduction": 0.1
     }
   ],
   "Enemies": [
@@ -3140,6 +3333,14 @@
       "Recruitable": false,
       "RequiresActComplete": false,
       "FragmentCost": 0
+    },
+    {
+      "Id": "akuroth",
+      "CharacterId": "akuroth",
+      "Stage": 70,
+      "Recruitable": false,
+      "RequiresActComplete": true,
+      "FragmentCost": 10
     }
   ],
   "Equipment": [

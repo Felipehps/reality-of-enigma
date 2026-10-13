@@ -31,6 +31,7 @@ public partial class Battle
         this.catalog=catalog;Allies=allies.ToList();Enemies=enemies.ToList();rng=new(seed);Round=firstRound=initialRound;
         foreach(var u in (initializeAllies?Allies:Enumerable.Empty<Unit>()).Concat(Enemies))
             foreach(var skill in SkillsFor(u))u.ReadyRound[skill.Id]=initialRound+1+skill.InitialCooldown;
+        SyncAkurothPhases(initialRound);
     }
     private IEnumerable<Unit> Order(){UpdateScarletSpeed();return Allies.Concat(Enemies).Where(u=>u.Alive)
         .OrderByDescending(u=>u.Speed*(1+Rules.Fighters(Allies.Contains(u)?Allies:Enemies,u).Speed)).ThenBy(u=>u.Layer).ThenBy(u=>u.Column);}
@@ -43,6 +44,9 @@ public partial class Battle
     public string UnavailableReason(Unit actor,Skill skill)
     {
         if(!actor.Alive)return "Fora de combate";
+        if(actor.Id=="akuroth"&&actor.AnnihilationCharging&&skill.Id!="akuroth_annihilation")return "Aniquilação em preparação";
+        if(skill.MinimumPhase>(actor.Ascended?2:1))return "Requer segunda fase";
+        if(skill.Cooldown>0&&actor.Stacks("akuroth_erasure")>0)return "Reescrita: habilidades especiais bloqueadas por uma ação";
         if(skill.FrontOnly&&actor.Layer!=0)return "Requer fileira da frente";
         if(skill.Operator=="split"&&(actor.Duality!=null||actor.Hp/actor.MaxHp<skill.MinimumHpRatio))return "Requer forma original e 70% de vida";
         if(skill.UsesPerBattle>0&&actor.SkillUses.GetValueOrDefault(skill.Id)>=skill.UsesPerBattle)return "Limite de usos nesta batalha";
@@ -83,6 +87,7 @@ public partial class Battle
     {
         if(Finished)return;
         UpdateScarletSpeed();
+        SyncAkurothPhases(Round);
         LockFormation();
         if(turns.Count==0){Round++;Log.Add($"Rodada {Round}");foreach(var u in Order())turns.Enqueue(u);}
         var actor=turns.Dequeue();LastActor=actor;LastImpacts.Clear();LastBuffTargets.Clear();LastAction="";LastSkill=null;LastTarget=null;
@@ -91,24 +96,26 @@ public partial class Battle
             foreach(var tick in actor.TickDamageStatuses()){LastImpacts.Add(new(tick.Target,tick.Damage,tick.Kind,false,0));Log.Add($"{(tick.Kind=="bleed"?"Sangramento":"Veneno")} > {tick.Target.CombatName}: {tick.Damage:F0}");}
             bool spiritCanAct=actor.Duality?.Spirit.StartOwnTurn()??true;
             if(!actor.Alive){LastAction="Sangramento";}
-            else if(!actor.StartOwnTurn()){LastAction=actor.SkippedBy;Log.Add($"{actor.Definition.Name}: perde ação por {actor.SkippedBy}");}
+            else if(!actor.StartOwnTurn()){actor.AnnihilationCharging=false;LastAction=actor.SkippedBy;Log.Add($"{actor.Definition.Name}: perde ação por {actor.SkippedBy}");}
             else
             {
                 var own=Allies.Contains(actor)?Allies:Enemies;var foes=Allies.Contains(actor)?Enemies:Allies;
+                SyncAkurothPhases(Round);
                 // Check against the current round after dequeue, never the next action's round.
-                var available=SkillsFor(actor).Where(s=>(!s.FrontOnly||actor.Layer==0)&&actor.Level>=s.MinimumLevel&&actor.Gate>=s.MinimumGate&&actor.ReadyRound.GetValueOrDefault(s.Id,1+s.InitialCooldown)<=Round&&(s.Operator!="extreme"||actor.CanExtreme)&&(s.UsesPerBattle==0||actor.SkillUses.GetValueOrDefault(s.Id)<s.UsesPerBattle)&&(s.Operator!="split"||actor.Duality==null&&actor.Hp/actor.MaxHp>=s.MinimumHpRatio)).ToArray();
-                var skill=chosen??available.FirstOrDefault(s=>s.Operator=="extreme")??available.LastOrDefault(s=>s.Cooldown>0)??available[0];
+                var available=SkillsFor(actor).Where(s=>(s.Cooldown==0||actor.Stacks("akuroth_erasure")==0)&&s.MinimumPhase<=actor.AkurothPhase&&(!s.FrontOnly||actor.Layer==0)&&actor.Level>=s.MinimumLevel&&actor.Gate>=s.MinimumGate&&actor.ReadyRound.GetValueOrDefault(s.Id,1+s.InitialCooldown)<=Round&&(s.Operator!="extreme"||actor.CanExtreme)&&(s.UsesPerBattle==0||actor.SkillUses.GetValueOrDefault(s.Id)<s.UsesPerBattle)&&(s.Operator!="split"||actor.Duality==null&&actor.Hp/actor.MaxHp>=s.MinimumHpRatio)).ToArray();
+                var skill=chosen??(actor.Id=="akuroth"?ChooseAkurothSkill(actor,available):null)??available.FirstOrDefault(s=>s.Operator=="extreme")??available.LastOrDefault(s=>s.Cooldown>0)??available[0];
                 var target=selected??(skill.Operator is "buff" or "split" or "eclipse_guard"?actor:skill.Operator=="heal"?own.Where(t=>t.Alive).OrderBy(t=>t.Hp/t.MaxHp).First():Targets(foes).OrderBy(t=>t.Layer).ThenBy(t=>t.Column).First());
                 LastSkill=skill;LastTarget=target;LastAction=skill.Name;
                 int stacks=skill.DamageStackStatus==null?0:target.Stacks(skill.DamageStackStatus);
                 Act(actor,target,own,foes,skill,1,stacks);
                 if(spiritCanAct&&actor.Duality is {} linked&&skill.Operator is not ("split" or "buff" or "heal" or "break"))Act(linked.Spirit,target,own,foes,skill,linked.CopyDamage,stacks);
-                if(skill.Cooldown>0)actor.ReadyRound[skill.Id]=Round+skill.Cooldown-actor.PendingCooldownRefund;
+                if(skill.Cooldown>0&&!actor.AnnihilationCharging)actor.ReadyRound[skill.Id]=Round+skill.Cooldown-actor.PendingCooldownRefund;
                 actor.PendingCooldownRefund=0;
             }
             actor.Duality?.Spirit.EndOwnTurn();actor.EndOwnTurn();actor.EndStatusTurn();
         }
         AwardBleedingDefeats();
+        SyncAkurothPhases(Round);
         // Dead units do not leave empty opportunities between the player's clicks.
         while(turns.Count>0&&!turns.Peek().Alive)turns.Dequeue();
         if(turns.Count==0){ApplyBloom();foreach(var u in Allies.Concat(Enemies))u.EndRound(Round);}
@@ -116,6 +123,7 @@ public partial class Battle
     }
     private void Act(Unit u,Unit target,List<Unit> own,List<Unit> foes,Skill s,double damageScale=1,int damageStacks=0)
     {
+        if(s.Id.StartsWith("akuroth_")){ActAkuroth(u,target,own,foes,s);return;}
         if(s.Operator.StartsWith("eclipse_")||s.Operator.StartsWith("scarlet_")){ActExtended(u,target,own,foes,s);return;}
         if(s.Operator.StartsWith("floral_")){ActFloral(u,target,foes,s);return;}
         if(s.Operator=="split"){u.Split(s);Log.Add("Corpo e Espírito despertaram");return;}

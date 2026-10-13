@@ -280,6 +280,7 @@ var dotHero=new Unit(catalog.Hero("sevrin") with {Stats=catalog.Hero("sevrin").S
 var dotVictim=new Unit(Dummy("dot-victim",10));dotVictim.AddStatus(bleedDef,dotHero);dotVictim.Statuses[0].RemainingTurns=1;
 var dotBattle=new Battle(catalog,new[]{dotHero},new[]{dotVictim});dotHero.ReadyRound["scarlet_quick"]=5;dotBattle.Advance();
 Check(!dotVictim.Alive&&dotHero.Hp>dotHero.MaxHp*.5&&dotHero.ReadyRound["scarlet_quick"]==4,"Final bleed tick awards heal and cooldown refund");
+AkurothTests.Run(catalog,Check);
 Console.WriteLine($"{passed} assertions passed.");
 }
 catch(Exception ex)

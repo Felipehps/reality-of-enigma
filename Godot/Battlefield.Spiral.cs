@@ -4,7 +4,7 @@ using System;
 using System.Linq;
 public partial class Battlefield
 {
-    public double ImpactDelay(CombatImpact hit)=>Battle?.LastSkill?.Id=="gale_fangs"?.75+hit.HitIndex*.46:HitMoment+(Battle?.LastSkill?.Operator=="horizon"?Battle.LastImpacts.IndexOf(hit)*.23:hit.HitIndex*.095);
+    public double ImpactDelay(CombatImpact hit)=>Battle?.LastSkill?.Id is {} id&&id.StartsWith("akuroth_")&&hit.Attacker?.Id=="akuroth"?AkurothImpact(id,hit.HitIndex):Battle?.LastSkill?.Id=="gale_fangs"?.75+hit.HitIndex*.46:HitMoment+(Battle?.LastSkill?.Operator=="horizon"?Battle.LastImpacts.IndexOf(hit)*.23:hit.HitIndex*.095);
     private bool IsSpiral(Unit unit)=>Battle?.LastSkill?.Id=="gale_fangs"&&(unit==actor||unit.Origin==actor)&&clock-actionAt>=.18&&clock-actionAt<3.24;
     private Vector2 SpiralPosition(Unit unit,Vector2 home,float age){
         var impacts=Battle!.LastImpacts.Where(h=>h.Attacker==unit).ToArray();

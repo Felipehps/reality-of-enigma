@@ -57,6 +57,7 @@ public partial class Battlefield
         float age=(float)(clock-actionAt);var skill=Battle?.LastSkill;
         if(actor==null||skill==null||age<0||age>EffectDuration||!cards.TryGetValue(actor,out var source))return;
         if(skill.Id=="gale_fangs")return;
+        if(actor.Id=="akuroth"){DrawAkurothPower(age);return;}
         if(skill.Operator.StartsWith("floral_")){DrawFloralPower(age);return;}
         bool friendly=Battle!.Allies.Contains(actor);float direction=friendly?1:-1;
         var from=GroundPosition(actor)+new Vector2(direction*25,-source.Size.Y*.60f);

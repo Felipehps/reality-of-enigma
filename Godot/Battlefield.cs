@@ -18,24 +18,24 @@ public partial class Battlefield:Control
     private double clock,actionAt=-10;
     private Unit? actor;
     public const float HitMoment=.65f;
-    public float EffectDuration=>Battle?.LastSkill?.Id=="gale_fangs"?3.5f:1.85f;
-    public bool IsAnimating=>clock-actionAt<EffectDuration||EntranceActive;
+    public float EffectDuration=>Battle?.LastSkill?.Id is {} id&&id.StartsWith("akuroth_")?AkurothDuration(id):Battle?.LastSkill?.Id=="gale_fangs"?3.5f:1.85f;
+    public bool IsAnimating=>clock-actionAt<EffectDuration||EntranceActive||AkurothTransforming;
     private readonly Color gold=new("d8b474"),blue=new("72dcff");
     private Font Font=>EnigmaStyle.Font;
     public override void _Ready()
     {
         arena=GD.Load<Texture2D>("res://Art/arena-v17.png");poses=GD.Load<Texture2D>("res://Art/kael-poses-v5.png");combatants=GD.Load<Texture2D>("res://Art/combatants-v5.png");
         effectAtlas=GD.Load<Texture2D>("res://Art/skill-effects-v6.png");
-        LoadFrames();LoadSoundProfiles();
+        LoadFrames();LoadSoundProfiles();LoadAkurothArt();LoadAkurothCinema();
         TextureFilter=TextureFilterEnum.Linear;
         CustomMinimumSize=new Vector2(0,440);MouseFilter=MouseFilterEnum.Stop;
     }
-    public void Bind(Battle battle){SilenceActionSounds();audioPaused=false;TargetIntent="attack";FormationEditing=false;exitAt=-100;evolutions.Clear();evolutionPlayed.Clear();entranceAt=-10;endingAt=-10;Battle=battle;Selected=battle.Enemies.FirstOrDefault();floats.Clear();damageNumbers.Clear();defeatedAt.Clear();frozenDefeats.Clear();poseTransitions.Clear();actor=null;actionAt=-10;ResetVisualStates();QueueRedraw();}
+    public void Bind(Battle battle){SilenceActionSounds();akurothTransformations.Clear();ResetArena();audioPaused=false;TargetIntent="attack";FormationEditing=false;exitAt=-100;evolutions.Clear();evolutionPlayed.Clear();entranceAt=-10;endingAt=-10;Battle=battle;foreach(var u in battle.Allies.Concat(battle.Enemies).Where(u=>u.Id=="akuroth"&&u.Ascended&&u.Alive))akurothTransformations[u]=-100;Selected=battle.Enemies.FirstOrDefault();floats.Clear();damageNumbers.Clear();defeatedAt.Clear();frozenDefeats.Clear();poseTransitions.Clear();actor=null;actionAt=-10;ResetVisualStates();QueueRedraw();}
     public double DisplayHp(Unit unit)=>VisualHp(unit);
     public void SelectUnit(Unit unit){Selected=unit;TooltipText="";UnitSelected?.Invoke(unit);QueueRedraw();}
     public void Animate(Dictionary<Unit,double> before)
     {
-        if(Battle==null)return;actor=Battle.LastActor;actionAt=clock;DelayVisualStates();ScheduleActionSound();
+        if(Battle==null)return;actor=Battle.LastActor;actionAt=clock;DelayVisualStates();ScheduleActionSound();ScheduleAkurothTransformation();ScheduleArenaImpacts();
         foreach(var pair in before){var delta=pair.Key.Hp-pair.Value;if(Math.Abs(delta)>.01)floats.Add((pair.Key,delta,clock));}
         foreach(var hit in Battle.LastImpacts)if(hit.Amount>.01)
             damageNumbers.Add(new(hit.Target,hit.Amount,hit.Kind,hit.Critical,hit.HitIndex,clock+ImpactDelay(hit)));
@@ -47,7 +47,7 @@ public partial class Battlefield:Control
         }
         QueueRedraw();
     }
-    public override void _Process(double delta){clock+=delta*1.16;UpdateClashAudio();UpdateActionSound();floats.RemoveAll(f=>clock-f.at>EffectDuration);damageNumbers.RemoveAll(f=>clock-f.At>1.3);QueueRedraw();}
+    public override void _Process(double delta){if(!previewTimeline){double step=delta;if(hitstopRemaining>0){hitstopRemaining-=delta;step*=.08;}clock+=step*1.16;}UpdateArenaImpacts();UpdateClashAudio();UpdateActionSound();floats.RemoveAll(f=>clock-f.at>EffectDuration);damageNumbers.RemoveAll(f=>clock-f.At>1.3);QueueRedraw();}
     public override void _GuiInput(InputEvent e)
     {
         if(e is InputEventMouseMotion motion){TooltipText=BuffHoverText(motion.Position);}
@@ -58,9 +58,10 @@ public partial class Battlefield:Control
     private void Text(string text,Vector2 pos,Color color,int size=14)=>DrawString(Font,pos,text,HorizontalAlignment.Left,-1,size,color);
     public override void _Draw()
     {
-        DrawTextureRect(arena,new Rect2(Vector2.Zero,Size),false);
+        DrawAkurothArena();
+        DrawAkurothWeather();
         DrawRect(new Rect2(Vector2.Zero,new Vector2(Size.X,45)),new Color(.02f,.04f,.08f,.72f));
-        Text(forestEnvironment?"FLORESTA DE VAELORN":"SANTUÁRIO PARTIDO",new Vector2(24,29),gold,17);
+        Text(AkurothInfernoMix()>.5f?"DOMÍNIO INFERNAL • AKUROTH":forestEnvironment?"FLORESTA DE VAELORN":"SANTUÁRIO PARTIDO",new Vector2(24,29),gold,17);
         Text("ATO I   /   ECOS DA FENDA",new Vector2(Size.X-260,29),new Color("c8dbe6"),13);
         for(int n=0;n<18;n++){
             float x=(n*179+(float)clock*7)%Size.X,y=60+(n*93+(float)clock*11)%(Size.Y-100);
@@ -69,6 +70,7 @@ public partial class Battlefield:Control
         cards.Clear();buffHover.Clear();
         if(Battle==null)return;
         DrawFormationGrid();
+        DrawArenaDamage();
         float height=Mathf.Min(136,Size.Y*.205f),width=160;
         foreach(var pair in new[]{(Battle.AlliedTargets,true),(Battle.EnemyTargets,false)})foreach(var unit in pair.Item1){
             var pos=CellFoot(pair.Item2,unit.Column,unit.Layer)+(unit.Origin!=null?new Vector2(pair.Item2?-70:70,62):Vector2.Zero);
@@ -77,8 +79,12 @@ public partial class Battlefield:Control
         }
         foreach(var pair in cards.OrderBy(p=>GroundPosition(p.Key).Y).ThenBy(p=>p.Key.Layer))DrawCombatant(pair.Key,pair.Value,Battle.Allies.Contains(pair.Key.Origin??pair.Key));
         DrawIdentityMarkers();
+        DrawAkurothSoulChains();
         DrawSkillIntroduction();
         DrawPowers();
+        DrawAkurothHud();
+        DrawAkurothCinematicOverlay();
+        DrawArenaFragments();
         DrawDamageNumbers();
         DrawTurnRail();
         DrawEncounterTransition();

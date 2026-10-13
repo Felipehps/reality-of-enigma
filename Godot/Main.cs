@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 public partial class Main:Control
 {
-    private bool IsQa=>OS.GetCmdlineUserArgs().Any(a=>a=="--qa"||a=="--qa-v23"||a=="--qa-v24"||a=="--qa-v25"||a=="--qa-v26"||a=="--qa-v29"||a=="--qa-v30");
+    private bool IsQa=>OS.GetCmdlineUserArgs().Any(a=>a=="--qa"||a=="--qa-v23"||a=="--qa-v24"||a=="--qa-v25"||a=="--qa-v26"||a=="--qa-v29"||a=="--qa-v30"||a=="--qa-akuroth");
     private Game game=null!;
     private Battle? battle;
     private Label summary=null!;
@@ -60,6 +60,7 @@ public partial class Main:Control
         Button(progression,"Kael Arsenal",()=>{Write(game.ChangePath("arsenal")?"Arsenal: kit base provisório":"Requer Kael nível 30");Persist();});
         Button(progression,"Usar no slot 5",()=>{var id=Selected();if(!game.Save.Roster.Any(x=>x.Id==id)||game.Save.Team.Take(4).Contains(id)){Write("Selecione um personagem recrutado fora dos quatro primeiros slots.");return;}game.Save.Team[4]=id;Persist();});
         Button(nav,"Treinamento",ShowTrainingMenu);
+        Button(nav,"AKUROTH • desafio",()=>Start("akuroth"));
         Button(nav,"Invocação",()=>{economy.Visible=!economy.Visible;row.Visible=false;progression.Visible=false;units.Visible=false;});
         Button(nav,"Fichas",ShowCharacterCards);
         Button(nav,"Equipe",()=>{progression.Visible=!progression.Visible;units.Visible=progression.Visible;economy.Visible=false;row.Visible=false;});
@@ -95,7 +96,7 @@ public partial class Main:Control
             foreach(var h in catalog.Characters.Where(c=>!c.Id.StartsWith("enemy")))selection.AddItem(h.Name);
             Refresh();Write("Clique no alvo e depois em uma habilidade do personagem da vez.\nAvançar resolve automaticamente uma ação; Auto reproduz o combate. Arena de efeitos não concede recompensas.\nBanner: Kael, Savor, Aelia, Brakk e Lyra — 20% cada. Kits dos demais ainda parciais.");
             Start("demo");
-            if(OS.GetCmdlineUserArgs().Contains("--qa-v30"))CaptureV30Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v29"))CaptureV29Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v26"))CaptureV26Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v25"))CaptureV25Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v24"))CaptureV24Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v23"))CaptureV23Qa();else if(IsQa)CaptureQa();else ShowHomeMenu();
+            if(OS.GetCmdlineUserArgs().Contains("--qa-akuroth"))CaptureAkurothQa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v30"))CaptureV30Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v29"))CaptureV29Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v26"))CaptureV26Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v25"))CaptureV25Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v24"))CaptureV24Qa();else if(OS.GetCmdlineUserArgs().Contains("--qa-v23"))CaptureV23Qa();else if(IsQa)CaptureQa();else ShowHomeMenu();
         }
         catch(Exception ex){Write("Não foi possível carregar. Nenhum save será sobrescrito. "+ex.Message);SetProcess(false);foreach(var r in new[]{row,economy,progression})foreach(var child in r.GetChildren())if(child is BaseButton b)b.Disabled=true;}
     }
@@ -151,6 +152,11 @@ public partial class Main:Control
         else if(kind=="eclipse"){
             allies=new[]{"sevrin","kael","aelia","brakk","lyra"}.Select((id,i)=>new Unit(game.Catalog.Hero(id),60,false,cells[i]%3,cells[i]/3)).ToList();
             enemies=new(){new Unit(game.Catalog.Hero("maltherion"),60,true,1,1)};
+        }
+        else if(kind=="akuroth")
+        {
+            allies=new[]{"sevrin","kael","aelia","brakk","lyra"}.Select((id,i)=>new Unit(game.Catalog.Hero(id),70,false,cells[i]%3,cells[i]/3)).ToList();
+            enemies=new(){new Unit(game.Catalog.Hero("akuroth"),70,true,1,1)};
         }
         else if(kind=="cast")
         {

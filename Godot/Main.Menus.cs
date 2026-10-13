@@ -44,6 +44,7 @@ public partial class Main
         Action(game.Save.CompletedStage==0?"COMEÇAR JORNADA":"CONTINUAR JORNADA",()=>Start("campaign"));
         Action("MAPA DA CAMPANHA",ShowCampaignMenu);
         Action("HERÓIS REVELADOS",ShowCharacterCards);
+        Action("AKUROTH • DESAFIO",()=>Start("akuroth"));
         if(game.Save.CompletedStage>=10)Action("SALA DE TREINAMENTO",ShowTrainingMenu);
         Action("CONFIGURAÇÕES",ShowSettings);
         Action("SAIR",()=>{Persist();GetTree().Quit();});

@@ -25,7 +25,8 @@ public partial class Battlefield
             float rise=68*(1-Mathf.Exp(-age*3));
             float pop=1+.24f*Mathf.Exp(-age*16);
             int lane=hit.Index%3;
-            var at=new Vector2(r.GetCenter().X+(lane-1)*31+Mathf.Sin(age*2.2f)*(lane-1)*18,r.Position.Y+44-rise-lane*12);
+            var foot=GroundPosition(hit.Unit);
+            var at=foot+new Vector2((lane-1)*31+Mathf.Sin(age*2.2f)*(lane-1)*18,-92-rise-lane*12);
             string value=(heal?"+":"")+hit.Amount.ToString("F0");
             DrawSetTransform(at,0,Vector2.One*pop);
             int size=hit.Critical?39:30;

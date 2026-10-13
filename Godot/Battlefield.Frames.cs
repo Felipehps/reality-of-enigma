@@ -31,6 +31,7 @@ public partial class Battlefield
     public static bool UsesCookingAtlas(Unit unit,bool active,bool alive,float hitAge,string? op)=>unit.Id=="savor"&&active&&alive&&hitAge>=.5f&&unit.Freeze==0&&unit.Stun==0&&op=="buff";
     public bool Portrait(Unit unit,out Texture2D texture,out Rect2 region)
     {
+        if(unit.Id=="akuroth"){texture=akurothArt;region=new Rect2(unit.Ascended?new Vector2(1140,240):new Vector2(320,205),new Vector2(220,230));return true;}
         texture=null!;region=default;
         if(!frameAtlases.TryGetValue(unit.Id,out var atlas))return false;
         var b=atlas.Data.Frames[0];float h=b[3]*.48f,w=Math.Min(b[2],h*.86f);
@@ -39,6 +40,7 @@ public partial class Battlefield
     public static float UpperBodyWeight(float fraction)=>Mathf.Pow(Mathf.Clamp((.72f-fraction)/.72f,0,1),2);
     public bool FullPortrait(Unit unit,out Texture2D texture,out Rect2 region)
     {
+        if(unit.Id=="akuroth"){texture=akurothArt;region=AkurothRegion(unit);return true;}
         texture=null!;region=default;
         if(!frameAtlases.TryGetValue(unit.Id,out var atlas))return false;
         var b=atlas.Data.Frames[0];texture=atlas.Texture;region=new Rect2(b[0],b[1],b[2],b[3]);return true;

@@ -37,7 +37,19 @@ public partial class Battlefield
         else if(skill.Operator=="split"){cast="growl";impact="void";}
         else if(skill.Operator=="horizon"){cast="charge";impact="beam";}
         else if(skill.Ice>0){cast="ice";impact="ice-hit";}
-        soundEvents.Add((clock+.14,cast,profile.Pitch,-15));
+        soundEvents.Add((clock+.14,cast,profile.Pitch,actor.Id=="akuroth"?-11:-15));
+        if(actor.Id=="akuroth"){
+            var hits=Battle.LastImpacts.Where(h=>h.Attacker==actor).ToArray();
+            if(hits.Length>0){
+                if(skill.Id=="akuroth_annihilation"){
+                    soundEvents.Add((clock+1.10,"akuroth-collapse-impact",1,-20));
+                    soundEvents.Add((clock+3.0,impact,1,-10));
+                }
+                else if(skill.Operator=="aoe")soundEvents.Add((clock+ImpactDelay(hits[0]),impact,1,-12));
+                else foreach(var h in hits.Take(8))soundEvents.Add((clock+ImpactDelay(h),impact,1,-15));
+            }
+            return;
+        }
         if(Battle.LastImpacts.Count==0)soundEvents.Add((clock+HitMoment,impact,profile.Pitch,-13));
         else foreach(var hit in Battle.LastImpacts.Select((h,i)=>(h,i)).GroupBy(x=>skill.Operator=="horizon"?x.i:x.h.HitIndex).Select(g=>g.First()).Take(10))soundEvents.Add((clock+ImpactDelay(hit.h),impact,profile.Pitch+(hit.i%3)*.025f,-20));
     }
@@ -67,7 +79,8 @@ public partial class Battlefield
     }
     // Original PCM synthesis: layered material transients, pitched resonances and envelopes.
     public static AudioStreamWav MakeCue(string cue){
-        const int rate=44100;double duration=cue is "heal" or "chime"?.65:cue is "leather" or "soft" or "metal" or "clawstep"?.15:.40;
+        if(cue.StartsWith("akuroth-"))return MakeAkurothCue(cue);
+        const int rate=44100;double duration=cue.StartsWith("akuroth-")?cue is "akuroth-transform" or "akuroth-annihilation"?1.4:.7:cue is "heal" or "chime"?.65:cue is "leather" or "soft" or "metal" or "clawstep"?.15:.40;
         var bytes=new byte[(int)(rate*duration)*2];var random=new Random(626);double low=0,soft=0;
         for(int n=0;n<bytes.Length/2;n++){
             double t=n/(double)rate,noise=random.NextDouble()*2-1;low=.86*low+.14*noise;
@@ -99,6 +112,13 @@ public partial class Battlefield
             else if(cue=="steel")v=(air*1.8+tone(1261)*.035+tone(1937)*.025)*Math.Exp(-t*9);
             else if(cue=="ice")v=(air*.8+tone(2201)*.025+tone(2893)*.018)*swell*Math.Exp(-t*5);
             else if(cue is "swing" or "fire" or "sizzle")v=air*2.1*swell*Math.Exp(-t*3);
+            if(cue.StartsWith("akuroth-")){
+                double baseHz=cue switch{"akuroth-cut"=>185,"akuroth-waves"=>75,"akuroth-prison"=>330,"akuroth-meteor"=>54,"akuroth-rift"=>121,"akuroth-chaos"=>220,"akuroth-collapse"=>63,"akuroth-rain"=>147,"akuroth-rewrite"=>440,"akuroth-transform"=>98,"akuroth-annihilation"=>41,_=>85};
+                double pulse=cue=="akuroth-chaos"?.6+.4*tone(13):1;
+                v=(tone(baseHz)*.22+tone(baseHz*1.498)*.12+soft*3+air*.7)*swell*pulse;
+                if(cue is "akuroth-prison" or "akuroth-rewrite")v+=tone(baseHz*4)*.07*Math.Exp(-t*7);
+                if(cue=="akuroth-impact")v=(tone(57)*.28+soft*3)*Math.Exp(-t*8);
+            }
             v*=Math.Min(1,t/.018)*Math.Min(1,(duration-t)/.05);short sample=(short)(Math.Tanh(v)*22000);bytes[n*2]=(byte)sample;bytes[n*2+1]=(byte)(sample>>8);
         }
         return new AudioStreamWav{Format=AudioStreamWav.FormatEnum.Format16Bits,MixRate=rate,Data=bytes};
