@@ -36,6 +36,7 @@ private:
  FString TransformBoss,AscendedBossKey;int32 ArenaRegion=6;
  void DrawNewCharacter(int32 Index,TSharedPtr<FJsonObject> Unit,FVector Position);
  void DrawNewSkill(FVector Source);
+ void DrawAkurothCostume(int32 Index,TSharedPtr<FJsonObject> Unit);
  void UpdateGarment(int32 Index,const FString& Id,FVector Position);
  void FaceRing(UInstancedStaticMeshComponent* Batch,FVector P,float Radius);
  UPROPERTY() TObjectPtr<UStaticMeshComponent> Backdrop;

@@ -31,7 +31,7 @@ AEnigmaWorldPresentation::AEnigmaWorldPresentation(){
  Sphere=LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Sphere.Sphere"));Cylinder=LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));Cube=LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Cube.Cube"));
  Material=LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Akuroth/Materials/M_Combat.M_Combat"));
  auto Clip=[&](const TCHAR* Path){return LoadObject<UAnimSequence>(nullptr,Path);};
- Attack2=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_Attack_02.MM_Attack_02"));Attack3=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_Attack_03.MM_Attack_03"));ChargedAttack=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_ChargedAttack.MM_ChargedAttack"));Walk=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Walk/MF_Unarmed_Walk_Fwd.MF_Unarmed_Walk_Fwd"));HitReact=Clip(TEXT("/Game/Characters/Mannequins/Anims/Rifle/HitReact/MM_HitReact_Front_Lgt_01.MM_HitReact_Front_Lgt_01"));Death=Clip(TEXT("/Game/Characters/Mannequins/Anims/Death/MM_Death_Front_01.MM_Death_Front_01"));
+ Attack2=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_Attack_02.MM_Attack_02"));Attack3=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_Attack_03.MM_Attack_03"));ChargedAttack=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_ChargedAttack.MM_ChargedAttack"));Walk=Clip(TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Walk/MF_Unarmed_Walk_Fwd.MF_Unarmed_Walk_Fwd"));Death=Clip(TEXT("/Game/Characters/Mannequins/Anims/Death/MM_Death_Front_01.MM_Death_Front_01"));
  Idle=LoadObject<UAnimSequence>(nullptr,TEXT("/Game/Characters/Mannequins/Anims/Unarmed/MM_Idle.MM_Idle"));Attack=LoadObject<UAnimSequence>(nullptr,TEXT("/Game/Characters/Mannequins/Anims/Unarmed/Attack/MM_Attack_01.MM_Attack_01"));
  auto Batch=[&](const TCHAR* Name,UStaticMesh* Mesh,FLinearColor Color,float Glow){auto C=CreateDefaultSubobject<UInstancedStaticMeshComponent>(Name);C->SetupAttachment(RootComponent);C->SetStaticMesh(Mesh);C->SetCollisionEnabled(ECollisionEnabled::NoCollision);C->SetMaterial(0,Material);return C;};
  Effects=Batch(TEXT("EffectLines"),Cylinder,FLinearColor(.35f,.14f,.9f),2.5f);Crimson=Batch(TEXT("CrimsonLines"),Cylinder,FLinearColor(.65f,.015f,.035f),2.5f);Dark=Batch(TEXT("VoidOrbs"),Sphere,FLinearColor(.003f,.001f,.009f),0);ShadowLimbs=Batch(TEXT("ShadowLimbs"),Cylinder,FLinearColor(.008f,.003f,.015f),0);
@@ -133,10 +133,10 @@ void AEnigmaWorldPresentation::Tick(float Dt){
   if(Boss&&!ReducedMotion&&TransformAge>=0&&TransformAge<3)P.Z+=FMath::Sin(TransformAge/3*PI)*120;
   const double* Initial=BeforeHealth.Find(Keys[I]);bool AliveOnScreen=Age>=0&&Initial?EnigmaCombatTiming::HealthAt(*Initial,N(U,TEXT("hp")),N(U,TEXT("maxHp")),Keys[I],Skill,A(Snapshot,TEXT("impacts")),Age,Duration)>0:B(U,TEXT("alive"));
   if(Id==TEXT("mazakin")&&B(U,TEXT("ascended"))&&!AliveOnScreen)P.Z-=80;
-  Bodies[I]->SetWorldLocation(P);Bodies[I]->SetWorldRotation(FRotator(0,I<A(Snapshot,TEXT("allies")).Num()?-90:90,AliveOnScreen||Death?0:75));
+  Bodies[I]->SetWorldLocation(P);Bodies[I]->SetWorldRotation(FRotator(0,I<A(Snapshot,TEXT("allies")).Num()?-90:90,AliveOnScreen?(HitAge>=0?FMath::Sin(FMath::Clamp(HitAge/.42f,0.f,1.f)*PI)*-10:0):Death?0:75));
   if(!AliveOnScreen&&RenderAlive[I]&&Death)Bodies[I]->PlayAnimation(Death,false);
   RenderAlive[I]=AliveOnScreen;Bodies[I]->SetVisibility(Id!=TEXT("mazakin_orb"));
-  if(AliveOnScreen&&I!=Attacker&&HitAge>=0&&Age-HitAge>LastReact[I]+.001f&&HitReact){LastReact[I]=Age-HitAge;ReactUntil[I]=Age+.42f;Bodies[I]->PlayAnimation(HitReact,false);}
+  if(AliveOnScreen&&I!=Attacker&&HitAge>=0&&Age-HitAge>LastReact[I]+.001f ){LastReact[I]=Age-HitAge;ReactUntil[I]=Age+.42f;}
   if(ReactUntil[I]>0&&Age>=ReactUntil[I]&&AliveOnScreen){ReactUntil[I]=-1;Bodies[I]->PlayAnimation(Idle,true);}
   if(Id==TEXT("mazakin_orb")&&AliveOnScreen){Ball(Dark,P+FVector(0,0,100),65);FaceRing(Crimson,P+FVector(0,0,100),72);}
   DrawNewCharacter(I,U,P);
@@ -144,6 +144,7 @@ void AEnigmaWorldPresentation::Tick(float Dt){
   for(auto V:A(U,TEXT("statuses"))){FString Status=S(V->AsObject(),TEXT("id"));if(Status.Contains(TEXT("poison")))Ring(Effects,P+FVector(0,0,10),75);if(Status.Contains(TEXT("bleed")))Beam(Crimson,P+FVector(0,0,80),P+FVector(0,0,20),4);}
   if(N(U,TEXT("ice"))>0||N(U,TEXT("freeze"))>0)Ring(Effects,P+FVector(0,0,45),80);
   if(Id==TEXT("akuroth")){
+   DrawAkurothCostume(I,U);
    FVector Head=Bodies[I]->GetBoneLocation(TEXT("head"));for(int32 H=0;H<2;H++)Beam(ShadowLimbs,Head+FVector(0,H?27:-27,12),Head+FVector(30,H?70:-70,95),10);
    if(B(U,TEXT("ascended"))){for(int32 Arm=0;Arm<6;Arm++){float A=Clock*.6f+Arm*PI/3;FVector Origin=P+FVector(0,0,235),Elbow=Origin+FVector(0,FMath::Cos(A)*140,FMath::Sin(A)*100),Hand=Elbow+FVector(-90,FMath::Cos(A)*90,35);Beam(ShadowLimbs,Origin,Elbow,14);Beam(ShadowLimbs,Elbow,Hand,10);Ring(Crimson,Hand,20);}for(int32 H=0;H<16;H++){FVector Root=Head+FVector(H%4*8-16,H/4*9-18,15);for(int32 J=0;J<6;J++)Beam(WhiteHair,Root+FVector(J*12,FMath::Sin(Clock*2+H+J)*10,-J*28),Root+FVector((J+1)*12,FMath::Sin(Clock*2+H+J+1)*10,-(J+1)*28),3);}}
   }

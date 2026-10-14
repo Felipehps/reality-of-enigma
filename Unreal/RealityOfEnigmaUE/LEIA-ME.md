@@ -36,4 +36,6 @@ Consulte o relatório e os logs ao lado deste projeto para os resultados confirm
 
 ## Recursos
 
-Os modelos, esqueletos e oito animações são dos templates da instalação Unreal da Epic. Os sons gravados reutilizam os arquivos do projeto original; os sons sintetizados reutilizam as funções originais preservadas em NativeCore/Tools/AudioExporter. Content/GameAudio contém os sons importados; os perfis de cada personagem e habilidade permanecem em GameData/audio.json. A pintura de inferno e o conceito anteriores mantêm sua documentação em Design/ARTE-E-PROMPT.md. O conceito é uma referência artística, não uma captura do jogo.
+Os modelos, esqueletos e sete animações e reação procedural de impacto são dos templates da instalação Unreal da Epic. Os sons gravados reutilizam os arquivos do projeto original; os sons sintetizados reutilizam as funções originais preservadas em NativeCore/Tools/AudioExporter. Content/GameAudio contém os sons importados; os perfis de cada personagem e habilidade permanecem em GameData/audio.json. A pintura de inferno e o conceito anteriores mantêm sua documentação em Design/ARTE-E-PROMPT.md. O conceito é uma referência artística, não uma captura do jogo.
+
+Consulte AKUROTH-ARTE-ATUAL.md para a melhoria do traje provisório.

@@ -62,3 +62,70 @@ void AEnigmaWorldPresentation::DrawNewSkill(FVector Source){
   if(Skill==TEXT("hajun_final")){FaceRing(Crimson,FVector(0,0,220),70+FMath::Sin(Age/Duration*PI)*110);Ball(Dark,FVector(0,0,220),55+FMath::Sin(Age/Duration*PI)*90);}
  }
 }
+
+// Costume geometry follows animated bones; no painted attack cards are used.
+void AEnigmaWorldPresentation::DrawAkurothCostume(int32 I,TSharedPtr<FJsonObject> U){
+ const bool PhaseTwo=B(U,TEXT("ascended"));
+ const float Scale=Bodies[I]->GetComponentScale().X;
+ const bool WindEnabled=!ReducedMotion&&RenderAlive[I];
+ auto Bone=[&](const TCHAR* Name){return Bodies[I]->GetBoneLocation(Name);};
+ const FVector Chest=Bone(TEXT("spine_03")),Hip=Bone(TEXT("pelvis")),Head=Bone(TEXT("head"));
+ auto Existing=Garments.Find(Keys[I]);UProceduralMeshComponent* Cloth=Existing?Existing->Get():nullptr;
+ if(!Cloth){
+  Cloth=NewObject<UProceduralMeshComponent>(this);AddInstanceComponent(Cloth);Cloth->SetupAttachment(RootComponent);
+  Cloth->SetCollisionEnabled(ECollisionEnabled::NoCollision);Cloth->RegisterComponent();
+  auto Mat=UMaterialInstanceDynamic::Create(Material,this);Mat->SetVectorParameterValue(TEXT("Color"),FLinearColor(.025f,.006f,.012f));Mat->SetScalarParameterValue(TEXT("Glow"),.015f);Cloth->SetMaterial(0,Mat);Garments.Add(Keys[I],Cloth);
+ }
+ TArray<FVector> Vertices,Normals;TArray<FVector2D> UV;TArray<int32> Triangles;TArray<FLinearColor> VertexTints;TArray<FProcMeshTangent> Tangents;
+ // Separate ribbons create ragged openings rather than a solid rectangular cape.
+ for(int32 Panel=0;Panel<12;Panel++){
+  const int32 Start=Vertices.Num();const float Angle=Panel*2*PI/12;
+  for(int32 Row=0;Row<=10;Row++)for(int32 Side=0;Side<2;Side++){
+   const float T=Row/10.f,A=Angle+(Side?1:-1)*.20f;
+   const float Wind=WindEnabled?FMath::Sin(Clock*1.7f+Panel*.8f+T*5)*T*T:0;
+   const float Length=(Panel%3==0?91.f:Panel%3==1?112.f:103.f)*Scale;
+   const float Radius=(23+T*30+Wind*7)*Scale;
+   const FVector Root=FMath::Lerp(Chest,Hip,FMath::Clamp(T*3,0.f,1.f));
+   Vertices.Add(Root+FVector(FMath::Cos(A)*Radius,FMath::Sin(A)*Radius,-T*Length+Wind*5*Scale));
+   Normals.Add(FVector(FMath::Cos(A),FMath::Sin(A),.2f).GetSafeNormal());UV.Add(FVector2D(Side,T));VertexTints.Add(FLinearColor::White);Tangents.Add(FProcMeshTangent(-FMath::Sin(A),FMath::Cos(A),0));
+  }
+  for(int32 Row=0;Row<10;Row++){int32 A=Start+Row*2,C=A+2;Triangles.Append({A,C,A+1,A+1,C,C+1,A+1,C,A,C+1,C,A+1});}
+  // Red seams follow each panel without turning the entire garment into a light source.
+  for(int32 Row=4;Row<10;Row++)Beam(Crimson,Vertices[Start+Row*2],Vertices[Start+(Row+1)*2],.55f*Scale);
+ }
+ if(Cloth->GetNumSections()==0)Cloth->CreateMeshSection_LinearColor(0,Vertices,Triangles,Normals,UV,VertexTints,Tangents,false);
+ else Cloth->UpdateMeshSection_LinearColor(0,Vertices,Normals,UV,VertexTints,Tangents);
+ // Chest eclipse and shoulder armour.
+ FVector Crest=Chest+FVector(-23*Scale,0,0);Ball(Dark,Crest,10*Scale);FaceRing(Crimson,Crest,12*Scale);
+ for(int32 Side=-1;Side<=1;Side+=2){
+  FVector Shoulder=Bone(Side<0?TEXT("upperarm_l"):TEXT("upperarm_r"));
+  Ball(ShadowLimbs,Shoulder,16*Scale);
+  for(int32 Spike=0;Spike<3;Spike++)Beam(ShadowLimbs,Shoulder+FVector(0,Side*Spike*5*Scale,0),Shoulder+FVector((Spike-1)*9*Scale,Side*(12+Spike*7)*Scale,(22-Spike*3)*Scale),3*Scale);
+ }
+ // Crown, dark hair in phase one, white hair already drawn by the phase-two renderer.
+ for(int32 Spike=0;Spike<5;Spike++){
+  FVector Root=Head+FVector(-3*Scale,(Spike-2)*7*Scale,12*Scale);
+  Beam(ShadowLimbs,Root,Root+FVector((Spike-2)*3*Scale,0,(Spike%2?24:34)*Scale),2*Scale);
+  Ball(Crimson,Root,1.2f*Scale);
+ }
+ if(!PhaseTwo)for(int32 Strand=0;Strand<18;Strand++)for(int32 J=0;J<5;J++){
+  float Wave=WindEnabled?FMath::Sin(Clock*1.5f+Strand*.6f+J*.5f)*3:0;
+  FVector A=Head+FVector((4+J*5)*Scale,((Strand-9)*1.7f+Wave)*Scale,(12-J*9)*Scale);
+  FVector End=A+FVector(5*Scale,0,-9*Scale);Beam(ShadowLimbs,A,End,(1.7f-J*.18f)*Scale);
+ }
+ // Gold chain links drape around the waist and move with the pelvis.
+ for(int32 Chain=0;Chain<2;Chain++)for(int32 Link=0;Link<24;Link++){
+  float A=Link*2*PI/24;FVector P=Hip+FVector(FMath::Cos(A)*29*Scale,FMath::Sin(A)*29*Scale,(-10-Chain*12-8*FMath::Abs(FMath::Sin(A)))*Scale);
+  Beam(Gold,P,P+FVector(-FMath::Sin(A)*3*Scale,FMath::Cos(A)*3*Scale,2*Scale),.65f*Scale);
+ }
+ const FVector Hand=Bone(TEXT("hand_r"));
+ const FVector Axis=Bodies[I]->GetBoneQuaternion(TEXT("hand_r")).RotateVector(FVector(0,1,0)).GetSafeNormal();
+ const FVector Edge=FVector::CrossProduct(Axis,FVector(0,0,1)).GetSafeNormal();
+ Beam(ShadowLimbs,Hand-Axis*15*Scale,Hand+Axis*70*Scale,3.5f*Scale);
+ Beam(Gold,Hand-Axis*3*Scale-Edge*12*Scale,Hand-Axis*3*Scale+Edge*12*Scale,1.5f*Scale);
+ for(int32 J=0;J<8;J++){
+  FVector A=Hand+Axis*(8+J*7)*Scale,End=Hand+Axis*(15+J*7)*Scale;
+  Beam(Crimson,A+Edge*(7-J*.6f)*Scale,End+Edge*(6.4f-J*.6f)*Scale,.7f*Scale);
+  Beam(ShadowLimbs,A,End+Edge*(J%2?5:-5)*Scale,(4-J*.35f)*Scale);
+ }
+}

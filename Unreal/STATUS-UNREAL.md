@@ -40,3 +40,5 @@ A apresentação atual possui animações básicas e efeitos procedurais. As cap
 - IMPORTAR-SAVE-UNREAL.ps1: importa para a versão do editor, sem substituir uma jornada existente. Não importa automaticamente para o save do executável independente.
 
 A base Godot foi preservada. Esta entrega cobre a migração funcional; a produção artística continua pendente.
+
+O traje provisório do AKUROTH foi ampliado; consulte AKUROTH-ARTE-ATUAL.md para a alteração e seus limites.

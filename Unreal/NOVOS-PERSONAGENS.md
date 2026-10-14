@@ -36,7 +36,7 @@ São 29 habilidades ativas novas. Os bosses não entram no banner de invocação
 
 As cinco imagens originais estão preservadas em Design/CharacterReferences e importadas em Content/GameArt. Elas aparecem nas fichas; não são usadas como imagens de ataques.
 
-Os modelos 3D definitivos não foram produzidos. A apresentação reutiliza Manny/Quinn, materiais e oito sequências da instalação Unreal da Epic. Roupas são superfícies procedurais animadas; cabelos, armas, orbes, corcel e pétalas são representações geométricas provisórias. Não substituem modelagem, texturas, rig e animações autorais fiéis às referências. A forma floral e o corcel são bloqueios visuais para testar a transformação.
+Os modelos 3D definitivos não foram produzidos. A apresentação reutiliza Manny/Quinn, materiais e sete sequências e reação procedural de impacto da instalação Unreal da Epic. Roupas são superfícies procedurais animadas; cabelos, armas, orbes, corcel e pétalas são representações geométricas provisórias. Não substituem modelagem, texturas, rig e animações autorais fiéis às referências. A forma floral e o corcel são bloqueios visuais para testar a transformação.
 
 Os efeitos atuais usam geometria 3D e instâncias animadas; Niagara está habilitado, mas não foram entregues gráficos Niagara autorais finais. Os sons reutilizam os recursos anteriores. O tempo de impacto passou a ser compartilhado por áudio, vida, reação e queda dos personagens.
 
