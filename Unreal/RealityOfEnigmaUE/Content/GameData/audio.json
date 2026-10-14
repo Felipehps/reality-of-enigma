@@ -232,5 +232,35 @@
     "Impact": "akuroth-annihilation-impact",
     "Step": "soft",
     "Pitch": 1
+  },
+  "mazakin": {
+    "Cast": "akuroth-rift-cast",
+    "Impact": "akuroth-meteor-impact",
+    "Step": "heavy",
+    "Pitch": 0.8
+  },
+  "hajun": {
+    "Cast": "swing",
+    "Impact": "steel",
+    "Step": "heavy",
+    "Pitch": 0.85
+  },
+  "zhujin": {
+    "Cast": "chime",
+    "Impact": "sizzle",
+    "Step": "soft",
+    "Pitch": 1.1
+  },
+  "tenrin": {
+    "Cast": "chime",
+    "Impact": "beam",
+    "Step": "leather",
+    "Pitch": 1
+  },
+  "zevalon": {
+    "Cast": "charge",
+    "Impact": "beam",
+    "Step": "soft",
+    "Pitch": 1.05
   }
 }

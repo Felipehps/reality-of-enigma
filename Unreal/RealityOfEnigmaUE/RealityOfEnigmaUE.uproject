@@ -2,7 +2,7 @@
   "FileVersion": 3,
   "EngineAssociation": "5.8",
   "Category": "Games",
-  "Description": "AKUROTH: compiled UE 5.8.3 combat prototype with temporary shapes.",
+  "Description": "Reality of Enigma: turn-based RPG migrated to Unreal with native rules and new boss/hero challenges.",
   "Modules": [
     {
       "Name": "RealityOfEnigmaUE",

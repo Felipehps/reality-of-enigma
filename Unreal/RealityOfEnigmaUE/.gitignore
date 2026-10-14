@@ -9,3 +9,4 @@ NativeCore/**/bin/
 NativeCore/**/obj/
 *.pdb
 *.log
+!Content/Runtime/Win64/Enigma.Native.dll

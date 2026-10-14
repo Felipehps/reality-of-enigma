@@ -352,6 +352,203 @@
         ],
         "DotResistance": 0.65
       }
+    },
+    {
+      "Id": "mazakin",
+      "Name": "MAZAKIN — Senhor do Submundo",
+      "Role": "Chefe / Invocação / Controle",
+      "Scale": "strength",
+      "Archetypes": [
+        "weaver"
+      ],
+      "Stats": {
+        "Hp": 18000,
+        "Strength": 190,
+        "Essence": 190,
+        "Defense": 90,
+        "Speed": 100
+      },
+      "Skills": [
+        "mazakin_basic",
+        "mazakin_orb",
+        "mazakin_chains",
+        "mazakin_ritual"
+      ],
+      "ControlResistance": 0.6,
+      "CritChance": 0.1,
+      "Eclipse": {
+        "Threshold": 0.2,
+        "Strength": 1.2,
+        "Defense": 1.2,
+        "Speed": 1.15,
+        "StackCap": 0,
+        "AscendedCap": 0,
+        "CritPerStack": 0,
+        "AscendedCritPerStack": 0,
+        "CritDamagePerStack": 0,
+        "AscendedCritDamagePerStack": 0,
+        "AscendedSkills": [
+          "mazakin_basic",
+          "mazakin_orb",
+          "mazakin_charge",
+          "mazakin_threat",
+          "mazakin_judgment"
+        ]
+      }
+    },
+    {
+      "Id": "mazakin_orb",
+      "Name": "Orbe das Almas Condenadas",
+      "Role": "Summon",
+      "Scale": "strength",
+      "Archetypes": [
+        "weaver"
+      ],
+      "Stats": {
+        "Hp": 600,
+        "Strength": 0,
+        "Essence": 0,
+        "Defense": 10,
+        "Speed": 0
+      },
+      "Skills": [
+        "orb_idle"
+      ]
+    },
+    {
+      "Id": "hajun",
+      "Name": "HAJUN — Carrasco do Submundo",
+      "Role": "Chefe / Tanque / Controle",
+      "Scale": "strength",
+      "Archetypes": [
+        "weaver"
+      ],
+      "Stats": {
+        "Hp": 15000,
+        "Strength": 140,
+        "Essence": 140,
+        "Defense": 30,
+        "Speed": 108
+      },
+      "Skills": [
+        "hajun_basic",
+        "hajun_axe",
+        "hajun_crush",
+        "hajun_body",
+        "hajun_judgment"
+      ],
+      "CritChance": 0.15,
+      "CritMultiplier": 1.5,
+      "ControlResistance": 0.7,
+      "BleedResistance": 0.5,
+      "Eclipse": {
+        "Threshold": 0.5,
+        "Strength": 1.4,
+        "Defense": 1.3333333333333333,
+        "Speed": 1.2222222222222223,
+        "AscendedBleedResistance": 0.7,
+        "AscendedSkills": [
+          "hajun_basic",
+          "hajun_axe",
+          "hajun_crush",
+          "hajun_body",
+          "hajun_judgment",
+          "hajun_bone",
+          "hajun_triple",
+          "hajun_final"
+        ]
+      }
+    },
+    {
+      "Id": "zhujin",
+      "Name": "ZHU JIN — Flor do Veneno",
+      "Role": "Chefe / Controle / Dano em Área",
+      "Scale": "strength",
+      "Archetypes": [
+        "weaver"
+      ],
+      "Stats": {
+        "Hp": 14500,
+        "Strength": 140,
+        "Essence": 140,
+        "Defense": 18.75,
+        "Speed": 132
+      },
+      "Skills": [
+        "zhujin_basic",
+        "zhujin_petals",
+        "zhujin_thorns",
+        "zhujin_sleep"
+      ],
+      "CritChance": 0.15,
+      "CritMultiplier": 1.5,
+      "ControlResistance": 0.6,
+      "PoisonResistance": 0.5,
+      "Floral": {
+        "CrimsonThreshold": 0.5,
+        "BloomThreshold": 0.25,
+        "CrimsonDefense": 1.0666666666666667,
+        "CrimsonControl": 0.7,
+        "CrimsonPoisonResistance": 0.6,
+        "CrimsonCritChance": 0.2,
+        "CrimsonCritMultiplier": 1.7
+      }
+    },
+    {
+      "Id": "tenrin",
+      "Name": "TENRIN — O Leão da Iluminação",
+      "Role": "Dano / Suporte / Controle",
+      "Scale": "strength",
+      "Archetypes": [
+        "channeler",
+        "swordsman"
+      ],
+      "Stats": {
+        "Hp": 1100,
+        "Strength": 210,
+        "Essence": 210,
+        "Defense": 22.5,
+        "Speed": 144
+      },
+      "Skills": [
+        "tenrin_basic",
+        "tenrin_lion",
+        "tenrin_judgment",
+        "tenrin_palm",
+        "tenrin_roar"
+      ],
+      "CritChance": 0.2,
+      "CritMultiplier": 1.6,
+      "ControlResistance": 0.7,
+      "StoryProtected": true
+    },
+    {
+      "Id": "zevalon",
+      "Name": "ZEVALON — Senhor dos Céus",
+      "Role": "Dano / Controle / Suporte",
+      "Scale": "strength",
+      "Archetypes": [
+        "channeler",
+        "swordsman"
+      ],
+      "Stats": {
+        "Hp": 1200,
+        "Strength": 210,
+        "Essence": 210,
+        "Defense": 23.75,
+        "Speed": 150
+      },
+      "Skills": [
+        "zevalon_basic",
+        "zevalon_lion",
+        "zevalon_judgment",
+        "zevalon_will",
+        "zevalon_wrath"
+      ],
+      "CritChance": 0.25,
+      "CritMultiplier": 1.7,
+      "ControlResistance": 0.7,
+      "StoryProtected": true
     }
   ],
   "Skills": [
@@ -931,6 +1128,317 @@
       "MinimumPhase": 2,
       "TargetHpDamage": 0.06,
       "Description": "Prepara por uma ação. Na próxima: esfera negra puxa todos os heróis e comprime (35% Essência +1% HP); explode (125% Essência +5% HP). Proteja, cure ou interrompa durante o aviso."
+    },
+    {
+      "Id": "orb_idle",
+      "Name": "Orbe abissal",
+      "Operator": "buff",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 0,
+      "Description": "Orbe abissal"
+    },
+    {
+      "Id": "mazakin_basic",
+      "Name": "Golpe do Submundo",
+      "Operator": "hit",
+      "Scale": "strength",
+      "Multiplier": 1,
+      "Cooldown": 0,
+      "Description": "Aplica Condenação (máx. 6): −5% Defesa e −4% resistência mágica por acúmulo."
+    },
+    {
+      "Id": "mazakin_orb",
+      "Name": "Orbe Abissal",
+      "Operator": "mazakin_orb",
+      "Scale": "strength",
+      "Multiplier": 2,
+      "Cooldown": 2,
+      "Description": "Invoca até três orbes destrutíveis; cada uma causa 200% de ATK em área e aplica Condenação. Sem ações próprias."
+    },
+    {
+      "Id": "mazakin_chains",
+      "Name": "Correntes do Submundo",
+      "Operator": "mazakin_chains",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 3,
+      "Description": "Prende o alvo por duas ações: 180% de ATK por ação e −40% Velocidade. Com cinco Condenações, +50% de dano."
+    },
+    {
+      "Id": "mazakin_ritual",
+      "Name": "Ritual da Condenação",
+      "Operator": "mazakin_ritual",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 4,
+      "Description": "Marca a casa do alvo por três rodadas: 250% ATK, +2 Condenações e duração +2. Uma morte no campo cura 15% da vida do boss."
+    },
+    {
+      "Id": "mazakin_charge",
+      "Name": "Investida Infernal",
+      "Operator": "line",
+      "Scale": "strength",
+      "Multiplier": 3,
+      "Cooldown": 2,
+      "Description": "300% ATK em linha, uma ação de stun e Condenação. O corcel avança pelo campo.",
+      "MinimumPhase": 2
+    },
+    {
+      "Id": "mazakin_threat",
+      "Name": "Ameaça do Abismo",
+      "Operator": "aoe",
+      "Scale": "strength",
+      "Multiplier": 2.5,
+      "Cooldown": 3,
+      "Description": "250% ATK em área; puxa os inimigos ao centro, aplica duas Condenações e reduz resistência a controle em 50% por duas ações.",
+      "MinimumPhase": 2
+    },
+    {
+      "Id": "mazakin_judgment",
+      "Name": "Juízo Eterno",
+      "Operator": "aoe",
+      "Scale": "strength",
+      "Multiplier": 4.5,
+      "Cooldown": 5,
+      "Description": "450% ATK em área. Contra seis Condenações ignora 80% da Defesa; deixa chamas de 120% ATK por duas rodadas.",
+      "InitialCooldown": 1,
+      "MinimumPhase": 2
+    },
+    {
+      "Id": "hajun_basic",
+      "Name": "Golpe do Carrasco",
+      "Operator": "eclipse_basic",
+      "Scale": "strength",
+      "Multiplier": 1,
+      "Cooldown": 0,
+      "Description": "Carniﬁcina aumenta ao acertar ou receber ataques: cinco acúmulos na primeira fase e sete na segunda.",
+      "TargetHpDamage": 0,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "InitialCooldown": 0
+    },
+    {
+      "Id": "hajun_axe",
+      "Name": "Machado Cortante",
+      "Operator": "eclipse_axe",
+      "Scale": "strength",
+      "Multiplier": 2.2,
+      "Cooldown": 2,
+      "Description": "220% ATK + 5% Vida Máxima. Sequência +15% (máx.45%); crítico aplica sangramento de 5% por duas ações.",
+      "TargetHpDamage": 0.05,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "InitialCooldown": 0
+    },
+    {
+      "Id": "hajun_crush",
+      "Name": "Esmagamento do Submundo",
+      "Operator": "eclipse_crush",
+      "Scale": "strength",
+      "Multiplier": 1.8,
+      "Cooldown": 3,
+      "Description": "180% ATK + 7% Vida Máxima. 30% de chance de stun por duas ações, 50% na segunda fase; aplica −20% ATK ao despertar.",
+      "TargetHpDamage": 0.07,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "InitialCooldown": 0
+    },
+    {
+      "Id": "hajun_body",
+      "Name": "Corpo do Demônio",
+      "Operator": "eclipse_guard",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 4,
+      "Description": "−30% dano recebido e +25% resistência a controle por duas ações. Defesa +3% por 10% de vida perdida (máx.30%). Na fase 2 ganha regeneração de 3%, até três acúmulos.",
+      "TargetHpDamage": 0,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "InitialCooldown": 0
+    },
+    {
+      "Id": "hajun_judgment",
+      "Name": "Machado do Juízo Infernal",
+      "Operator": "eclipse_judgment",
+      "Scale": "strength",
+      "Multiplier": 2.5,
+      "Cooldown": 5,
+      "Description": "250% ATK +10% Vida Máxima em área, bônus por Carnificina e Maldição do Carrasco. Na fase 2: 300% ATK +12% Vida Máxima.",
+      "TargetHpDamage": 0.1,
+      "Hits": 1,
+      "MinimumPhase": 1,
+      "InitialCooldown": 1
+    },
+    {
+      "Id": "hajun_bone",
+      "Name": "Lâmina de Ossos",
+      "Operator": "eclipse_bone",
+      "Scale": "strength",
+      "Multiplier": 2,
+      "Cooldown": 2,
+      "Description": "200% ATK +8% Vida Máxima. Crítico aplica Fratura (−30% Defesa). +10% dano por Carnificina (máx.70%).",
+      "TargetHpDamage": 0.08,
+      "Hits": 1,
+      "MinimumPhase": 2,
+      "InitialCooldown": 0
+    },
+    {
+      "Id": "hajun_triple",
+      "Name": "Corte Triplo do Submundo",
+      "Operator": "eclipse_triple",
+      "Scale": "strength",
+      "Multiplier": 1,
+      "Cooldown": 4,
+      "Description": "Três golpes de 100% ATK; chance de stun no terceiro golpe e 15% de debilitação por golpe.",
+      "TargetHpDamage": 0,
+      "Hits": 3,
+      "MinimumPhase": 2,
+      "InitialCooldown": 0
+    },
+    {
+      "Id": "hajun_final",
+      "Name": "Aniquilação Final",
+      "Operator": "eclipse_final",
+      "Scale": "strength",
+      "Multiplier": 5,
+      "Cooldown": 6,
+      "Description": "500% ATK +15% Vida Máxima em área; Fim Inevitável, redução de velocidade e cura de 15% ao matar.",
+      "TargetHpDamage": 0.15,
+      "Hits": 1,
+      "MinimumPhase": 2,
+      "InitialCooldown": 1
+    },
+    {
+      "Id": "zhujin_basic",
+      "Name": "Toque da Flor Venenosa",
+      "Operator": "floral_basic",
+      "Scale": "strength",
+      "Multiplier": 1,
+      "Cooldown": 0,
+      "Description": "Aplica Veneno: 2% da Vida Máxima por ação, até cinco acúmulos; aos cinco, +25% dano das habilidades do boss."
+    },
+    {
+      "Id": "zhujin_petals",
+      "Name": "Pétalas Incandescentes",
+      "Operator": "floral_petals",
+      "Scale": "strength",
+      "Multiplier": 1.8,
+      "Cooldown": 3,
+      "Description": "180% ATK +8% Vida Máxima em área, Queimadura Venenosa e −20% dano. Abaixo de 40% HP recebe +30% dano. Na forma carmesim, supressão total de 30%."
+    },
+    {
+      "Id": "zhujin_thorns",
+      "Name": "Espinhos da Flor Negra",
+      "Operator": "floral_thorns",
+      "Scale": "strength",
+      "Multiplier": 2.5,
+      "Cooldown": 2,
+      "Description": "250% ATK, três acúmulos de Veneno, −15% Defesa e −10% cura. Com três venenos prévios, +40% dano."
+    },
+    {
+      "Id": "zhujin_sleep",
+      "Name": "Sono da Flor do Paraíso",
+      "Operator": "floral_sleep",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 5,
+      "Description": "35% de chance antes da resistência a controle: sono por duas ações e +20% dano de Zhu Jin; elites e bosses sofrem uma ação.",
+      "InitialCooldown": 1
+    },
+    {
+      "Id": "tenrin_basic",
+      "Name": "Golpe Divino",
+      "Operator": "divine_basic",
+      "Scale": "strength",
+      "Multiplier": 1,
+      "Cooldown": 0,
+      "Description": "Aplica uma Marca Divina."
+    },
+    {
+      "Id": "tenrin_lion",
+      "Name": "Golpe do Leão Celestial",
+      "Operator": "divine_lion",
+      "Scale": "strength",
+      "Multiplier": 2.2,
+      "Cooldown": 2,
+      "Description": "220% ATK; 70% de chance de marca adicional. Três Marcas Divinas: golpe extra de 120% ATK."
+    },
+    {
+      "Id": "tenrin_judgment",
+      "Name": "Julgamento Divino",
+      "Operator": "aoe",
+      "Scale": "strength",
+      "Multiplier": 1.8,
+      "Cooldown": 3,
+      "Description": "180% ATK em área, duas marcas adicionais e −20% velocidade por duas ações. Cinco marcas aplicam redução de dano de 30%."
+    },
+    {
+      "Id": "tenrin_palm",
+      "Name": "Palma da Serenidade",
+      "Operator": "divine_guard",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 4,
+      "Description": "Somente na frente: proteção de 25% por duas ações, −40% dano dos inimigos da sua coluna e remove um efeito negativo de cada aliado.",
+      "FrontOnly": true
+    },
+    {
+      "Id": "tenrin_roar",
+      "Name": "Rugido da Iluminação",
+      "Operator": "aoe",
+      "Scale": "strength",
+      "Multiplier": 3,
+      "Cooldown": 5,
+      "Description": "300% ATK em área, cinco marcas, −30% dano inimigo por três ações e +25% velocidade dos aliados por três rodadas. Mortes com cinco marcas curam 30%.",
+      "InitialCooldown": 1
+    },
+    {
+      "Id": "zevalon_basic",
+      "Name": "Golpe Celestial",
+      "Operator": "divine_basic",
+      "Scale": "strength",
+      "Multiplier": 1,
+      "Cooldown": 0,
+      "Description": "Aplica uma Marca Celestial. Ao atingir cinco, um raio de 150% ATK e cura de 10%."
+    },
+    {
+      "Id": "zevalon_lion",
+      "Name": "Golpe do Leão Celestial",
+      "Operator": "divine_lion",
+      "Scale": "strength",
+      "Multiplier": 2.2,
+      "Cooldown": 2,
+      "Description": "220% ATK; 70% de chance de duas marcas adicionais. Cinco marcas prévias: golpe extra em área de 120% ATK."
+    },
+    {
+      "Id": "zevalon_judgment",
+      "Name": "Julgamento Celestial",
+      "Operator": "aoe",
+      "Scale": "strength",
+      "Multiplier": 1.8,
+      "Cooldown": 3,
+      "Description": "180% ATK em área, duas marcas adicionais e −20% velocidade. Com cinco marcas prévias, +40% dano e ignora 20% Defesa."
+    },
+    {
+      "Id": "zevalon_will",
+      "Name": "Vontade do Céu",
+      "Operator": "divine_guard",
+      "Scale": "strength",
+      "Multiplier": 0,
+      "Cooldown": 4,
+      "Description": "Somente na frente: protege todos os aliados em 25%, remove um efeito negativo e reflete 15% do dano por duas ações; uma marca em cada inimigo.",
+      "FrontOnly": true
+    },
+    {
+      "Id": "zevalon_wrath",
+      "Name": "Ira de Zeus",
+      "Operator": "aoe",
+      "Scale": "strength",
+      "Multiplier": 3.5,
+      "Cooldown": 5,
+      "Description": "350% ATK em área, cinco marcas, −30% dano por três ações e stun por uma ação. Ao matar: cura 20% e +30% iniciativa na próxima rodada.",
+      "InitialCooldown": 1
     }
   ],
   "StatusEffects": [
@@ -1130,6 +1638,87 @@
       "MaxStacks": 1,
       "Duration": 1,
       "DamageReduction": 0.1
+    },
+    {
+      "Id": "condemnation",
+      "MaxStacks": 6,
+      "Duration": 4,
+      "DefenseReduction": 0.05,
+      "MagicResistanceReduction": 0.04
+    },
+    {
+      "Id": "mazakin_chains",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "SourceStrengthDamage": 1.8
+    },
+    {
+      "Id": "abyss_aura",
+      "MaxStacks": 1,
+      "Duration": 1,
+      "HealReduction": 0.7,
+      "IncomingDamage": 0.2
+    },
+    {
+      "Id": "abyss_threat",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "ControlReduction": 0.5
+    },
+    {
+      "Id": "hajun_axe_bleed",
+      "MaxStacks": 5,
+      "Duration": 2,
+      "TargetHpDamage": 0.05,
+      "Family": "bleed"
+    },
+    {
+      "Id": "hajun_regeneration",
+      "MaxStacks": 3,
+      "Duration": 999
+    },
+    {
+      "Id": "divine_mark",
+      "MaxStacks": 5,
+      "Duration": 4
+    },
+    {
+      "Id": "celestial_mark",
+      "MaxStacks": 5,
+      "Duration": 4,
+      "DefenseReduction": 0.04,
+      "ControlPenalty": 0.03
+    },
+    {
+      "Id": "divine_guard",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "IncomingDamage": -0.25
+    },
+    {
+      "Id": "celestial_guard",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "IncomingDamage": -0.25,
+      "Reflection": 0.15
+    },
+    {
+      "Id": "divine_column",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "DamageReduction": 0.4
+    },
+    {
+      "Id": "divine_judgment",
+      "MaxStacks": 1,
+      "Duration": 2,
+      "DamageReduction": 0.3
+    },
+    {
+      "Id": "divine_roar",
+      "MaxStacks": 1,
+      "Duration": 3,
+      "DamageReduction": 0.3
     }
   ],
   "Enemies": [
@@ -3341,6 +3930,30 @@
       "Recruitable": false,
       "RequiresActComplete": true,
       "FragmentCost": 10
+    },
+    {
+      "Id": "mazakin",
+      "CharacterId": "mazakin",
+      "Stage": 0,
+      "Recruitable": false,
+      "RequiresActComplete": false,
+      "FragmentCost": 0
+    },
+    {
+      "Id": "hajun",
+      "CharacterId": "hajun",
+      "Stage": 0,
+      "Recruitable": false,
+      "RequiresActComplete": false,
+      "FragmentCost": 0
+    },
+    {
+      "Id": "zhujin",
+      "CharacterId": "zhujin",
+      "Stage": 0,
+      "Recruitable": false,
+      "RequiresActComplete": false,
+      "FragmentCost": 0
     }
   ],
   "Equipment": [
@@ -3404,9 +4017,13 @@
       "aelia",
       "brakk",
       "lyra",
-      "sevrin"
+      "sevrin",
+      "tenrin",
+      "zevalon"
     ],
     "Weights": [
+      1,
+      1,
       1,
       1,
       1,

@@ -1,6 +1,6 @@
 namespace Vaelorn;
 
-public record CombatImpact(Unit Target,double Amount,string Kind,bool Critical,int HitIndex,Unit? Attacker=null);
+public record CombatImpact(Unit Target,double Amount,string Kind,bool Critical,int HitIndex,Unit? Attacker=null,string Effect="");
 
 public partial class Battle
 {
@@ -33,8 +33,8 @@ public partial class Battle
             foreach(var skill in SkillsFor(u))u.ReadyRound[skill.Id]=initialRound+1+skill.InitialCooldown;
         SyncAkurothPhases(initialRound);
     }
-    private IEnumerable<Unit> Order(){UpdateScarletSpeed();return Allies.Concat(Enemies).Where(u=>u.Alive)
-        .OrderByDescending(u=>u.Speed*(1+Rules.Fighters(Allies.Contains(u)?Allies:Enemies,u).Speed)).ThenBy(u=>u.Layer).ThenBy(u=>u.Column);}
+    private IEnumerable<Unit> Order(){UpdateScarletSpeed();UpdateDivineFocus();return Allies.Concat(Enemies).Where(u=>u.Alive&&u.Definition.Role!="Summon")
+        .OrderByDescending(u=>u.Speed*(1+u.ActionAdvance)*(1+Rules.Fighters(Allies.Contains(u)?Allies:Enemies,u).Speed)).ThenBy(u=>u.Layer).ThenBy(u=>u.Column);}
     public Skill[] SkillsFor(Unit unit)
     {
         if(unit.Id=="kael"&&unit.Path=="martial")
@@ -65,7 +65,7 @@ public partial class Battle
         var skill=SkillsFor(actor).SingleOrDefault(s=>s.Id==skillId);
         if(skill==null){error="Habilidade não pertence ao personagem";return false;}
         error=UnavailableReason(actor,skill);if(error!="")return false;
-        if(skill.Operator is not ("break" or "buff" or "split" or "random" or "eclipse_guard"))
+        if(skill.Operator is not ("break" or "buff" or "split" or "random" or "eclipse_guard" or "divine_guard"))
         {
             var allowed=skill.Operator=="heal"?AlliedTargets:EnemyTargets;
             if(target==null||!target.Alive||!allowed.Contains(target)){error=skill.Operator=="heal"?"Selecione um aliado vivo":"Selecione um inimigo vivo";return false;}
@@ -89,8 +89,11 @@ public partial class Battle
         UpdateScarletSpeed();
         SyncAkurothPhases(Round);
         LockFormation();
-        if(turns.Count==0){Round++;Log.Add($"Rodada {Round}");foreach(var u in Order())turns.Enqueue(u);}
-        var actor=turns.Dequeue();LastActor=actor;LastImpacts.Clear();LastBuffTargets.Clear();LastAction="";LastSkill=null;LastTarget=null;
+        bool newRound=turns.Count==0;
+        if(newRound){Round++;Log.Add($"Rodada {Round}");foreach(var u in Order())turns.Enqueue(u);}
+        var actor=turns.Dequeue();LastActor=actor;LastImpacts.Clear();processedReflections.Clear();LastBuffTargets.Clear();LastAction="";LastSkill=null;LastTarget=null;
+        foreach(var combatant in Allies.Concat(Enemies))combatant.CurrentCombatRound=Round;actor.ActionAdvance=0;
+        if(newRound)StartChampionRound();
         if(actor.Alive)
         {
             foreach(var tick in actor.TickDamageStatuses()){LastImpacts.Add(new(tick.Target,tick.Damage,tick.Kind,false,0));Log.Add($"{(tick.Kind=="bleed"?"Sangramento":"Veneno")} > {tick.Target.CombatName}: {tick.Damage:F0}");}
@@ -100,11 +103,11 @@ public partial class Battle
             else
             {
                 var own=Allies.Contains(actor)?Allies:Enemies;var foes=Allies.Contains(actor)?Enemies:Allies;
-                SyncAkurothPhases(Round);
+                SyncAkurothPhases(Round);SyncChampionPhases();UpdateChampionAuras();
                 // Check against the current round after dequeue, never the next action's round.
                 var available=SkillsFor(actor).Where(s=>(s.Cooldown==0||actor.Stacks("akuroth_erasure")==0)&&s.MinimumPhase<=actor.AkurothPhase&&(!s.FrontOnly||actor.Layer==0)&&actor.Level>=s.MinimumLevel&&actor.Gate>=s.MinimumGate&&actor.ReadyRound.GetValueOrDefault(s.Id,1+s.InitialCooldown)<=Round&&(s.Operator!="extreme"||actor.CanExtreme)&&(s.UsesPerBattle==0||actor.SkillUses.GetValueOrDefault(s.Id)<s.UsesPerBattle)&&(s.Operator!="split"||actor.Duality==null&&actor.Hp/actor.MaxHp>=s.MinimumHpRatio)).ToArray();
                 var skill=chosen??(actor.Id=="akuroth"?ChooseAkurothSkill(actor,available):null)??available.FirstOrDefault(s=>s.Operator=="extreme")??available.LastOrDefault(s=>s.Cooldown>0)??available[0];
-                var target=selected??(skill.Operator is "buff" or "split" or "eclipse_guard"?actor:skill.Operator=="heal"?own.Where(t=>t.Alive).OrderBy(t=>t.Hp/t.MaxHp).First():Targets(foes).OrderBy(t=>t.Layer).ThenBy(t=>t.Column).First());
+                var target=selected??(skill.Operator is "buff" or "split" or "eclipse_guard" or "divine_guard" or "reposition"?actor:skill.Operator=="heal"?own.Where(t=>t.Alive).OrderBy(t=>t.Hp/t.MaxHp).First():Targets(foes).OrderBy(t=>t.Layer).ThenBy(t=>t.Column).First());
                 LastSkill=skill;LastTarget=target;LastAction=skill.Name;
                 int stacks=skill.DamageStackStatus==null?0:target.Stacks(skill.DamageStackStatus);
                 Act(actor,target,own,foes,skill,1,stacks);
@@ -114,15 +117,19 @@ public partial class Battle
             }
             actor.Duality?.Spirit.EndOwnTurn();actor.EndOwnTurn();actor.EndStatusTurn();
         }
+        ResolveChampionReflections();ResolveChampionDefeats();UpdateDivineFocus();
         AwardBleedingDefeats();
         SyncAkurothPhases(Round);
         // Dead units do not leave empty opportunities between the player's clicks.
         while(turns.Count>0&&!turns.Peek().Alive)turns.Dequeue();
-        if(turns.Count==0){ApplyBloom();foreach(var u in Allies.Concat(Enemies))u.EndRound(Round);}
+        if(turns.Count==0){ResolveChampionHazards();ResolveChampionReflections();ResolveChampionDefeats();ApplyBloom();foreach(var u in Allies.Concat(Enemies))u.EndRound(Round);}
         if(Finished)Log.Add(Won?"Vitória":"Derrota ou limite de 100 rodadas");
     }
     private void Act(Unit u,Unit target,List<Unit> own,List<Unit> foes,Skill s,double damageScale=1,int damageStacks=0)
     {
+        if(s.Operator=="reposition"){u.Reposition(repositionCell);LastBuffTargets.Add(u);return;}
+        if(s.Id.StartsWith("mazakin_")){ActMazakin(u,target,own,foes,s);return;}
+        if(s.Id.StartsWith("tenrin_")||s.Id.StartsWith("zevalon_")){ActDivine(u,target,own,foes,s);return;}
         if(s.Id.StartsWith("akuroth_")){ActAkuroth(u,target,own,foes,s);return;}
         if(s.Operator.StartsWith("eclipse_")||s.Operator.StartsWith("scarlet_")){ActExtended(u,target,own,foes,s);return;}
         if(s.Operator.StartsWith("floral_")){ActFloral(u,target,foes,s);return;}
@@ -169,7 +176,7 @@ public partial class Battle
             {
                 var bonus=Rules.Fighters(own,u);var defense=Rules.Fighters(foes,t);
                 var crit=rng.NextDouble()<u.CriticalChance+bonus.Crit+(u.Gate==8?.20:0);
-                var d=Rules.Hit(t,stat*multiplier*damageScale*u.OutgoingDamage*(1+t.VulnerabilityFrom(u))*(1+s.DamagePerStack*damageStacks)*(1+bonus.Damage)*(crit?u.CriticalMultiplier:1),1-(1-defense.Reduction)*(1-t.ProtectionFrom(u)),s.Operator=="extreme"?.3:0);
+                var d=Rules.Hit(t,stat*multiplier*damageScale*u.OutgoingDamage*(1+t.VulnerabilityFrom(u))*(1+s.DamagePerStack*damageStacks)*(1+bonus.Damage)*(crit?u.CriticalMultiplier:1),1-(1-defense.Reduction)*(1-t.ProtectionFrom(u)),s.Operator=="extreme"?.3:0,s.Scale=="essence");
                 LastImpacts.Add(new(t,d,s.Scale=="essence"?"essence":"physical",crit,actionHit++,u));
                 if(d>0&&u.Definition.AttackStatus is {} statusId){var effect=catalog.StatusEffects.Single(e=>e.Id==statusId);if(rng.NextDouble()<t.IncomingStatusChance(statusId,u.Definition.AttackStatusChance*s.StatusChanceMultiplier))t.AddStatus(effect,u);}
                 if(d>0&&s.ApplyStatus is {} applied)t.AddStatus(catalog.StatusEffects.Single(e=>e.Id==applied),u);

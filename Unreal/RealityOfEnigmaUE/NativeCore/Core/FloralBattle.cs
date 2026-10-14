@@ -5,7 +5,7 @@ public partial class Battle
     private void FlowerStatus(Unit target,Unit source,string id,int count=1){
         var effect=catalog.StatusEffects.Single(e=>e.Id==id);
         for(int n=0;n<count;n++){
-            if(id=="poison"&&rng.NextDouble()<target.Definition.PoisonResistance)continue;
+            if(id=="poison"&&rng.NextDouble()<target.PoisonResistance)continue;
             if(!target.AddStatus(effect,source))continue;
             var added=target.Statuses.Last();
             if(target.Boss||target.StunImmune){added.Magnitude=.5;if(effect.Sleep)added.RemainingTurns=1;}
@@ -27,7 +27,7 @@ public partial class Battle
             if(skill.Operator=="floral_thorns"&&t.Stacks("poison")>=kit.ThornStackThreshold)raw*=1+kit.ThornStackBonus;
             bool critical=rng.NextDouble()<u.CriticalChance;
             double damage=Rules.Hit(t,raw*u.OutgoingDamage*(1+t.VulnerabilityFrom(u))*(critical?u.CriticalMultiplier:1),t.ProtectionFrom(u));
-            LastImpacts.Add(new(t,damage,"essence",critical,hit++));
+            LastImpacts.Add(new(t,damage,"essence",critical,hit++,u));
             if(damage<=0)continue;
             FlowerStatus(t,u,"poison",1+(u.Crimson?kit.CrimsonPoison:0)+(skill.Operator=="floral_thorns"?kit.ThornPoison:0));
             if(t.Stacks("poison")>=kit.PoisonMax)FlowerStatus(t,u,"deep_poison");

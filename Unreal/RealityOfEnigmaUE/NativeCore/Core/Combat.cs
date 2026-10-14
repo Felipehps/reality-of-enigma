@@ -16,7 +16,7 @@ public partial class Unit
     public double MaxHp=>OriginalMaxHp*(Duality!=null?BodyMaxShare:Origin!=null?FormMaxShare:1);
     public double Hp{get;set;}
     private double Growth=>1+.03*(Level-1);
-    public double Defense=>Definition.Stats.Defense*Growth*(1-StatusReduction(e=>e.DefenseReduction))*(1+StatusReduction(e=>e.DefenseBonus))*(Ascended?Definition.Eclipse?.Defense??1:1);
+    public double Defense=>Definition.Stats.Defense*Growth*(1-StatusReduction(e=>e.DefenseReduction))*(1+StatusReduction(e=>e.DefenseBonus))*(Ascended?Definition.Eclipse?.Defense??1:1)*(Crimson?Definition.Floral?.CrimsonDefense??1:1);
     public bool Crimson{get;private set;}
     public bool Blooming{get;private set;}
     public double OutgoingDamage=>(1-StatusReduction(e=>e.DamageReduction))*(Crimson?1+(Definition.Floral?.CrimsonDamage??0):1);
@@ -45,15 +45,15 @@ public partial class Unit
     public double BuffEssence=>Buffs.Values.Sum(b=>b.Essence);
     public double BuffSpeed=>Buffs.Values.Sum(b=>b.Speed);
     public void ApplyBuff(string id,CombatBuff buff){if(Alive)Buffs[id]=buff;}
-    public double Strength=>Definition.Stats.Strength*Growth*(Ascended?Definition.Eclipse?.Strength??1:1)*(1+BuffStrength)*(1+.08*Gate+(Gate==8?.25:0));
+    public double Strength=>Definition.Stats.Strength*Growth*(Ascended?Definition.Eclipse?.Strength??1:1)*(1+BuffStrength+(Id=="tenrin"?.04*DivineFocus:0))*(1+.08*Gate+(Gate==8?.25:0));
     public double Essence=>Definition.Stats.Essence*Growth*(1+BuffEssence);
-    public double Speed=>Definition.Stats.Speed*(Ascended?Definition.Eclipse?.Speed??1:1)*(1+BleedingSpeed+FocusBleeds*(Definition.Scarlet?.TargetSpeedPerBleed??0))*(Crimson?1+(Definition.Floral?.CrimsonSpeed??0):1)*(1+BuffSpeed)*(1+.04*Gate+(Gate==8?.30:0))*(Gate==8?1:1-Math.Min(.5,.03*Ice+(SlowTurns>0?.15:0)+(TechniqueSlowTurns>0?TechniqueSlow:0)));
+    public double Speed=>Definition.Stats.Speed*(Ascended?Definition.Eclipse?.Speed??1:1)*(1+BleedingSpeed+FocusBleeds*(Definition.Scarlet?.TargetSpeedPerBleed??0))*(Crimson?1+(Definition.Floral?.CrimsonSpeed??0):1)*(1+BuffSpeed+(Id=="tenrin"?.03*DivineFocus:0))*(1+.04*Gate+(Gate==8?.30:0))*(Gate==8?1:1-Math.Min(.5,.03*Ice+(SlowTurns>0?.15:0)+(TechniqueSlowTurns>0?TechniqueSlow:0)));
     public Unit(Character definition,int level=1,bool boss=false,int column=0,int layer=0,string path="base",bool? stunImmune=null)
     {
         Definition=definition;Level=level;Boss=boss;Column=column;Layer=layer;Path=path;StunImmune=stunImmune??(boss&&definition.Floral==null&&definition.Eclipse==null);
         OriginalMaxHp=definition.Stats.Hp*Growth;Hp=MaxHp;
     }
-    internal void Reposition(int cell){Column=cell%3;Layer=cell/3;}
+    internal void Reposition(int cell){Column=cell%3;Layer=cell/3;Duality?.Spirit.Reposition(cell);}
     public void OpenGate(int count=1)
     {if(Id=="kael"&&Path=="martial"&&Alive)Gate=Math.Min(Level>=70?8:7,Gate+count);}
     public void EndRound(int round){EclipseRound(round);completedRounds++;if(completedRounds%2==0)OpenGate();foreach(var key in Buffs.Where(b=>b.Value.ExpiresRound<=round).Select(b=>b.Key).ToArray())Buffs.Remove(key);}
@@ -63,7 +63,7 @@ public partial class Unit
         foreach(var threshold in new[]{75,50,25})
             if(before/MaxHp*100>threshold&&Hp/MaxHp*100<=threshold&&crossed.Add(threshold))OpenGate();
         double lost=before-Hp;UpdateAscension();
-        if(Definition.Floral is {} flower){if(Hp/MaxHp<flower.CrimsonThreshold)Crimson=true;if(Hp/MaxHp<flower.BloomThreshold)Blooming=true;}
+        if(Definition.Floral is {} flower){if(Alive&&Hp/MaxHp<=flower.CrimsonThreshold)Crimson=true;if(Alive&&Hp/MaxHp<=flower.BloomThreshold)Blooming=true;}
         if(Hp<=0){DiedBleeding=BleedCount>0;(Origin??this).EndDuality();if(Alive)DiedBleeding=false;}
         return lost;
     }
@@ -118,7 +118,10 @@ public static class Rules
         var n=Counts(team).GetValueOrDefault("fighter");var member=u.Archetypes.Contains("fighter");
         return new(n>=2?.10:0,n>=3&&member?.30:0,n>=4&&member?.12:0,n>=5&&member?.15:0);
     }
-    public static double Hit(Unit target,double raw,double reduction=0,double ignoreDefense=0)=>target.LoseHp(Math.Max(0,raw)*100/(100+target.Defense*(1-ignoreDefense))*(1-reduction)*(1+Math.Clamp(target.Statuses.Sum(s=>s.Effect.IncomingDamage*s.Magnitude),-.8,2)));
+    public static double Hit(Unit target,double raw,double reduction=0,double ignoreDefense=0,bool magical=false){
+        double amount=target.LoseHp(Math.Max(0,raw)*100/(100+target.Defense*(1-Math.Clamp(ignoreDefense,0,1)))*(1-reduction)*(1+Math.Clamp(target.Statuses.Sum(s=>s.Effect.IncomingDamage*s.Magnitude),-.8,2))*(magical?1-target.MagicResistance:1));
+        if(amount>0&&target.Id=="hajun")target.RegisterHit(target.CurrentCombatRound);return amount;
+    }
     public static double[] Horizon(Unit caster,IEnumerable<Unit> targets)
     {
         double carry=0;var result=new List<double>();

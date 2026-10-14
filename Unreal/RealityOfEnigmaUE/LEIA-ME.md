@@ -1,6 +1,6 @@
 # Reality of Enigma — migração para Unreal Engine 5.8.3
 
-A Unreal agora hospeda os sistemas do jogo: menus, campanha, equipe, formação, invocação, progressão, salvamento e combate com turnos individuais. A apresentação visual continua em desenvolvimento: as batalhas usam modelos Manny/Quinn provisórios, animação de ataque e repouso da Epic e efeitos em geometria 3D. Os personagens definitivos e a qualidade da imagem conceitual ainda não foram entregues.
+A Unreal agora hospeda os sistemas do jogo: menus, campanha, equipe, formação, invocação, progressão, salvamento e combate com turnos individuais. A apresentação visual continua em desenvolvimento: as batalhas usam modelos Manny/Quinn provisórios, animação de ataque e repouso da Epic e efeitos em geometria 3D. Os personagens definitivos e a qualidade da imagem conceitual ainda não foram entregues. Mazakin, Hajun, Zhu Jin, Tenrin e Zevalon foram adicionados com 29 habilidades; consulte NOVOS-PERSONAGENS.md para as regras, artes e adaptações ao sistema por turnos.
 
 ## Jogar
 
@@ -30,10 +30,10 @@ A nova jornada usa Saved/Campaign/save-v1.json do projeto. O Godot permanece pre
 
 A interface requer Unreal 5.8.3, compilador C++ e Windows SDK. Para recompilar as regras, use .NET SDK 10 e execute dotnet publish NativeCore/Enigma.Native.csproj -c Release -r win-x64 -o Content/Runtime/Win64. Para os testes originais aplicados à nova base: dotnet run --project NativeCore/Tests/Enigma.Native.Tests.csproj -c Release.
 
-A integração na Unreal é testada com -game -NullRHI -unattended -nosound -EnigmaMigrationQA. O parâmetro cria um salvamento isolado. -EnigmaUITour=<pasta absoluta> captura os menus e três arenas e verifica limites de botões e ações da interface. As verificações chamam os controles programaticamente; não representam um teste manual de todos os dispositivos de entrada.
+A integração na Unreal é testada com -game -NullRHI -unattended -nosound -EnigmaMigrationQA. O parâmetro cria um salvamento isolado. -EnigmaUITour=<pasta absoluta> captura os menus e três arenas e verifica limites de botões e ações da interface. -EnigmaCombatReplay=<pasta> reproduz estados reais de combate, verificando vida e áudio e capturando transformações. As verificações chamam os controles programaticamente; não representam um teste manual de todos os dispositivos de entrada.
 
 Consulte o relatório e os logs ao lado deste projeto para os resultados confirmados. O teste de campanha executa todos os encontros com uma equipe de referência de nível 70, verificando encerramento e progressão tanto em vitória quanto em derrota; não comprova que qualquer equipe vence todas as fases.
 
 ## Recursos
 
-Os modelos, esqueletos e duas animações são dos templates da instalação Unreal da Epic. Os sons gravados reutilizam os arquivos do projeto original; os sons sintetizados reutilizam as funções originais preservadas em NativeCore/Tools/AudioExporter. Content/GameAudio contém os sons importados; os perfis de cada personagem e habilidade permanecem em GameData/audio.json. A pintura de inferno e o conceito anteriores mantêm sua documentação em Design/ARTE-E-PROMPT.md. O conceito é uma referência artística, não uma captura do jogo.
+Os modelos, esqueletos e oito animações são dos templates da instalação Unreal da Epic. Os sons gravados reutilizam os arquivos do projeto original; os sons sintetizados reutilizam as funções originais preservadas em NativeCore/Tools/AudioExporter. Content/GameAudio contém os sons importados; os perfis de cada personagem e habilidade permanecem em GameData/audio.json. A pintura de inferno e o conceito anteriores mantêm sua documentação em Design/ARTE-E-PROMPT.md. O conceito é uma referência artística, não uma captura do jogo.

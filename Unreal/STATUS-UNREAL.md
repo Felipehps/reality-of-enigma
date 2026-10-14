@@ -4,7 +4,7 @@ Verificado em 14/10/2026. A versão Windows independente foi compilada, empacota
 
 ## Sistemas migrados
 
-Campanha com 70 encontros e sete regiões, prólogo, fichas, equipe, formação, invocação, níveis, estrelas, caminhos, reconstrução, tickets, recompensas offline, salvamento, treino com três ondas, combate por turnos individuais e arenas de teste. AKUROTH mantém duas fases, transformação aos 30% de vida e dez habilidades. A arena cinematográfica anterior permanece separada da campanha.
+Campanha com 70 encontros e sete regiões, prólogo, fichas, equipe, formação, invocação, níveis, estrelas, caminhos, reconstrução, tickets, recompensas offline, salvamento, treino com três ondas, combate por turnos individuais e arenas de teste. AKUROTH mantém duas fases, transformação aos 30% de vida e dez habilidades. A arena cinematográfica anterior permanece separada da campanha. Foram acrescentados Mazakin, Hajun, Zhu Jin, Tenrin e Zevalon, com 29 habilidades, cinco arenas e duas opções novas no banner de invocação.
 
 A Unreal controla apresentação, entrada e áudio. O núcleo original em C# foi preservado e compilado em uma DLL nativa Win64 que roda dentro do processo da Unreal. O jogador não depende do Godot nem de um runtime .NET separado. Não houve reescrita integral das regras em C++.
 
@@ -12,11 +12,12 @@ A Unreal controla apresentação, entrada e áudio. O núcleo original em C# foi
 
 | Verificação | Resultado |
 | --- | --- |
-| Testes das regras na nova base | 288 aprovados |
+| Testes das regras na nova base | 441 aprovados |
 | Integração com a DLL nativa | 62 verificações, zero falhas |
 | Todos os 70 encontros da campanha | 141 verificações, zero falhas |
-| Integração no executável Windows | 49 verificações, zero falhas |
-| Interface no executável Windows | 16 capturas, zero falhas |
+| Integração no executável Windows | 69 verificações, zero falhas |
+| Interface no executável Windows | 26 capturas, zero falhas |
+| Replays dos personagens novos no executável | 15 estados de combate, 122 verificações, zero falhas |
 | Compilação e empacotamento Windows | Concluídos com saída 0 |
 
 O teste dos encontros usa uma equipe de referência de nível 70: venceu 68 de 70 e verificou vitória, derrota e progressão. Não equivale a jogar toda a campanha desde um save novo. Os testes de interface acionam os controles programaticamente; não substituem avaliação manual completa.
@@ -25,13 +26,13 @@ O teste dos encontros usa uma equipe de referência de nível 70: venceu 68 de 7
 
 Os personagens são modelos Manny/Quinn provisórios da Epic. Os modelos 3D definitivos de AKUROTH e dos heróis ainda não foram criados. As pinturas originais aparecem em menus, fichas, prólogo e fundos distantes; o piso, obstáculos, personagens e efeitos são geometria 3D.
 
-A apresentação atual possui animações básicas e efeitos procedurais. As capturas reais mostram cenário simples e boss excessivamente escuro. Ainda faltam modelagem fiel à arte, animações autorais, efeitos Niagara finais e acabamento cinematográfico. A imagem conceitual não representa a qualidade atual do executável.
+A apresentação atual possui animações básicas e efeitos procedurais. As capturas novas mostram iluminação corrigida, personagens visíveis, roupas e acessórios procedurais e efeitos 3D provisórios. Ainda faltam modelagem fiel à arte, animações autorais, efeitos Niagara finais e acabamento cinematográfico. A imagem conceitual não representa a qualidade atual do executável.
 
 ## Arquivos
 
 - RealityOfEnigma-Unreal/Windows: jogo independente.
 - RealityOfEnigmaUE: projeto, código e recursos para edição.
-- unreal-windows-previews: capturas reais do executável.
+- new-character-previews e new-character-combat-previews: capturas reais da nova versão Windows.
 - migration-validation: logs dos testes e do empacotamento.
 - COMPILAR-JOGO-UNREAL.cmd: recompila e abre a versão do editor.
 - EMPACOTAR-JOGO-UNREAL.cmd: gera outra versão independente.

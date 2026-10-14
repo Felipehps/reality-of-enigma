@@ -1,4 +1,6 @@
 #include "EnigmaCampaignMode.h"
+#include "EnigmaCombatTiming.h"
+#include "Misc/FileHelper.h"
 #include "EnigmaGameInstance.h"
 #include "EnigmaWorldPresentation.h"
 #include "Engine/Canvas.h"
@@ -30,9 +32,13 @@ AEnigmaCampaignMode::AEnigmaCampaignMode(){PrimaryActorTick.bCanEverTick=true;De
 UEnigmaGameInstance* AEnigmaCampaignMode::Game(){return Cast<UEnigmaGameInstance>(GetGameInstance());}
 TSharedPtr<FJsonObject> AEnigmaCampaignMode::DisplayState(){return AnimationAge>=0&&AnimationDisplay?AnimationDisplay:Game()->State;}
 void AEnigmaCampaignMode::BeginPlay(){
- Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
+ Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
  const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->GetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->GetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);
+ WorldArt->ReducedMotion=ReducedMotion;
  if(!Game()||!Game()->State.IsValid())Message=Game()?Game()->Error:TEXT("GameInstance não configurado");
+ if(!CombatReplayFolder.IsEmpty()){
+  FString Manifest;TArray<TSharedPtr<FJsonValue>> Names;if(FFileHelper::LoadFileToString(Manifest,*(CombatReplayFolder/TEXT("manifest.json")))&&FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Manifest),Names)){for(auto Name:Names)CombatReplayNames.Add(Name->AsString());}else{UE_LOG(LogTemp,Error,TEXT("COMBAT_REPLAY_MANIFEST_FAILED"));FPlatformMisc::RequestExitWithStatus(false,1);}
+ }
  if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA")))GetWorldTimerManager().SetTimerForNextTick(this,&AEnigmaCampaignMode::RunChecks);
 }
 void AEnigmaCampaignMode::SavePreferences(){const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->SetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->SetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);GConfig->Flush(false,Pref);}
@@ -41,27 +47,33 @@ void AEnigmaCampaignMode::Start(const FString& Kind,int32 Stage){
  if(Kind==TEXT("campaign")&&N(O(Game()->State,TEXT("save")),TEXT("CompletedStage"))==0&&!B(O(Game()->State,TEXT("save")),TEXT("OpeningSeen"))){Page=TEXT("opening");OpeningShot=0;OpeningAge=0;ReplayOpening=false;PendingStage=Stage;Auto=false;return;}
  auto Request=MakeShared<FJsonObject>();Request->SetStringField(TEXT("command"),TEXT("start"));Request->SetStringField(TEXT("id"),Kind);Request->SetNumberField(TEXT("number"),Stage);Request->SetStringField(TEXT("boss"),TrainingBoss);
  if(!Game()->Execute(Request)){Message=Game()->Error;return;}
- Page=TEXT("battle");Target.Reset();BeforeAction.Reset();AnimationAge=-1;Auto=false;Message.Reset();
+ Page=TEXT("battle");MoveMenu=false;Target.Reset();BeforeAction.Reset();AnimationAge=-1;Auto=false;Message.Reset();
  WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),Kind==TEXT("campaign")?(Stage-1)/10:Kind==TEXT("floral")?0:6);
 }
-void AEnigmaCampaignMode::Act(const FString& Skill){
+void AEnigmaCampaignMode::Act(const FString& Skill,int32 Cell){
  if(AnimationAge>=0||WorldArt->Transforming()||!Game()||!Game()->State)return;
  BeforeAction=Game()->State;
- auto Request=MakeShared<FJsonObject>();Request->SetStringField(TEXT("command"),TEXT("act"));Request->SetStringField(TEXT("id"),Skill);Request->SetStringField(TEXT("target"),Target);
+ auto Request=MakeShared<FJsonObject>();Request->SetStringField(TEXT("command"),Cell>=0?TEXT("reposition"):TEXT("act"));Request->SetNumberField(TEXT("number"),Cell);Request->SetStringField(TEXT("id"),Skill);Request->SetStringField(TEXT("target"),Target);
  if(!Game()->Execute(Request)){Message=Game()->Error;BeforeAction.Reset();return;}
- Message.Reset();AnimationAge=0;auto Battle=O(Game()->State,TEXT("battle"));AnimationDuration=S(Battle,TEXT("lastSkill"))==TEXT("akuroth_annihilation")&&A(Battle,TEXT("impacts")).Num()>0?4.6f:2.2f;
+ MoveMenu=false;PresentLastAction();
+}
+void AEnigmaCampaignMode::PresentLastAction(){
+ Message.Reset();AnimationAge=0;auto Battle=O(Game()->State,TEXT("battle"));AnimationDuration=EnigmaCombatTiming::IsAnnihilationDischarge(Battle)?4.6f:2.2f;
  FString Copy;FJsonSerializer::Serialize(Game()->State.ToSharedRef(),TJsonWriterFactory<>::Create(&Copy));FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Copy),AnimationDisplay);
  UpdateDisplayedHealth();WorldArt->PlayAction(O(Game()->State,TEXT("battle")),Volume);AutoAge=0;
 }
 void AEnigmaCampaignMode::Tick(float Dt){
  Super::Tick(Dt);Clock+=Dt;
  if(!UITourFolder.IsEmpty())TickUITour();
+ if(!CombatReplayFolder.IsEmpty())TickCombatReplay();
  if(Page==TEXT("opening")&&OpeningAuto){OpeningAge+=Dt;if(OpeningAge>9)Action(TEXT("openingNext"));}
  if(AnimationAge>=0){AnimationAge+=Dt;UpdateDisplayedHealth();if(AnimationAge>=AnimationDuration){AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),S(Game()->State,TEXT("mode"))==TEXT("campaign")?(int32(N(Game()->State,TEXT("stage")))-1)/10:6);}}
  if(Page==TEXT("battle")&&Auto&&AnimationAge<0&&!WorldArt->Transforming()){AutoAge+=Dt;if(AutoAge>.45f){AutoAge=0;auto Battle=O(Game()->State,TEXT("battle"));if(B(Battle,TEXT("finished"))&&B(Battle,TEXT("won"))&&Repeat&&S(Game()->State,TEXT("mode"))==TEXT("training")&&N(Battle,TEXT("wave"))==3){Start(TEXT("training"));Game()->Command(TEXT("begin"));Auto=true;}else if(B(Battle,TEXT("finished"))&&!(S(Game()->State,TEXT("mode"))==TEXT("training")&&B(Battle,TEXT("won"))&&N(Battle,TEXT("wave"))<3))Auto=false;else Act();}}
 }
 void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Number){
  if(!Game()||!Game()->State)return;
+ if(Name==TEXT("moveMenu")){MoveMenu=!MoveMenu;return;}
+ if(Name==TEXT("reposition")){Act(TEXT(""),Number);return;}
  if(Name==TEXT("page")){Auto=false;AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();Page=Id;ListPage=0;if(Id==TEXT("opening")){ReplayOpening=true;OpeningShot=0;OpeningAge=0;}WorldArt->HideBattle();return;}
  if(Name==TEXT("select")){Selected=Id;return;}
  if(Name==TEXT("target")){Target=Id;return;}
@@ -85,7 +97,7 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
   if(Cells.IsValidIndex(TeamSlot)){int32 Old=int32(Cells[TeamSlot]->AsNumber());for(int32 I=0;I<Cells.Num();I++)if(I!=TeamSlot&&int32(Cells[I]->AsNumber())==Number)Cells[I]=MakeShared<FJsonValueNumber>(Old);Cells[TeamSlot]=MakeShared<FJsonValueNumber>(Number);auto Req=MakeShared<FJsonObject>();Req->SetStringField(TEXT("command"),TEXT("formation"));Req->SetArrayField(TEXT("cells"),Cells);Game()->Execute(Req);}return;
  }
  if(Name==TEXT("volume")){Volume=FMath::Clamp(Volume+Number*.1f,0.f,1.f);SavePreferences();return;}
- if(Name==TEXT("motion")){ReducedMotion=!ReducedMotion;SavePreferences();return;}
+ if(Name==TEXT("motion")){ReducedMotion=!ReducedMotion;WorldArt->ReducedMotion=ReducedMotion;SavePreferences();return;}
  if(Name==TEXT("fullscreen")){auto Settings=GEngine->GetGameUserSettings();Settings->SetFullscreenMode(Settings->GetFullscreenMode()==EWindowMode::Windowed?EWindowMode::WindowedFullscreen:EWindowMode::Windowed);Settings->ApplySettings(false);Settings->SaveSettings();return;}
  if(Name==TEXT("quit")){Game()->Command(TEXT("save"));FPlatformMisc::RequestExit(false);return;}
  if(Name==TEXT("legacyBoss")){UGameplayStatics::OpenLevel(this,TEXT("/Engine/Maps/Entry"),true,TEXT("game=/Script/RealityOfEnigmaUE.AkurothArenaMode"));return;}
@@ -156,7 +168,7 @@ void AEnigmaCampaignHUD::DrawHUD(){
  }
  else if(Page==TEXT("team")||Page==TEXT("cards")){
   Text(Page==TEXT("team")?TEXT("EQUIPE E PROGRESSÃO"):TEXT("FICHAS DO ELENCO"),45,107,FLinearColor(.95f,.77f,.5f),1.4f);
-  TArray<TSharedPtr<FJsonValue>> Entries;if(Page==TEXT("team"))Entries=A(Save,TEXT("Roster"));else for(auto C:A(Catalog,TEXT("Characters")))if(!S(C->AsObject(),TEXT("Id")).StartsWith(TEXT("enemy")))Entries.Add(C);
+  TArray<TSharedPtr<FJsonValue>> Entries;if(Page==TEXT("team"))Entries=A(Save,TEXT("Roster"));else for(auto C:A(Catalog,TEXT("Characters")))if(!S(C->AsObject(),TEXT("Id")).StartsWith(TEXT("enemy"))&&S(C->AsObject(),TEXT("Role"))!=TEXT("Summon"))Entries.Add(C);
   int32 Pages=FMath::Max(1,(Entries.Num()+7)/8);Mode->ListPage=FMath::Clamp(Mode->ListPage,0,Pages-1);
   for(int32 I=Mode->ListPage*8;I<FMath::Min(Entries.Num(),Mode->ListPage*8+8);I++){
    auto E=Entries[I]->AsObject();FString Id=S(E,TEXT("Id"));auto Def=Find(A(Catalog,TEXT("Characters")),Id);FString Label=S(Def,TEXT("Name"));if(Page==TEXT("team"))Label+=FString::Printf(TEXT(" • Nv.%.0f • %.0f estrelas"),N(E,TEXT("Level")),N(E,TEXT("Stars")));Button(Label,45,165+(I%8)*46,310,TEXT("select"),Id);
@@ -172,11 +184,18 @@ void AEnigmaCampaignHUD::DrawHUD(){
    Button(TEXT("Kael: caminho marcial"),395,502,310,TEXT("path"),TEXT("martial"));Button(TEXT("Kael: Arsenal"),735,502,260,TEXT("path"),TEXT("arsenal"));
    Text(FString::Printf(TEXT("Slot escolhido: %d. Promoção exige nível máximo e cópia/Coringa."),Mode->TeamSlot+1),395,564,FLinearColor(.73f,.72f,.8f));
   } else {
-   const TSet<FString> PortraitIds={TEXT("kael"),TEXT("savor"),TEXT("aelia"),TEXT("brakk"),TEXT("lyra"),TEXT("raizen"),TEXT("varkas"),TEXT("sevrin")};if(PortraitIds.Contains(Mode->Selected)){if(auto T=Texture(TEXT("Hero_")+Mode->Selected))DrawTexture(T,965*Scale,280*Scale,250*Scale,330*Scale,Mode->Selected==TEXT("varkas")||Mode->Selected==TEXT("sevrin")?0:.55f,0,Mode->Selected==TEXT("varkas")||Mode->Selected==TEXT("sevrin")?1:.45f,1,FLinearColor(.65f,.65f,.65f,1));}
+   const TSet<FString> PortraitIds={TEXT("kael"),TEXT("savor"),TEXT("aelia"),TEXT("brakk"),TEXT("lyra"),TEXT("raizen"),TEXT("varkas"),TEXT("sevrin"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon")};if(PortraitIds.Contains(Mode->Selected)){if(auto T=Texture(TEXT("Hero_")+Mode->Selected))DrawTexture(T,965*Scale,280*Scale,250*Scale,330*Scale,Mode->Selected==TEXT("varkas")||Mode->Selected==TEXT("sevrin")?0:.55f,0,Mode->Selected==TEXT("varkas")||Mode->Selected==TEXT("sevrin")?1:.45f,1,FLinearColor(.65f,.65f,.65f,1));}
+   const TSet<FString> NewIds={TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon")};
+   if(NewIds.Contains(Mode->Selected)){if(auto T=Texture(TEXT("Hero_")+Mode->Selected))DrawTexture(T,965*Scale,280*Scale,250*Scale,330*Scale,.16f,.035f,.33f,.5f,FLinearColor::White);Button(TEXT("Ver arte completa"),970,623,245,TEXT("page"),TEXT("reference"));}
    auto Stories=O(State,TEXT("stories"));auto Story=O(Stories,*Mode->Selected);Wrap(S(Story,TEXT("Title"))+TEXT(" • ")+S(Story,TEXT("Affiliation"))+TEXT("\n")+S(Story,TEXT("History")),395,284,70,6);
    auto Abilities=A(Hero,TEXT("Skills"));for(int32 I=0;I<Abilities.Num()&&I<7;I++){auto Skill=Find(A(Catalog,TEXT("Skills")),Abilities[I]->AsString());Text(S(Skill,TEXT("Name"))+FString::Printf(TEXT(" • Recarga %.0f • Multiplicador %.2f"),N(Skill,TEXT("Cooldown")),N(Skill,TEXT("Multiplier"))),395,442+I*23,FLinearColor(.87f,.8f,.67f),.92f);}
-   if(Mode->Selected==TEXT("varkas")||Mode->Selected==TEXT("sevrin"))Button(TEXT("Testar personagem"),395,620,260,TEXT("start"),Mode->Selected);
+   if(Mode->Selected==TEXT("varkas")||Mode->Selected==TEXT("sevrin")||NewIds.Contains(Mode->Selected))Button(TEXT("Testar personagem"),395,620,260,TEXT("start"),Mode->Selected);
   }
+ }
+ else if(Page==TEXT("reference")){
+  Text(S(Find(A(Catalog,TEXT("Characters")),Mode->Selected),TEXT("Name"))+TEXT(" • ARTE DE REFERÊNCIA"),45,100,FLinearColor(.95f,.77f,.5f),1.2f);
+  if(auto T=Texture(TEXT("Hero_")+Mode->Selected))DrawTexture(T,255*Scale,140*Scale,750*Scale,500*Scale,0,0,1,1,FLinearColor::White);
+  Button(TEXT("Voltar à ficha"),45,650,260,TEXT("page"),TEXT("cards"));
  }
  else if(Page==TEXT("formation")){
   Text(TEXT("FORMAÇÃO • escolha um membro e depois uma casa"),45,118,FLinearColor(.95f,.8f,.5f),1.3f);
@@ -196,9 +215,9 @@ void AEnigmaCampaignHUD::DrawHUD(){
   Wrap(TEXT("Os marcos da campanha liberam cada chefe. HP e estados persistem entre as ondas. A recompensa só é concedida após a terceira onda e apenas uma vez por encontro."),45,510,110,4);
  }
  else if(Page==TEXT("arenas")){
-  const FString Labels[]={TEXT("Demonstração do grupo"),TEXT("Prévia do elenco"),TEXT("Fenrath"),TEXT("Sevrin: sangramento"),TEXT("Velmora: veneno e flores"),TEXT("Maltherion: ascensão"),TEXT("Kael: VIII estágio"),TEXT("AKUROTH: regras completas")};
-  const FString Ids[]={TEXT("demo"),TEXT("cast"),TEXT("varkas"),TEXT("sevrin"),TEXT("floral"),TEXT("eclipse"),TEXT("sandbox"),TEXT("akuroth")};
-  for(int32 I=0;I<8;I++)Button(Labels[I],45+(I%2)*575,160+(I/2)*83,530,TEXT("start"),Ids[I]);
+  const FString Labels[]={TEXT("Demonstração do grupo"),TEXT("Prévia do elenco"),TEXT("Fenrath"),TEXT("Sevrin: sangramento"),TEXT("Velmora: veneno e flores"),TEXT("Maltherion: ascensão"),TEXT("Kael: VIII estágio"),TEXT("AKUROTH: regras completas"),TEXT("Mazakin: Submundo"),TEXT("Hajun: Carnificina"),TEXT("Zhu Jin: Flor do Veneno"),TEXT("Tenrin: Iluminação"),TEXT("Zevalon: Senhor dos Céus")};
+  const FString Ids[]={TEXT("demo"),TEXT("cast"),TEXT("varkas"),TEXT("sevrin"),TEXT("floral"),TEXT("eclipse"),TEXT("sandbox"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon")};
+  for(int32 I=0;I<UE_ARRAY_COUNT(Ids);I++)Button(Labels[I],45+(I%3)*405,160+(I/3)*67,380,TEXT("start"),Ids[I]);
   Button(TEXT("AKUROTH: demonstração cinematográfica anterior"),45,530,650,TEXT("legacyBoss"));Button(TEXT("Rever prólogo"),735,530,350,TEXT("page"),TEXT("opening"));
  }
  else if(Page==TEXT("settings")){
@@ -209,12 +228,15 @@ void AEnigmaCampaignHUD::DrawHUD(){
   auto Battle=O(State,TEXT("battle"));Box(0,62,1280,85,FLinearColor(.015f,.01f,.035f,.9f));Text(FString::Printf(TEXT("Rodada %.0f • Onda %.0f"),N(Battle,TEXT("round")),N(Battle,TEXT("wave"))),25,74,FLinearColor(.95f,.8f,.6f));
   FString Turns=TEXT("Ordem: ");for(auto T:A(Battle,TEXT("turns")))Turns+=T->AsString()+TEXT("   ›   ");Text(Turns.Left(135),25,118,FLinearColor(.75f,.75f,.85f),.85f);
   auto Allies=A(Battle,TEXT("allies"));auto Enemies=A(Battle,TEXT("enemies"));
-  for(auto E:Enemies){auto U=E->AsObject();if(S(U,TEXT("id"))==TEXT("akuroth")) {Text(B(U,TEXT("ascended"))?TEXT("AKUROTH • Soberano do Absoluto"):TEXT("AKUROTH • O Portador do Vazio"),380,73,FLinearColor(.95f,.72f,.45f),1.1f);Box(380,100,535,7,FLinearColor(.15f,.01f,.025f));Box(380,100,535*float(N(U,TEXT("hp"))/N(U,TEXT("maxHp"))),7,FLinearColor(.8f,.03f,.08f));}}
-  for(int32 Side=0;Side<2;Side++){auto Units=Side==0?Allies:Enemies;for(int32 I=0;I<Units.Num()&&I<9;I++){auto U=Units[I]->AsObject();float X=Side?940:20,Y=165+I*40;FString Key=S(U,TEXT("key"));Button((S(U,TEXT("id"))==TEXT("akuroth")?TEXT("AKUROTH"):S(U,TEXT("name")))+FString::Printf(TEXT(" %.0f/%.0f"),N(U,TEXT("hp")),N(U,TEXT("maxHp"))),X,Y,320,TEXT("target"),Key,0,B(U,TEXT("alive")),34);Box(X,Y+32,320*float(N(U,TEXT("hp"))/FMath::Max(1.0,N(U,TEXT("maxHp")))),2,Key==Mode->Target?FLinearColor(.95f,.75f,.25f):Side?FLinearColor(.75f,.04f,.1f):FLinearColor(.1f,.7f,.4f));}}
+  for(auto E:Enemies){auto U=E->AsObject();FString Id=S(U,TEXT("id"));if(Id==TEXT("akuroth")||Id==TEXT("mazakin")||Id==TEXT("hajun")||Id==TEXT("zhujin")){FString Title=Id==TEXT("akuroth")?(B(U,TEXT("ascended"))?TEXT("AKUROTH • Soberano do Absoluto"):TEXT("AKUROTH • O Portador do Vazio")):Id==TEXT("mazakin")?(B(U,TEXT("ascended"))?TEXT("MAZAKIN • Rei do Abismo"):TEXT("MAZAKIN • Senhor do Submundo")):Id==TEXT("hajun")?(B(U,TEXT("ascended"))?TEXT("HAJUN • Ascensão Absoluta"):TEXT("HAJUN • Carrasco do Submundo")):(B(U,TEXT("blooming"))?TEXT("ZHU JIN • Florescimento"):B(U,TEXT("crimson"))?TEXT("ZHU JIN • Flor Carmesim"):TEXT("ZHU JIN • Flor do Veneno"));Text(Title,380,73,FLinearColor(.95f,.72f,.45f),1.1f);Box(380,100,535,7,FLinearColor(.15f,.01f,.025f));Box(380,100,535*float(N(U,TEXT("hp"))/N(U,TEXT("maxHp"))),7,FLinearColor(.8f,.03f,.08f));}}
+  for(int32 Side=0;Side<2;Side++){auto Units=Side==0?Allies:Enemies;for(int32 I=0;I<Units.Num()&&I<9;I++){auto U=Units[I]->AsObject();float X=Side?940:20,Y=165+I*40;FString Key=S(U,TEXT("key"));Button(((S(U,TEXT("id"))==TEXT("akuroth")||S(U,TEXT("id"))==TEXT("mazakin")||S(U,TEXT("id"))==TEXT("hajun")||S(U,TEXT("id"))==TEXT("tenrin")||S(U,TEXT("id"))==TEXT("zevalon"))?S(U,TEXT("id")).ToUpper():S(U,TEXT("id"))==TEXT("zhujin")?TEXT("ZHU JIN"):S(U,TEXT("name")))+FString::Printf(TEXT(" %.0f/%.0f"),N(U,TEXT("hp")),N(U,TEXT("maxHp"))),X,Y,320,TEXT("target"),Key,0,B(U,TEXT("alive")),34);Box(X,Y+32,320*float(N(U,TEXT("hp"))/FMath::Max(1.0,N(U,TEXT("maxHp")))),2,Key==Mode->Target?FLinearColor(.95f,.75f,.25f):Side?FLinearColor(.75f,.04f,.1f):FLinearColor(.1f,.7f,.4f));}}
   Box(0,550,1280,170,FLinearColor(.01f,.008f,.025f,.94f));
   if(!B(Battle,TEXT("locked"))){Button(TEXT("Iniciar combate"),30,565,260,TEXT("begin"));for(int32 I=0;I<9;I++)Button(FString::Printf(TEXT("Casa %d"),I+1),390+(I%3)*155,220+(I/3)*57,145,TEXT("battleCell"),TEXT(""),I);}
   else Button(TEXT("Próxima ação"),30,565,220,TEXT("act"));
   Button(Mode->Auto?TEXT("Parar automático"):TEXT("Automático"),275,565,220,TEXT("auto"));Button(TEXT("Registro"),520,565,150,TEXT("log"));Button(Mode->Repeat?TEXT("Repetir treino: sim"):TEXT("Repetir treino: não"),690,565,260,TEXT("repeat"));
+  if(B(Battle,TEXT("locked"))&&B(Battle,TEXT("allyTurn"))&&!B(Battle,TEXT("finished")))Button(Mode->MoveMenu?TEXT("Cancelar movimento"):TEXT("Reposicionar"),980,565,250,TEXT("moveMenu"),TEXT(""),0,Mode->AnimationAge<0);
+  if(Mode->MoveMenu){Box(370,175,490,200,FLinearColor(.01f,.01f,.025f,.95f));for(int32 Cell=0;Cell<9;Cell++){bool Free=true;for(auto V:Allies){auto U=V->AsObject();Free&=!(B(U,TEXT("alive"))&&int32(N(U,TEXT("layer")))*3+int32(N(U,TEXT("column")))==Cell);}Button(FString::Printf(TEXT("Casa %d"),Cell+1),385+(Cell%3)*155,195+(Cell/3)*52,145,TEXT("reposition"),TEXT(""),Cell,Free,42);}}
+  auto Actor=Find(Allies,S(Battle,TEXT("actor")),TEXT("key"));if(!S(Actor,TEXT("key")).IsEmpty()){FString Detail;if(S(Actor,TEXT("id"))==TEXT("zevalon"))Detail=FString::Printf(TEXT("Energia celestial: %.0f/5"),N(Actor,TEXT("energy")));if(S(Actor,TEXT("id"))==TEXT("tenrin"))Detail=FString::Printf(TEXT("Aura do Leão: %.0f/5"),N(Actor,TEXT("divineFocus")));if(!Detail.IsEmpty())Text(Detail,360,480,FLinearColor(.98f,.78f,.35f),1.1f);}
   auto Skills=A(Battle,TEXT("skills"));bool Allowed=B(Battle,TEXT("locked"))&&B(Battle,TEXT("allyTurn"))&&!B(Battle,TEXT("finished"))&&Mode->AnimationAge<0;
   for(int32 I=0;I<Skills.Num()&&I<9;I++){auto Ability=Skills[I]->AsObject();Button(FString::Printf(TEXT("%d • %s"),I+1,*S(Ability,TEXT("name"))),30+(I%5)*245,613+(I/5)*43,230,TEXT("act"),S(Ability,TEXT("id")),0,Allowed&&S(Ability,TEXT("reason")).IsEmpty());}
   if(B(Battle,TEXT("finished"))){Text(B(Battle,TEXT("won"))?TEXT("VITÓRIA"):TEXT("DERROTA"),500,170,B(Battle,TEXT("won"))?FLinearColor(.95f,.8f,.4f):FLinearColor(.9f,.2f,.2f),2);if(S(State,TEXT("mode"))==TEXT("campaign")){int32 Stage=N(State,TEXT("stage"));if(B(Battle,TEXT("won"))&&Stage<70)Button(TEXT("Próxima fase"),460,232,330,TEXT("start"),TEXT("campaign"),Stage+1);if(Stage%10==0&&B(Battle,TEXT("won"))){Mode->Region=(Stage-1)/10;Button(TEXT("História da região"),460,279,330,TEXT("page"),TEXT("ending"));}}}
@@ -232,7 +254,7 @@ void AEnigmaCampaignMode::RunChecks(){
  const double Gold=N(O(O(G->State,TEXT("save")),TEXT("Inventory")),TEXT("Gold"));Check(G->Command(TEXT("summon"),TEXT(""),10),TEXT("summon_ten"));Check(N(O(O(G->State,TEXT("save")),TEXT("Inventory")),TEXT("Gold"))==Gold-9000,TEXT("summon_cost"));
  Check(!G->Command(TEXT("start"),TEXT("campaign"),70),TEXT("locked_campaign"));Check(G->Command(TEXT("start"),TEXT("campaign"),1),TEXT("campaign_entry"));Check(A(O(G->State,TEXT("battle")),TEXT("allies")).Num()==5,TEXT("five_individual_allies"));
  Check(G->Command(TEXT("begin")),TEXT("formation_lock"));Check(B(O(G->State,TEXT("battle")),TEXT("locked")),TEXT("locked_flag"));Check(G->Command(TEXT("act")),TEXT("campaign_action"));
- for(auto Kind:{TEXT("demo"),TEXT("cast"),TEXT("varkas"),TEXT("sevrin"),TEXT("floral"),TEXT("eclipse"),TEXT("sandbox"),TEXT("akuroth")}){
+ for(auto Kind:{TEXT("demo"),TEXT("cast"),TEXT("varkas"),TEXT("sevrin"),TEXT("floral"),TEXT("eclipse"),TEXT("sandbox"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon")}){
   Check(G->Command(TEXT("start"),Kind),Kind);WorldArt->ShowBattle(O(G->State,TEXT("battle")),6);Check(G->Command(TEXT("begin")),TEXT("begin_arena"));int32 I=0;for(;I<1000&&!B(O(G->State,TEXT("battle")),TEXT("finished"));I++)if(!G->Command(TEXT("act")))break;
   Check(B(O(G->State,TEXT("battle")),TEXT("finished")),TEXT("arena_finishes"));Check(I<1000,TEXT("bounded_turns"));
  }
@@ -245,11 +267,11 @@ void AEnigmaCampaignMode::RunChecks(){
 
 void AEnigmaCampaignMode::CaptureUI(const FString& Name){
  for(auto& Button:Buttons){int32 W,H;UGameplayStatics::GetPlayerController(this,0)->GetViewportSize(W,H);if(Button.Min.X<0||Button.Min.Y<0||Button.Min.X+Button.Size.X>W+.5f||Button.Min.Y+Button.Size.Y>H+.5f){UIWarnings++;UE_LOG(LogTemp,Error,TEXT("UI_QA_BOUNDS %s %s"),*Name,*Button.Name);}}
- const FString File=FPaths::ConvertRelativePathToFull(UITourFolder/(Name+TEXT(".png")));FScreenshotRequest::RequestScreenshot(File,true,false);UE_LOG(LogTemp,Display,TEXT("UI_QA_CAPTURE %s buttons=%d"),*Name,Buttons.Num());
+ const FString File=FPaths::ConvertRelativePathToFull((CombatReplayFolder.IsEmpty()?UITourFolder:CombatReplayFolder/TEXT("captures"))/(Name+TEXT(".png")));FScreenshotRequest::RequestScreenshot(File,true,false);UE_LOG(LogTemp,Display,TEXT("UI_QA_CAPTURE %s buttons=%d"),*Name,Buttons.Num());
 }
 void AEnigmaCampaignMode::TickUITour(){
  if(Clock<UITourNext)return;UITourNext=Clock+3.5f;
- const FString Names[]={TEXT("home"),TEXT("campaign"),TEXT("team"),TEXT("formation"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("settings"),TEXT("arenas"),TEXT("opening-1"),TEXT("opening-8"),TEXT("battle-formation"),TEXT("battle-ready"),TEXT("battle-action"),TEXT("floral"),TEXT("akuroth")};
+ const FString Names[]={TEXT("home"),TEXT("campaign"),TEXT("team"),TEXT("formation"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("settings"),TEXT("arenas"),TEXT("opening-1"),TEXT("opening-8"),TEXT("battle-formation"),TEXT("battle-ready"),TEXT("battle-action"),TEXT("floral"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon"),TEXT("mazakin-art"),TEXT("hajun-art"),TEXT("zhujin-art"),TEXT("tenrin-art"),TEXT("zevalon-art")};
  if(UITourIndex>=UE_ARRAY_COUNT(Names)){UE_LOG(LogTemp,Display,TEXT("ENIGMA_UI_QA_RESULT captures=%d failures=%d"),UITourIndex,UIWarnings);FPlatformMisc::RequestExitWithStatus(false,UIWarnings?1:0);return;}
  FString Name=Names[UITourIndex];
  if(UITourIndex<9){Action(TEXT("page"),Name);}
@@ -263,17 +285,37 @@ void AEnigmaCampaignMode::TickUITour(){
  }
  else if(UITourIndex==14){Start(TEXT("floral"));Game()->Command(TEXT("begin"));}
  else if(UITourIndex==15){Start(TEXT("akuroth"));Game()->Command(TEXT("begin"));}
+ else if(UITourIndex<21){Start(Name);Game()->Command(TEXT("begin"));}
+ else{Selected=Name.LeftChop(4);Action(TEXT("page"),TEXT("reference"));}
  UITourIndex++;FTimerHandle Handle;GetWorldTimerManager().SetTimer(Handle,[this,Name](){CaptureUI(Name);},.85f,false);
 }
 
 void AEnigmaCampaignMode::UpdateDisplayedHealth(){
  if(!AnimationDisplay||!BeforeAction)return;auto Current=O(Game()->State,TEXT("battle"));auto Before=O(BeforeAction,TEXT("battle"));auto Display=O(AnimationDisplay,TEXT("battle"));
- const FString Skill=S(Current,TEXT("lastSkill"));bool Ultimate=Skill==TEXT("akuroth_annihilation")&&A(Current,TEXT("impacts")).Num()>0;
+ const FString Skill=S(Current,TEXT("lastSkill"));
  auto All=A(Current,TEXT("allies"));All.Append(A(Current,TEXT("enemies")));auto Old=A(Before,TEXT("allies"));Old.Append(A(Before,TEXT("enemies")));auto Visible=A(Display,TEXT("allies"));Visible.Append(A(Display,TEXT("enemies")));
- for(auto V:Visible){auto Unit=V->AsObject();FString Key=S(Unit,TEXT("key"));auto Start=Find(Old,Key,TEXT("key"));auto Final=Find(All,Key,TEXT("key"));if(S(Start,TEXT("key")).IsEmpty())continue;double HP=N(Start,TEXT("hp"));bool HadHit=false;
-  for(auto I:A(Current,TEXT("impacts"))){auto Hit=I->AsObject();if(S(Hit,TEXT("target"))!=Key)continue;HadHit=true;int32 Index=N(Hit,TEXT("hit"));FString Kind=S(Hit,TEXT("kind"));float At=Ultimate?(Index%2?3.f:1.1f):(Skill.Contains(TEXT("meteor"))||Skill.Contains(TEXT("rain"))?1.3f:.65f)+FMath::Min(Index,10)*.08f;if(Kind==TEXT("poison")||Kind==TEXT("bleed"))At=.25f;if(AnimationAge>=At)HP+=N(Hit,TEXT("amount"))*(Kind==TEXT("heal")?1:-1);
-  }
-  if(!HadHit&&AnimationAge>=.65f||AnimationAge>=AnimationDuration-.1f)HP=N(Final,TEXT("hp"));Unit->SetNumberField(TEXT("hp"),FMath::Clamp(HP,0.0,N(Unit,TEXT("maxHp"))));Unit->SetBoolField(TEXT("alive"),HP>0);
+ for(auto V:Visible){auto Unit=V->AsObject();FString Key=S(Unit,TEXT("key"));auto Start=Find(Old,Key,TEXT("key"));auto Final=Find(All,Key,TEXT("key"));if(S(Start,TEXT("key")).IsEmpty())continue;double HP=EnigmaCombatTiming::HealthAt(N(Start,TEXT("hp")),N(Final,TEXT("hp")),N(Unit,TEXT("maxHp")),Key,Skill,A(Current,TEXT("impacts")),AnimationAge,AnimationDuration);
+  Unit->SetNumberField(TEXT("hp"),HP);Unit->SetBoolField(TEXT("alive"),HP>0);
  }
  if(AnimationAge<AnimationDuration-.1f)Display->SetBoolField(TEXT("finished"),false);
+}
+
+void AEnigmaCampaignMode::CheckReplayHealth(TSharedPtr<FJsonObject> Sample,const FString& Name){
+ auto Battle=O(DisplayState(),TEXT("battle"));auto Units=A(Battle,TEXT("allies"));Units.Append(A(Battle,TEXT("enemies")));
+ for(auto& Expected:O(Sample,TEXT("health"))->Values){CombatReplayChecks++;FString Key(*Expected.Key);auto Unit=Find(Units,Key,TEXT("key"));if(!FMath::IsNearlyEqual(N(Unit,TEXT("hp")),Expected.Value->AsNumber(),.1)){CombatReplayFailures++;UE_LOG(LogTemp,Error,TEXT("COMBAT_REPLAY_HP_FAIL %s target=%s expected=%.2f actual=%.2f age=%.3f"),*Name,*Key,Expected.Value->AsNumber(),N(Unit,TEXT("hp")),AnimationAge);}}
+ CaptureUI(Name);
+}
+void AEnigmaCampaignMode::TickCombatReplay(){
+ if(Clock<CombatReplayNext)return;
+ if(CombatReplayIndex>=CombatReplayNames.Num()){UE_LOG(LogTemp,Display,TEXT("ENIGMA_COMBAT_REPLAY_RESULT fixtures=%d checks=%d failures=%d"),CombatReplayIndex,CombatReplayChecks,CombatReplayFailures+UIWarnings);FPlatformMisc::RequestExitWithStatus(false,CombatReplayFailures+UIWarnings?1:0);CombatReplayNext=Clock+1000;return;}
+ FString Name=CombatReplayNames[CombatReplayIndex++],Text;TSharedPtr<FJsonObject> Fixture;
+ if(!FFileHelper::LoadFileToString(Text,*(CombatReplayFolder/(Name+TEXT(".json"))))||!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text),Fixture)){CombatReplayFailures++;CombatReplayNext=Clock+1;return;}
+ Auto=false;Page=TEXT("battle");BeforeAction=O(Fixture,TEXT("before"));Game()->State=BeforeAction;AnimationAge=-1;AnimationDisplay.Reset();WorldArt->ShowBattle(O(BeforeAction,TEXT("battle")),6);
+ float Delay=WorldArt->Transforming()?3.3f:.1f;CombatReplayNext=Clock+Delay+5.5f;
+ FTimerHandle Handle;GetWorldTimerManager().SetTimer(Handle,[this,Fixture,Name](){
+  Game()->State=O(Fixture,TEXT("after"));PresentLastAction();
+  CombatReplayChecks++;if(!FMath::IsNearlyEqual(AnimationDuration,float(N(Fixture,TEXT("duration"))),.001f)){CombatReplayFailures++;UE_LOG(LogTemp,Error,TEXT("COMBAT_REPLAY_DURATION_FAIL %s duration=%.2f"),*Name,AnimationDuration);}
+  for(auto Value:A(Fixture,TEXT("audioTimes"))){float At=Value->AsNumber();CombatReplayChecks++;if(!WorldArt->HasImpactCueAt(At)){CombatReplayFailures++;UE_LOG(LogTemp,Error,TEXT("COMBAT_REPLAY_AUDIO_FAIL %s at=%.2f"),*Name,At);}}
+  int32 Index=0;for(auto Value:A(Fixture,TEXT("samples"))){auto Sample=Value->AsObject();FString Capture=Name+FString::Printf(TEXT("-%d"),Index++);FTimerHandle SampleHandle;GetWorldTimerManager().SetTimer(SampleHandle,[this,Sample,Capture](){CheckReplayHealth(Sample,Capture);},float(N(Sample,TEXT("at"))),false);}
+ },Delay,false);
 }

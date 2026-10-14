@@ -3,7 +3,7 @@
 #include "GameFramework/Actor.h"
 #include "Dom/JsonObject.h"
 #include "EnigmaWorldPresentation.generated.h"
-class USoundWave;class UAudioComponent;class UStaticMeshComponent;class USkeletalMeshComponent;class UInstancedStaticMeshComponent;class UMaterialInterface;class UStaticMesh;class UAnimSequence;class ACameraActor;class UPointLightComponent;
+class UProceduralMeshComponent;class UDirectionalLightComponent;class USoundWave;class UAudioComponent;class UStaticMeshComponent;class USkeletalMeshComponent;class UInstancedStaticMeshComponent;class UMaterialInterface;class UStaticMesh;class UAnimSequence;class ACameraActor;class UPointLightComponent;
 UCLASS()
 class REALITYOFENIGMAUE_API AEnigmaWorldPresentation:public AActor {
  GENERATED_BODY()
@@ -11,6 +11,7 @@ public:
  AEnigmaWorldPresentation();virtual void BeginPlay() override;virtual void Tick(float Dt) override;
  void ShowBattle(TSharedPtr<FJsonObject> Battle,int32 Region);
  void PlayAction(TSharedPtr<FJsonObject> Battle,float Volume);void HideBattle();
+ bool ReducedMotion=false;bool HasImpactCueAt(float At) const;
  bool Ready=false;bool Transforming() const{return TransformAge>=0&&TransformAge<3;}
 private:
  UPROPERTY() TArray<TObjectPtr<USkeletalMeshComponent>> Bodies;
@@ -20,6 +21,23 @@ private:
  UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Crimson;
  UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> ShadowLimbs;
  UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> WhiteHair;
+ UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Gold;
+ UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Lightning;
+ UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Mount;
+ UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Petals;
+ UPROPERTY() TMap<FString,TObjectPtr<UProceduralMeshComponent>> Garments;
+ UPROPERTY() TObjectPtr<UAnimSequence> Attack2;
+ UPROPERTY() TObjectPtr<UAnimSequence> Attack3;
+ UPROPERTY() TObjectPtr<UAnimSequence> ChargedAttack;
+ UPROPERTY() TObjectPtr<UAnimSequence> Walk;
+ UPROPERTY() TObjectPtr<UAnimSequence> HitReact;
+ UPROPERTY() TObjectPtr<UAnimSequence> Death;
+ TArray<bool> RenderAlive;TArray<float> LastReact,ReactUntil;
+ FString TransformBoss,AscendedBossKey;int32 ArenaRegion=6;
+ void DrawNewCharacter(int32 Index,TSharedPtr<FJsonObject> Unit,FVector Position);
+ void DrawNewSkill(FVector Source);
+ void UpdateGarment(int32 Index,const FString& Id,FVector Position);
+ void FaceRing(UInstancedStaticMeshComponent* Batch,FVector P,float Radius);
  UPROPERTY() TObjectPtr<UStaticMeshComponent> Backdrop;
  UPROPERTY() TObjectPtr<UStaticMesh> Sphere;
  UPROPERTY() TObjectPtr<UStaticMesh> Cylinder;
@@ -29,6 +47,9 @@ private:
  UPROPERTY() TObjectPtr<UMaterialInterface> Material;
  UPROPERTY() TObjectPtr<ACameraActor> Camera;
  UPROPERTY() TObjectPtr<UPointLightComponent> Light;
+ UPROPERTY() TObjectPtr<UDirectionalLightComponent> KeyLight;
+ UPROPERTY() TObjectPtr<UDirectionalLightComponent> RimLight;
+ TMap<FString,double> BeforeHealth;
  TArray<FString> Keys;TArray<FVector> Homes;TArray<FLinearColor> Colors;
  TSharedPtr<FJsonObject> Snapshot;
  FString Skill,Operator;int32 Attacker=-1;TArray<int32> Victims;float Age=-1,Clock=0,TransformAge=-1,Duration=2.2f;bool Ascended=false;

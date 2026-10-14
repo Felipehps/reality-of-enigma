@@ -33,5 +33,30 @@
     "Title": "Lâminas do Crepúsculo",
     "Affiliation": "Sentinelas da Última Ponte",
     "History": "Sevrin protegia a última ponte entre os arquivos solares e as aldeias exteriores. Quando a ruptura apagou os nomes dos viajantes, marcou nas próprias lâminas a promessa de recuperar cada identidade perdida. Descobriu que o sangue contaminado guarda o rastro de Nhal’Zor. Abandonou o posto para seguir essa trilha e encontrar os sobreviventes antes que o Devorador consuma suas memórias."
+  },
+  "mazakin": {
+    "Title": "Senhor das Almas Condenadas / Rei do Abismo",
+    "Affiliation": "Submundo",
+    "History": "O inferno não é um lugar: é sua presença. Aos 20% de vida, Mazakin desperta o corcel infernal e transforma a arena."
+  },
+  "hajun": {
+    "Title": "Humanoide do Submundo / Ascensão Absoluta",
+    "Affiliation": "Submundo",
+    "History": "A dor dos outros alimenta sua Carnificina. Aos 50% de vida, abandona os limites e revela a espada de ossos e sua verdadeira forma."
+  },
+  "zhujin": {
+    "Title": "Flor do Veneno / Flor Carmesim",
+    "Affiliation": "Jardim Venenoso",
+    "History": "A beleza da flor esconde a morte em seu pólen. A transformação acontece aos 50% e o florescimento aos 25%."
+  },
+  "tenrin": {
+    "Title": "O Leão da Iluminação",
+    "Affiliation": "Divino",
+    "History": "A verdadeira força não destrói o mundo: ela guia o que está perdido. Marcas Divinas fortalecem Tenrin e sustentam a equipe."
+  },
+  "zevalon": {
+    "Title": "Senhor dos Céus",
+    "Affiliation": "Divino",
+    "History": "O trovão não pergunta: ele simplesmente julga. Marcas Celestiais, raios e energia compõem seu ciclo de combate."
   }
 }

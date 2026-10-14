@@ -59,6 +59,10 @@ public sealed class GameSession
                 if(id.Length==0)battle.Advance();
                 else if(!battle.TryAct(id,FindUnit(r["target"]?.GetValue<string>()??""),out var error))throw new InvalidOperationException(error);
                 notice=battle.LastAction;Award();break;
+            case "reposition":
+                if(battle==null)throw new InvalidOperationException("Sem batalha");
+                if(!battle.TryRepositionActive(number,out var moveError))throw new InvalidOperationException(moveError);
+                notice=battle.LastAction;Award();break;
             case "leave":battle=null;training=null;mode="";break;
             case "save":persist=true;break;
         }
@@ -86,6 +90,8 @@ public sealed class GameSession
             case "training":
                 nextTraining=g.BeginTraining(bossId)??throw new InvalidOperationException("Treino bloqueado");
                 allies=nextTraining.Current.Allies;enemies=nextTraining.Current.Enemies;break;
+            case "mazakin":case "hajun":case "zhujin":allies=Team(new[]{"tenrin","zevalon","aelia","sevrin","lyra"},70);enemies=new(){new(c.Hero(kind),70,true,1,1)};break;
+            case "tenrin":case "zevalon":allies=Team(new[]{kind},70);enemies=new(){new(c.Hero("enemy_fenda"),70,false,0,0),new(c.Hero("enemy_fenda"),70,false,1,0),new(c.Hero("enemy_fenda"),70,false,2,0)};break;
             case "akuroth":allies=Team(new[]{"sevrin","kael","aelia","brakk","lyra"},70);enemies=new(){new(c.Hero("akuroth"),70,true,1,1)};break;
             case "eclipse":allies=Team(new[]{"sevrin","kael","aelia","brakk","lyra"},60);enemies=new(){new(c.Hero("maltherion"),60,true,1,1)};break;
             case "floral":allies=Team(new[]{"kael","savor","aelia","brakk","lyra"},50);enemies=new(){new(c.Hero("nerathis"),50,true,1,1)};break;
@@ -114,7 +120,7 @@ public sealed class GameSession
         ["key"]=u.InstanceId.ToString(),["id"]=u.Id,["name"]=u.CombatName,["hp"]=u.Hp,["maxHp"]=u.MaxHp,
         ["level"]=u.Level,["column"]=u.Column,["layer"]=u.Layer,["alive"]=u.Alive,["boss"]=u.Boss,
         ["ascended"]=u.Ascended,["gate"]=u.Gate,["ice"]=u.Ice,["freeze"]=u.Freeze,["stun"]=u.Stun,
-        ["charging"]=u.AnnihilationCharging,["strength"]=u.Strength,["essence"]=u.Essence,["defense"]=u.Defense,["speed"]=u.Speed,
+        ["charging"]=u.AnnihilationCharging,["crimson"]=u.Crimson,["blooming"]=u.Blooming,["carnage"]=u.Carnage,["energy"]=u.CelestialEnergy,["divineFocus"]=u.DivineFocus,["initiativeBoost"]=u.ActionAdvance,["summoner"]=u.Summoner?.InstanceId.ToString(),["strength"]=u.Strength,["essence"]=u.Essence,["defense"]=u.Defense,["speed"]=u.Speed,
         ["buffs"]=new JsonArray(u.Buffs.Select(p=>(JsonNode)new JsonObject{["id"]=p.Key,["strength"]=p.Value.Strength,["essence"]=p.Value.Essence,["speed"]=p.Value.Speed,["expires"]=p.Value.ExpiresRound}).ToArray()),
         ["statuses"]=new JsonArray(u.Statuses.Select(s=>(JsonNode)new JsonObject{["id"]=s.Effect.Id,["turns"]=s.RemainingTurns}).ToArray())
     };
@@ -138,7 +144,8 @@ public sealed class GameSession
                     ["reason"]=b.UnavailableReason(actor,s)
                 }).ToArray()),
                 ["lastTarget"]=b.LastTarget?.InstanceId.ToString(),["buffTargets"]=new JsonArray(b.LastBuffTargets.Select(u=>(JsonNode)JsonValue.Create(u.InstanceId.ToString())!).ToArray()),["lastOperator"]=b.LastSkill?.Operator,["lastActor"]=b.LastActor?.InstanceId.ToString(),["lastSkill"]=b.LastSkill?.Id,["lastAction"]=b.LastAction,
-                ["impacts"]=new JsonArray(b.LastImpacts.Select(x=>(JsonNode)new JsonObject{["target"]=x.Target.InstanceId.ToString(),["amount"]=x.Amount,["kind"]=x.Kind,["critical"]=x.Critical,["hit"]=x.HitIndex}).ToArray()),
+                ["impacts"]=new JsonArray(b.LastImpacts.Select(x=>(JsonNode)new JsonObject{["source"]=x.Attacker?.InstanceId.ToString(),["effect"]=x.Effect,["target"]=x.Target.InstanceId.ToString(),["amount"]=x.Amount,["kind"]=x.Kind,["critical"]=x.Critical,["hit"]=x.HitIndex}).ToArray()),
+                ["hazards"]=new JsonArray(b.Hazards.Select(h=>(JsonNode)new JsonObject{["cell"]=h.Cell,["kind"]=h.Kind,["turns"]=Math.Max(0,h.ExpiresRound-b.Round+1),["allyTargets"]=b.Enemies.Contains(h.Source),["source"]=h.Source.InstanceId.ToString()}).ToArray()),
                 ["log"]=new JsonArray(b.Log.TakeLast(12).Select(x=>(JsonNode)JsonValue.Create(x)!).ToArray())
             };
         }
