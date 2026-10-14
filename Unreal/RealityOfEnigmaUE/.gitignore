@@ -1,0 +1,11 @@
+Binaries/
+Intermediate/
+Saved/
+DerivedDataCache/
+.vs/
+*.sln
+*.suo
+NativeCore/**/bin/
+NativeCore/**/obj/
+*.pdb
+*.log

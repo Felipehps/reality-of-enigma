@@ -1,3 +1,14 @@
+# Migração para Unreal Engine 5.8.3
+
+A versão funcional Unreal está em `Unreal/RealityOfEnigmaUE`. Ela inclui campanha, equipe, formação, progressão, invocação, treino, salvamento e combate por turnos. O núcleo C# foi compilado em DLL nativa com NativeAOT e roda dentro da Unreal; não depende do Godot ou de um runtime .NET instalado no computador do jogador.
+
+Para editar, abra `Unreal/RealityOfEnigmaUE/RealityOfEnigmaUE.uproject`. Use `Unreal/COMPILAR-JOGO-UNREAL.cmd` para compilar ou `Unreal/EMPACOTAR-JOGO-UNREAL.cmd` para gerar o executável Windows. Requisitos de desenvolvimento: Unreal 5.8.3, ferramentas C++/Windows SDK e .NET SDK 10. Os scripts esperam a instalação em `C:/Program Files/Epic Games/UE_5.8`.
+
+Consulte [o estado da migração](Unreal/STATUS-UNREAL.md) e [as instruções da Unreal](Unreal/RealityOfEnigmaUE/LEIA-ME.md). Os modelos 3D atuais são provisórios da Epic, os efeitos são procedurais e a arte definitiva está pendente. Os executáveis e arquivos de depuração não entram no histórico do repositório; os assets e a DLL nativa necessários estão incluídos.
+
+A base Godot abaixo continua preservada como referência da migração.
+
+---
 # Reality Of Enigma
 
 RPG gacha offline em desenvolvimento. Base compartilhada: **V30**, Godot **4.4.1 .NET**, C# e **SDK .NET8**. Personagens, interfaces e animações ainda estão em evolução.

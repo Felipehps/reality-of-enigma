@@ -1,0 +1,37 @@
+{
+  "kael": {
+    "Title": "O veterano entre dois mundos",
+    "Affiliation": "Independente • aliado dos mercenários",
+    "History": "Antes da ruptura, Kael guardava suas lâminas longe da vida que havia construído com a esposa e a filha. O trabalho no campo lhe oferecia uma paz que as campanhas militares nunca deram. Quando a explosão sacudiu a floresta perto de casa, vestiu novamente a roupa de combate. A busca por respostas o levou até Savor e seu grupo. Ainda não luta por um reino: luta para impedir que a guerra alcance quem deixou para trás."
+  },
+  "savor": {
+    "Title": "O chef da companhia",
+    "Affiliation": "Companhia de mercenários",
+    "History": "Savor aprendeu que um grupo sobrevive tanto pela confiança quanto pelas armas. Entre contratos e longas viagens, assumiu a cozinha dos acampamentos e o cuidado de manter todos de pé. Seu modo descontraído esconde a responsabilidade de quem precisa decidir quando avançar e quando recuar. Liderava a busca pelo filho desaparecido do governador quando a explosão alterou a missão. Ao encontrar Kael, reconheceu no silêncio do veterano alguém que também carregava pessoas para proteger."
+  },
+  "aelia": {
+    "Title": "A tecelã dos sobreviventes",
+    "Affiliation": "Companhia de mercenários",
+    "History": "Aelia desenvolveu sua afinidade com a Essência cuidando de feridos que chegavam pelas estradas. Para ela, cada fio vital conta uma história que ainda não deveria terminar. Viajar com Savor tornou possível alcançar pessoas além dos abrigos e povoados onde costumava trabalhar. Entrou na missão do governador para trazer alguém de volta, não para colecionar vitórias. Diante da ruptura, sua atenção continua nos companheiros e na humanidade que a corrupção tenta apagar."
+  },
+  "brakk": {
+    "Title": "A força que sustenta o grupo",
+    "Affiliation": "Companhia de mercenários",
+    "History": "Brakk conhece o peso de estruturas que não podem cair. Depois de sobreviver a um acidente nas frentes de mineração, reconstruiu parte do corpo com próteses mecânicas e aprendeu a transformá-las em proteção. O antigo trabalho lhe ensinou a reconhecer rachaduras antes do desabamento; as viagens com Savor lhe deram um novo motivo para ficar na linha de frente. É humano por trás do aço. Quando a fenda se abre, seu primeiro impulso é assegurar que todos tenham uma saída."
+  },
+  "lyra": {
+    "Title": "A memória sob o gelo",
+    "Affiliation": "Vínculo reconstruído por invocação",
+    "History": "Lyra surge na jornada pela primeira invocação garantida, ocupando o lugar deixado por Raizen. Seu domínio do gelo parece mais antigo do que as lembranças que consegue alcançar. Reconhece sensações, lugares frios e o gesto de empunhar uma lâmina, mas as peças de seu passado ainda não se encaixam. Ela acompanha o grupo para compreender a própria origem e a ligação entre a invocação e os fragmentos do mundo. A resposta completa permanece como mistério para os próximos capítulos."
+  },
+  "varkas": {
+    "Title": "A Fera de Duas Almas",
+    "Affiliation": "Vigias da Cicatriz • proposta narrativa",
+    "History": "Fenrath guardava os desfiladeiros onde a névoa repetia as vozes dos desaparecidos. Ao resgatar uma caravana presa numa ruptura, sua alma foi partida: uma metade permaneceu na carne e a outra passou a caminhar na luz fria do espírito. Ele aprendeu a reuni-las para sobreviver, mas cada separação cobra uma parte de sua resistência. Agora segue os rastros de Nhal’Zor para descobrir se as vozes que escuta ainda podem ser salvas. Seu corpo prepara a presa; seu espírito fecha a fuga. História original provisória, sujeita a revisão."
+  },
+  "sevrin": {
+    "Title": "Lâminas do Crepúsculo",
+    "Affiliation": "Sentinelas da Última Ponte",
+    "History": "Sevrin protegia a última ponte entre os arquivos solares e as aldeias exteriores. Quando a ruptura apagou os nomes dos viajantes, marcou nas próprias lâminas a promessa de recuperar cada identidade perdida. Descobriu que o sangue contaminado guarda o rastro de Nhal’Zor. Abandonou o posto para seguir essa trilha e encontrar os sobreviventes antes que o Devorador consuma suas memórias."
+  }
+}

@@ -1,0 +1,51 @@
+[
+  {
+    "Number": 1,
+    "Name": "Floresta do Limiar",
+    "Summary": "A ruptura silenciou a mata. Kael e os mercenários seguem as marcas deixadas pelos predadores.",
+    "Ending": "A trilha termina numa cratera. Lá, o grupo encontra Solarius. Raizen o provoca e o Rei do Sol responde com Sol Esmagador. A força do golpe é impossível de enfrentar naquele momento.\nUma fada intervém e salva os sobreviventes. Raizen parte, atraído pela promessa de mais poder. A primeira invocação traz Lyra para o grupo.\nRecuperados, os companheiros seguem pelo Desfiladeiro dos Ecos em busca de um caminho de volta ao Rei do Sol.",
+    "Art": "res://Art/region-1-v23.png"
+  },
+  {
+    "Number": 2,
+    "Name": "Desfiladeiro dos Ecos",
+    "Summary": "Pontes partidas levam à sentinela Varkhan. Uma vontade estranha fala por trás de seus olhos.",
+    "Ending": "Varkhan se desfaz em Fragmentos de Alma. Por um instante, a voz que saía de sua boca deixa de ser a dele.\nAelia: — Ainda há alguém aqui dentro. Não deixem esses fragmentos para trás.\nO vale além do desfiladeiro está coberto de fumaça.",
+    "Art": "res://Art/region-2-v23.png"
+  },
+  {
+    "Number": 3,
+    "Name": "Vale das Cinzas",
+    "Summary": "A estrada de volta cruza casas queimadas. Para Kael, a ameaça deixa de ser distante.",
+    "Ending": "A devastação alcançou a família que Kael tentava proteger. Sua antiga vida terminou entre aquelas cinzas.\nSavor permanece ao seu lado enquanto Kael recolhe as lâminas.\nA escolha entre Arsenal Vivo e o caminho marcial passa a marcar a jornada. A única passagem adiante cruza a serra.",
+    "Art": "res://Art/region-3-v23.png"
+  },
+  {
+    "Number": 4,
+    "Name": "Serra do Véu Branco",
+    "Summary": "O caminho do palácio desapareceu sob o gelo. A travessia exige manter o grupo unido.",
+    "Ending": "O gelo cede e revela uma escadaria até as águas antigas. Lyra percebe que o frio não nasceu da montanha: ele selava algo que vinha de baixo.\nO grupo avista as torres do Arquivo das Marés.",
+    "Art": "res://Art/region-4-v23.png"
+  },
+  {
+    "Number": 5,
+    "Name": "Arquivo das Marés",
+    "Summary": "Velmora enraizou-se nos arquivos inundados. Seu pólen protege os registros do Devorador de Mundos.",
+    "Ending": "As pétalas de Velmora se fecham e as raízes deixam os arquivos. Sob o último selo, o grupo encontra o nome Nhal’Zor, o Devorador de Mundos. A assinatura solar revela que Solarius já conhecia a ameaça. O caminho segue pela Travessia do Eclipse.",
+    "Art": "res://Art/region-5-v23.png"
+  },
+  {
+    "Number": 6,
+    "Name": "Travessia do Eclipse",
+    "Summary": "Maltherion guarda a última ponte solar. Sua armadura aprisiona fragmentos de um eclipse que Nhal’Zor nunca permitiu terminar.",
+    "Ending": "A armadura de Maltherion se parte e suas asas de cristal perdem a luz. O antigo carrasco cai, libertando a ponte. Entre os restos do selo, Kael reconhece a mesma energia da explosão que viu no campo. O palácio está aberto; Solarius aguarda do outro lado.",
+    "Art": "res://Art/region-6-v23.png"
+  },
+  {
+    "Number": 7,
+    "Name": "Palácio do Sol Partido",
+    "Summary": "Solarius ocupa o palácio onde enfrentava Nhal’Zor. O grupo chega preparado para lutar.",
+    "Ending": "Solarius prepara Sol Esmagador. Antes da detonação, Kael rompe o VIII estágio: aura vermelha, músculos no limite. Seu golpe extremo derruba o Rei do Sol.\nO grupo decide poupá-lo. Só então Solarius revela que tentava conter Nhal’Zor no palácio — e que Raizen pode se tornar o próximo receptáculo do Devorador.\nO primeiro ato termina. Solarius pode ser reencontrado na Sala de Treinamento.",
+    "Art": "res://Art/region-7-v23.png"
+  }
+]
