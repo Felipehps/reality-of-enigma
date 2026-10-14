@@ -1,0 +1,11 @@
+{
+  "character": "hajun",
+  "phase": 1,
+  "source_faces": 1903068,
+  "optimized_faces": 120000,
+  "height_meters": 1.8,
+  "skeleton": false,
+  "animations": false,
+  "role": "3d-preview-only",
+  "source_preserved": true
+}

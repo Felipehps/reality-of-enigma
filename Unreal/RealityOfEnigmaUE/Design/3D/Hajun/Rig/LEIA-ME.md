@@ -1,0 +1,1 @@
+Hajun — fase 1. FBX de produção com 61 ossos, 80 mil triângulos e pesos corrigidos. Reimportação Blender verificada. Sem animações. Necessita retarget, revisão das deformações da roupa e arma e teste na Unreal antes de substituir o personagem animado do combate. Veja rig-corrigido.json.

@@ -41,3 +41,5 @@ Os modelos, esqueletos e sete animações e reação procedural de impacto são 
 Consulte AKUROTH-ARTE-ATUAL.md para a melhoria do traje provisório.
 
 As referências individuais das duas fases de Hajun e Zhu Jin podem ser consultadas nas fichas. Veja ARTES-FASES.md.
+
+Hajun possui uma prévia 3D giratória em sua ficha: Ver arte completa → Modelo 3D • fase 1. O FBX com esqueleto está preparado separadamente; veja HAJUN-MODELO-3D.md para os limites e validações.
