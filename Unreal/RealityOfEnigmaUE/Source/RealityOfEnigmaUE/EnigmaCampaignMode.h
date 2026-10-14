@@ -14,6 +14,7 @@ public:
  void Action(const FString& Name,const FString& Id=TEXT(""),int32 Number=0);
  void Click(FVector2D Position);void Wheel(int32 Direction);void Key(int32 Index);
  FString Page=TEXT("home"),Selected=TEXT("kael"),Target,TrainingBoss=TEXT("varkhan"),Message;
+ int32 ReferencePhase=0;
  int32 Region=0,ListPage=0,TeamSlot=0,OpeningShot=0,PendingStage=1;bool Auto=false,Repeat=false,ReducedMotion=false;
  float Volume=.7f,AnimationAge=-1,Clock=0;bool MoveMenu=false;
  bool LogVisible=false,OpeningAuto=true,ReplayOpening=false;

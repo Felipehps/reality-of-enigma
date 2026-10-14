@@ -74,8 +74,9 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
  if(!Game()||!Game()->State)return;
  if(Name==TEXT("moveMenu")){MoveMenu=!MoveMenu;return;}
  if(Name==TEXT("reposition")){Act(TEXT(""),Number);return;}
- if(Name==TEXT("page")){Auto=false;AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();Page=Id;ListPage=0;if(Id==TEXT("opening")){ReplayOpening=true;OpeningShot=0;OpeningAge=0;}WorldArt->HideBattle();return;}
- if(Name==TEXT("select")){Selected=Id;return;}
+ if(Name==TEXT("referencePhase")){ReferencePhase=FMath::Clamp(Number,0,2);return;}
+ if(Name==TEXT("page")){ReferencePhase=0;Auto=false;AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();Page=Id;ListPage=0;if(Id==TEXT("opening")){ReplayOpening=true;OpeningShot=0;OpeningAge=0;}WorldArt->HideBattle();return;}
+ if(Name==TEXT("select")){ReferencePhase=0;Selected=Id;return;}
  if(Name==TEXT("target")){Target=Id;return;}
  if(Name==TEXT("list")){ListPage=FMath::Max(0,ListPage+Number);return;}
  if(Name==TEXT("nextRegion")){Region=FMath::Min(6,Region+1);Page=TEXT("campaign");return;}
@@ -194,7 +195,13 @@ void AEnigmaCampaignHUD::DrawHUD(){
  }
  else if(Page==TEXT("reference")){
   Text(S(Find(A(Catalog,TEXT("Characters")),Mode->Selected),TEXT("Name"))+TEXT(" • ARTE DE REFERÊNCIA"),45,100,FLinearColor(.95f,.77f,.5f),1.2f);
-  if(auto T=Texture(TEXT("Hero_")+Mode->Selected))DrawTexture(T,255*Scale,140*Scale,750*Scale,500*Scale,0,0,1,1,FLinearColor::White);
+  const bool HasPhases=Mode->Selected==TEXT("hajun")||Mode->Selected==TEXT("zhujin");
+  FString ArtName=TEXT("Hero_")+Mode->Selected;
+  if(HasPhases&&Mode->ReferencePhase>0)ArtName+=FString::Printf(TEXT("_phase%d"),Mode->ReferencePhase);
+  if(HasPhases){Button(TEXT("Ficha original"),45,155,185,TEXT("referencePhase"),TEXT(""),0);Button(TEXT("Fase 1"),45,205,185,TEXT("referencePhase"),TEXT(""),1);Button(TEXT("Fase 2"),45,255,185,TEXT("referencePhase"),TEXT(""),2);Text(Mode->ReferencePhase?FString::Printf(TEXT("FASE %d"),Mode->ReferencePhase):TEXT("FICHA ORIGINAL"),45,315,FLinearColor(.95f,.77f,.5f));}
+  Box(250,140,770,495,FLinearColor(.025f,.025f,.035f,.98f));
+  if(auto T=Texture(ArtName)){float Fit=FMath::Min(750.f/T->GetSizeX(),475.f/T->GetSizeY());float W=T->GetSizeX()*Fit,H=T->GetSizeY()*Fit;DrawTexture(T,(635-W*.5f)*Scale,(387.5f-H*.5f)*Scale,W*Scale,H*Scale,0,0,1,1,FLinearColor::White);}
+  else Text(TEXT("Arte indisponível"),390,330,FLinearColor(.9f,.3f,.3f));
   Button(TEXT("Voltar à ficha"),45,650,260,TEXT("page"),TEXT("cards"));
  }
  else if(Page==TEXT("formation")){
@@ -249,6 +256,7 @@ void AEnigmaCampaignHUD::DrawHUD(){
 void AEnigmaCampaignMode::RunChecks(){
  int32 Checks=0,Failures=0;auto Check=[&](bool Ok,const TCHAR* Name){Checks++;if(!Ok){Failures++;UE_LOG(LogTemp,Error,TEXT("MIGRATION_QA_FAIL %s: %s"),Name,*Game()->Error);}};
  auto G=Game();Check(G&&G->State.IsValid(),TEXT("native_library_loaded"));if(!G||!G->State){FPlatformMisc::RequestExitWithStatus(false,1);return;}
+ for(const TCHAR* ArtName:{TEXT("Hero_hajun_phase1"),TEXT("Hero_hajun_phase2"),TEXT("Hero_zhujin_phase1"),TEXT("Hero_zhujin_phase2")}){FString Name(ArtName);Check(LoadObject<UTexture2D>(nullptr,*(TEXT("/Game/GameArt/")+Name+TEXT(".")+Name))!=nullptr,ArtName);}
  Check(A(O(G->State,TEXT("catalog")),TEXT("Stages")).Num()==70,TEXT("seventy_stages"));Check(A(G->State,TEXT("regions")).Num()==7,TEXT("seven_regions"));Check(A(G->State,TEXT("opening")).Num()==8,TEXT("eight_opening_shots"));
  Check(A(O(G->State,TEXT("save")),TEXT("Roster")).Num()==5,TEXT("starting_roster"));Check(G->Command(TEXT("level"),TEXT("kael")),TEXT("level_call"));Check(N(Find(A(O(G->State,TEXT("save")),TEXT("Roster")),TEXT("kael")),TEXT("Level"))==2,TEXT("level_rule"));
  const double Gold=N(O(O(G->State,TEXT("save")),TEXT("Inventory")),TEXT("Gold"));Check(G->Command(TEXT("summon"),TEXT(""),10),TEXT("summon_ten"));Check(N(O(O(G->State,TEXT("save")),TEXT("Inventory")),TEXT("Gold"))==Gold-9000,TEXT("summon_cost"));
@@ -271,7 +279,7 @@ void AEnigmaCampaignMode::CaptureUI(const FString& Name){
 }
 void AEnigmaCampaignMode::TickUITour(){
  if(Clock<UITourNext)return;UITourNext=Clock+3.5f;
- const FString Names[]={TEXT("home"),TEXT("campaign"),TEXT("team"),TEXT("formation"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("settings"),TEXT("arenas"),TEXT("opening-1"),TEXT("opening-8"),TEXT("battle-formation"),TEXT("battle-ready"),TEXT("battle-action"),TEXT("floral"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon"),TEXT("mazakin-art"),TEXT("hajun-art"),TEXT("zhujin-art"),TEXT("tenrin-art"),TEXT("zevalon-art")};
+ const FString Names[]={TEXT("home"),TEXT("campaign"),TEXT("team"),TEXT("formation"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("settings"),TEXT("arenas"),TEXT("opening-1"),TEXT("opening-8"),TEXT("battle-formation"),TEXT("battle-ready"),TEXT("battle-action"),TEXT("floral"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon"),TEXT("mazakin-art"),TEXT("hajun-art"),TEXT("zhujin-art"),TEXT("tenrin-art"),TEXT("zevalon-art"),TEXT("hajun-phase1-art"),TEXT("hajun-phase2-art"),TEXT("zhujin-phase1-art"),TEXT("zhujin-phase2-art")};
  if(UITourIndex>=UE_ARRAY_COUNT(Names)){UE_LOG(LogTemp,Display,TEXT("ENIGMA_UI_QA_RESULT captures=%d failures=%d"),UITourIndex,UIWarnings);FPlatformMisc::RequestExitWithStatus(false,UIWarnings?1:0);return;}
  FString Name=Names[UITourIndex];
  if(UITourIndex<9){Action(TEXT("page"),Name);}
@@ -286,7 +294,11 @@ void AEnigmaCampaignMode::TickUITour(){
  else if(UITourIndex==14){Start(TEXT("floral"));Game()->Command(TEXT("begin"));}
  else if(UITourIndex==15){Start(TEXT("akuroth"));Game()->Command(TEXT("begin"));}
  else if(UITourIndex<21){Start(Name);Game()->Command(TEXT("begin"));}
- else{Selected=Name.LeftChop(4);Action(TEXT("page"),TEXT("reference"));}
+ else if(UITourIndex<26){Selected=Name.LeftChop(4);Action(TEXT("page"),TEXT("reference"));}
+ else{
+  Selected=UITourIndex<28?TEXT("hajun"):TEXT("zhujin");Action(TEXT("page"),TEXT("reference"));
+  int32 Phase=(UITourIndex-26)%2+1;FTimerHandle PhaseHandle;GetWorldTimerManager().SetTimer(PhaseHandle,[this,Phase](){auto Choice=Buttons.FindByPredicate([Phase](const FButton& B){return B.Name==TEXT("referencePhase")&&B.Number==Phase&&B.Enabled;});if(Choice)Click(Choice->Min+Choice->Size*.5f);else UIWarnings++;},.3f,false);
+ }
  UITourIndex++;FTimerHandle Handle;GetWorldTimerManager().SetTimer(Handle,[this,Name](){CaptureUI(Name);},.85f,false);
 }
 

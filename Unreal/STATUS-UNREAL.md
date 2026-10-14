@@ -15,8 +15,8 @@ A Unreal controla apresentação, entrada e áudio. O núcleo original em C# foi
 | Testes das regras na nova base | 441 aprovados |
 | Integração com a DLL nativa | 62 verificações, zero falhas |
 | Todos os 70 encontros da campanha | 141 verificações, zero falhas |
-| Integração no executável Windows | 69 verificações, zero falhas |
-| Interface no executável Windows | 26 capturas, zero falhas |
+| Integração no executável Windows | 73 verificações, zero falhas |
+| Interface no executável Windows | 30 capturas, zero falhas |
 | Replays dos personagens novos no executável | 15 estados de combate, 122 verificações, zero falhas |
 | Compilação e empacotamento Windows | Concluídos com saída 0 |
 
@@ -42,3 +42,5 @@ A apresentação atual possui animações básicas e efeitos procedurais. As cap
 A base Godot foi preservada. Esta entrega cobre a migração funcional; a produção artística continua pendente.
 
 O traje provisório do AKUROTH foi ampliado; consulte AKUROTH-ARTE-ATUAL.md para a alteração e seus limites.
+
+As artes individuais das fases de Hajun e Zhu Jin estão na galeria, com seleção de fase e proporções preservadas. Consulte ARTES-FASES.md.
