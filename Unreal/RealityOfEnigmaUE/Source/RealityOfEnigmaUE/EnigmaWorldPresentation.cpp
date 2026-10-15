@@ -81,7 +81,7 @@ void AEnigmaWorldPresentation::ShowBattle(TSharedPtr<FJsonObject> Battle,int32 R
   }
  }
  for(int32 I=0;I<Units.Num();I++){auto U=Units[I]->AsObject();bool Enemy=I>=A(Battle,TEXT("allies")).Num();Homes[I]=FVector((Enemy?1:-1)*(450+float(N(U,TEXT("layer")))*120),(float(N(U,TEXT("column")))-1)*190,0);Bodies[I]->SetVisibility(true);FString Id=S(U,TEXT("id"));bool BossForm=(Id==TEXT("akuroth")||Id==TEXT("mazakin")||Id==TEXT("hajun"))&&B(U,TEXT("ascended"))||Id==TEXT("zhujin")&&B(U,TEXT("crimson"));if(BossForm&&!Ascended){Ascended=true;TransformBoss=Id;AscendedBossKey=S(U,TEXT("key"));TransformAge=0;PlayCue(Id==TEXT("zhujin")?TEXT("chime"):TEXT("akuroth-transform"),1,.7f);if(Backdrop&&Id!=TEXT("zhujin"))Backdrop->SetMaterial(0,LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Akuroth/Environment/M_InfernoBackdrop.M_InfernoBackdrop")));}}
- Snapshot=Battle;SetActorHiddenInGame(false);
+ Snapshot=Battle;SyncTripoArt();SetActorHiddenInGame(false);
 }
 void AEnigmaWorldPresentation::HideBattle(){SetActorHiddenInGame(true);Age=-1;Snapshot.Reset();StopSounds();}
 void AEnigmaWorldPresentation::PlayAction(TSharedPtr<FJsonObject> Battle,float Volume){
@@ -92,7 +92,7 @@ void AEnigmaWorldPresentation::PlayAction(TSharedPtr<FJsonObject> Battle,float V
  for(auto Value:A(Battle,TEXT("impacts"))){auto Hit=Value->AsObject();FString Kind=S(Hit,TEXT("kind")),From=S(Hit,TEXT("source"));if(Kind==TEXT("poison")||Kind==TEXT("bleed")||Kind==TEXT("hazard")||Kind==TEXT("reflect")||Kind==TEXT("heal")&&Operator!=TEXT("heal")||!From.IsEmpty()&&From!=Actor)continue;int32 I=Keys.IndexOfByKey(S(Hit,TEXT("target")));if(I>=0)Victims.AddUnique(I);}
  for(auto Buff:A(Battle,TEXT("buffTargets"))){int32 I=Keys.IndexOfByKey(Buff->AsString());if(I>=0)Victims.AddUnique(I);}
  if(Victims.Num()==0){int32 I=Keys.IndexOfByKey(S(Battle,TEXT("lastTarget")));if(I>=0)Victims.Add(I);}
- if(Attacker>=0&&!Skill.IsEmpty()){UAnimSequence* Clip=Operator==TEXT("reposition")?Walk:Skill.Contains(TEXT("final"))||Skill.Contains(TEXT("wrath"))||Skill.Contains(TEXT("roar"))||Skill.Contains(TEXT("judgment"))?ChargedAttack:Skill.Contains(TEXT("triple"))||Skill.Contains(TEXT("chaos"))?Attack3:Skill.Contains(TEXT("lion"))||Skill.Contains(TEXT("axe"))?Attack2:Attack;Bodies[Attacker]->PlayAnimation(Clip?Clip:Attack.Get(),Operator==TEXT("reposition"));}LastReact.Init(-1,Bodies.Num());ReactUntil.Init(-1,Bodies.Num());Age=0;PlayVolume=Volume;SoundEvents.Reset();LastStep=-1;
+ if(Attacker>=0&&!Skill.IsEmpty()){UAnimSequence* Clip=Operator==TEXT("reposition")?Walk:Skill.Contains(TEXT("final"))||Skill.Contains(TEXT("wrath"))||Skill.Contains(TEXT("roar"))||Skill.Contains(TEXT("judgment"))?ChargedAttack:Skill.Contains(TEXT("triple"))||Skill.Contains(TEXT("chaos"))?Attack3:Skill.Contains(TEXT("lion"))||Skill.Contains(TEXT("axe"))?Attack2:Attack;Bodies[Attacker]->PlayAnimation(IsTripoBody(Attacker)?BodyClip(Attacker,Skill.Contains(TEXT("annihilation"))?TEXT("Ultimate"):Skill.Contains(TEXT("chaos"))?TEXT("Chaos"):Skill.Contains(TEXT("cut"))?TEXT("Slash"):TEXT("Cast")):(Clip?Clip:Attack.Get()),Operator==TEXT("reposition"));}LastReact.Init(-1,Bodies.Num());ReactUntil.Init(-1,Bodies.Num());Age=0;PlayVolume=Volume;SoundEvents.Reset();LastStep=-1;
  FString ActorId;if(Attacker>=0){auto Units=A(Battle,TEXT("allies"));Units.Append(A(Battle,TEXT("enemies")));for(auto U:Units)if(S(U->AsObject(),TEXT("key"))==Actor)ActorId=S(U->AsObject(),TEXT("id"));}
  TSharedPtr<FJsonObject> Profile;const TSharedPtr<FJsonObject>* Found=nullptr;
  if(SoundProfiles){if(SoundProfiles->TryGetObjectField(TEXT("skill:")+Skill,Found))Profile=*Found;else if(SoundProfiles->TryGetObjectField(ActorId.StartsWith(TEXT("enemy"))?TEXT("enemy_fenda"):ActorId,Found))Profile=*Found;}
@@ -118,6 +118,7 @@ void AEnigmaWorldPresentation::Ring(UInstancedStaticMeshComponent* Batch,FVector
 void AEnigmaWorldPresentation::Tick(float Dt){
  Super::Tick(Dt);Clock+=Dt;Effects->ClearInstances();Crimson->ClearInstances();Dark->ClearInstances();ShadowLimbs->ClearInstances();WhiteHair->ClearInstances();Gold->ClearInstances();Lightning->ClearInstances();Mount->ClearInstances();Petals->ClearInstances();if(!Snapshot||IsHidden())return;
  if(Age>=0){Age+=Dt;for(int32 I=SoundEvents.Num()-1;I>=0;I--)if(Age>=SoundEvents[I].At){PlayCue(SoundEvents[I].Cue,SoundEvents[I].Pitch,SoundEvents[I].Gain);SoundEvents.RemoveAt(I);}if(Age<1.3f&&Age-LastStep>.22f&&Attacker>=0&&Victims.Num()>0&&!Skill.IsEmpty()&&Operator!=TEXT("heal")&&Operator!=TEXT("buff")&&!Skill.StartsWith(TEXT("akuroth_"))){LastStep=Age;PlayCue(StepCue,StepPitch,.16f);}}if(TransformAge>=0)TransformAge+=Dt;
+ if(TripoTransformPending&&TransformAge>=3){for(int32 I=0;I<Bodies.Num();I++)if(IsTripoBody(I))Bodies[I]->PlayAnimation(BodyClip(I,TEXT("Idle")),true);TripoTransformPending=false;}
  TArray<TSharedPtr<FJsonValue>> Units=A(Snapshot,TEXT("allies"));Units.Append(A(Snapshot,TEXT("enemies")));if(Units.Num()!=Bodies.Num())return;
  FVector Center=FVector(0,0,220);bool Ultimate=EnigmaCombatTiming::IsAnnihilationDischarge(Snapshot);
  for(int32 I=0;I<Bodies.Num();I++){
@@ -133,17 +134,17 @@ void AEnigmaWorldPresentation::Tick(float Dt){
   if(Boss&&!ReducedMotion&&TransformAge>=0&&TransformAge<3)P.Z+=FMath::Sin(TransformAge/3*PI)*120;
   const double* Initial=BeforeHealth.Find(Keys[I]);bool AliveOnScreen=Age>=0&&Initial?EnigmaCombatTiming::HealthAt(*Initial,N(U,TEXT("hp")),N(U,TEXT("maxHp")),Keys[I],Skill,A(Snapshot,TEXT("impacts")),Age,Duration)>0:B(U,TEXT("alive"));
   if(Id==TEXT("mazakin")&&B(U,TEXT("ascended"))&&!AliveOnScreen)P.Z-=80;
-  Bodies[I]->SetWorldLocation(P);Bodies[I]->SetWorldRotation(FRotator(0,I<A(Snapshot,TEXT("allies")).Num()?-90:90,AliveOnScreen?(HitAge>=0?FMath::Sin(FMath::Clamp(HitAge/.42f,0.f,1.f)*PI)*-10:0):Death?0:75));
-  if(!AliveOnScreen&&RenderAlive[I]&&Death)Bodies[I]->PlayAnimation(Death,false);
+  Bodies[I]->SetWorldLocation(P);Bodies[I]->SetWorldRotation(FRotator(0,I<A(Snapshot,TEXT("allies")).Num()?-90:IsTripoBody(I)?45:90,AliveOnScreen?(HitAge>=0?FMath::Sin(FMath::Clamp(HitAge/.42f,0.f,1.f)*PI)*-10:0):Death?0:75));
+  if(!AliveOnScreen&&RenderAlive[I]&&Death)Bodies[I]->PlayAnimation(IsTripoBody(I)?BodyClip(I,TEXT("Death")):Death.Get(),false);
   RenderAlive[I]=AliveOnScreen;Bodies[I]->SetVisibility(Id!=TEXT("mazakin_orb"));
   if(AliveOnScreen&&I!=Attacker&&HitAge>=0&&Age-HitAge>LastReact[I]+.001f ){LastReact[I]=Age-HitAge;ReactUntil[I]=Age+.42f;}
-  if(ReactUntil[I]>0&&Age>=ReactUntil[I]&&AliveOnScreen){ReactUntil[I]=-1;Bodies[I]->PlayAnimation(Idle,true);}
+  if(ReactUntil[I]>0&&Age>=ReactUntil[I]&&AliveOnScreen){ReactUntil[I]=-1;Bodies[I]->PlayAnimation(IsTripoBody(I)?BodyClip(I,TEXT("Idle")):Idle.Get(),true);}
   if(Id==TEXT("mazakin_orb")&&AliveOnScreen){Ball(Dark,P+FVector(0,0,100),65);FaceRing(Crimson,P+FVector(0,0,100),72);}
   DrawNewCharacter(I,U,P);
-  if(Age>=Duration&&I==Attacker&&AliveOnScreen)Bodies[I]->PlayAnimation(Idle,true);
+  if(Age>=Duration&&I==Attacker&&AliveOnScreen)Bodies[I]->PlayAnimation(IsTripoBody(I)?BodyClip(I,TEXT("Idle")):Idle.Get(),true);
   for(auto V:A(U,TEXT("statuses"))){FString Status=S(V->AsObject(),TEXT("id"));if(Status.Contains(TEXT("poison")))Ring(Effects,P+FVector(0,0,10),75);if(Status.Contains(TEXT("bleed")))Beam(Crimson,P+FVector(0,0,80),P+FVector(0,0,20),4);}
   if(N(U,TEXT("ice"))>0||N(U,TEXT("freeze"))>0)Ring(Effects,P+FVector(0,0,45),80);
-  if(Id==TEXT("akuroth")){
+  if(Id==TEXT("akuroth")&&!IsTripoBody(I)){
    DrawAkurothCostume(I,U);
    FVector Head=Bodies[I]->GetBoneLocation(TEXT("head"));for(int32 H=0;H<2;H++)Beam(ShadowLimbs,Head+FVector(0,H?27:-27,12),Head+FVector(30,H?70:-70,95),10);
    if(B(U,TEXT("ascended"))){for(int32 Arm=0;Arm<6;Arm++){float A=Clock*.6f+Arm*PI/3;FVector Origin=P+FVector(0,0,235),Elbow=Origin+FVector(0,FMath::Cos(A)*140,FMath::Sin(A)*100),Hand=Elbow+FVector(-90,FMath::Cos(A)*90,35);Beam(ShadowLimbs,Origin,Elbow,14);Beam(ShadowLimbs,Elbow,Hand,10);Ring(Crimson,Hand,20);}for(int32 H=0;H<16;H++){FVector Root=Head+FVector(H%4*8-16,H/4*9-18,15);for(int32 J=0;J<6;J++)Beam(WhiteHair,Root+FVector(J*12,FMath::Sin(Clock*2+H+J)*10,-J*28),Root+FVector((J+1)*12,FMath::Sin(Clock*2+H+J+1)*10,-(J+1)*28),3);}}
@@ -166,10 +167,11 @@ void AEnigmaWorldPresentation::Tick(float Dt){
   if(Skill==TEXT("akuroth_annihilation")&&!Ultimate){Ball(Dark,Source+FVector(-160,0,175),45+Age*20);Ring(Crimson,Source+FVector(-160,0,175),70+FMath::Sin(Age*3)*15);}
   if(Ultimate){float T=Age/Duration;Ball(Dark,Center,60+FMath::Sin(T*PI)*130);Ring(Crimson,Center,100+FMath::Sin(T*PI)*160);Ring(Effects,Center+FVector(0,0,50),180+FMath::Sin(T*PI)*90);for(int32 I=0;I<30;I++){float A=I*2*PI/30+Age*5;float R=300*(1-T);Beam(Crimson,Center+FVector(FMath::Cos(A)*R,FMath::Sin(A)*R,FMath::Sin(A*3)*40),Center+FVector(FMath::Cos(A+.25f)*R,FMath::Sin(A+.25f)*R,0),3);}if(Age>3.f)Ring(Crimson,FVector(0,0,20),(Age-3.f)*900);}
  }
- if(Age>=Duration){for(int32 I=0;I<Bodies.Num();I++)if(RenderAlive[I])Bodies[I]->PlayAnimation(Idle,true);Age=-1;}
+ if(Age>=Duration){for(int32 I=0;I<Bodies.Num();I++)if(RenderAlive[I])Bodies[I]->PlayAnimation(IsTripoBody(I)?BodyClip(I,TEXT("Idle")):Idle.Get(),true);Age=-1;}
   for(auto Value:A(Snapshot,TEXT("impacts"))){auto Hit=Value->AsObject();float At=EnigmaCombatTiming::ImpactAt(Skill,Hit);int32 TargetIndex=Keys.IndexOfByKey(S(Hit,TEXT("target")));if(TargetIndex<0||Age<At||Age>=At+.65f)continue;FVector P=Bodies[TargetIndex]->GetComponentLocation()+FVector(0,0,110);if(S(Hit,TEXT("kind"))==TEXT("heal")){Ring(Gold,P-FVector(0,0,90),50+(Age-At)*100);}else if(S(Hit,TEXT("effect")).StartsWith(TEXT("mazakin_"))){FaceRing(Crimson,P,50+(Age-At)*100);Beam(Crimson,P+FVector(0,0,300),P,7);}}
  for(auto Hazard:A(Snapshot,TEXT("hazards"))){auto H=Hazard->AsObject();int32 Cell=N(H,TEXT("cell"));FVector P((B(H,TEXT("allyTargets"))?-1:1)*(450+float(Cell/3)*120),(Cell%3-1)*190,5);FaceRing(Crimson,P+FVector(0,0,10),25);Ring(Crimson,P,86);for(int32 J=0;J<12;J++){float A=J*2*PI/12;Beam(Crimson,P+FVector(FMath::Cos(A)*55,FMath::Sin(A)*55,0),P+FVector(FMath::Cos(A)*55,FMath::Sin(A)*55,25+FMath::Sin(Clock*4+J)*20),3);}}
- if(Camera){float Focus=!ReducedMotion&&Transforming()?FMath::Sin(TransformAge/3.f*PI):0;FVector Position=FMath::Lerp(FVector(0,2450,1150),FVector(300,1800,850),Focus*.5f);Camera->SetActorLocation(Position);Camera->SetActorRotation((FMath::Lerp(FVector(0,0,170),FVector(550,0,280),Focus*.5f)-Position).Rotation());Camera->GetCameraComponent()->SetFieldOfView(58-Focus*7);}
+ if(Camera){float Focus=!ReducedMotion&&Transforming()?FMath::Sin(TransformAge/3.f*PI):0;FVector Position=FMath::Lerp(TripoArenaEnabled?FVector(0,2250,2100):FVector(0,2450,1150),TripoArenaEnabled?FVector(300,1950,1750):FVector(300,1800,850),Focus*.5f);Camera->SetActorLocation(Position);Camera->SetActorRotation((FMath::Lerp(FVector(0,0,170),FVector(550,0,280),Focus*.5f)-Position).Rotation());Camera->GetCameraComponent()->SetFieldOfView(58-Focus*7);}
+ if(TripoArenaEnabled){for(int32 J=0;J<36;J++){float A=J*2*PI/36;float R=TripoArenaPhase==2?1030:1150;float Z=FMath::Fmod(Clock*75+J*29,150.f);FVector P(FMath::Cos(A)*R,FMath::Sin(A)*R,5+Z);Beam(Crimson,P,P+FVector(FMath::Sin(Clock*5+J)*7,0,12),2);}}
  if(Ascended){Light->SetLightColor(FLinearColor(.65f,.1f,.28f));KeyLight->SetLightColor(TransformBoss==TEXT("zhujin")?FLinearColor(.6f,.9f,.55f):FLinearColor(.9f,.58f,.65f));RimLight->SetLightColor(TransformBoss==TEXT("zhujin")?FLinearColor(.5f,.6f,.12f):FLinearColor(.6f,.22f,.95f));for(int32 I=0;I<65;I++){float X=FMath::Sin(I*16.3f)*1050,Y=FMath::Cos(I*11.7f)*700,Z=FMath::Fmod(Clock*60+I*37,330.f);Beam(Crimson,FVector(X,Y,Z),FVector(X+3,Y,Z+10),2);}if(!ReducedMotion&&FMath::Fmod(Clock,4.f)<.18f)for(int32 J=0;J<8;J++)Beam(Effects,FVector(700-J*25,-650,650-J*60),FVector(675-J*25,-650,590-J*60),4);}
 }
 

@@ -14,6 +14,12 @@ public:
  bool ReducedMotion=false;bool HasImpactCueAt(float At) const;
  bool Ready=false;bool Transforming() const{return TransformAge>=0&&TransformAge<3;}
 private:
+ UPROPERTY() TObjectPtr<UStaticMeshComponent> TripoArena;
+ UPROPERTY() TMap<FString,TObjectPtr<UAnimSequence>> TripoClips;
+ bool IsTripoBody(int32 Index) const;
+ UAnimSequence* BodyClip(int32 Index,const FString& Kind);
+ void SyncTripoArt();
+ bool TripoTransformPending=false;bool TripoArenaEnabled=false;int32 TripoArenaPhase=0;
  UPROPERTY() TArray<TObjectPtr<USkeletalMeshComponent>> Bodies;
  UPROPERTY() TArray<TObjectPtr<UStaticMeshComponent>> Scenery;
  UPROPERTY() TObjectPtr<UInstancedStaticMeshComponent> Effects;

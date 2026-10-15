@@ -1,17 +1,22 @@
-# AKUROTH — melhoria do traje provisório
+# AKUROTH — teste com as artes 3D do Tripo
 
-O AKUROTH recebeu um manto 3D com doze painéis separados e pontas irregulares, costuras vermelhas, correntes na cintura, placas e espinhos nos ombros, eclipse no peito, coroa e espada de sombra. O cabelo escuro aparece na primeira fase; o cabelo branco e os seis braços de sombra da segunda fase foram preservados.
+As duas malhas de personagem e os dois cenários fornecidos pelo usuário estão integrados ao combate da Unreal. O Core continua calculando turnos, IA, dano, estados e transformação aos 30% de vida. A apresentação troca a malha e a arena quando o estado ascended é ativado.
 
-O manto acompanha os ossos animados do corpo e tem movimento de vento. A opção de movimento reduzido desativa essa oscilação; personagens mortos também deixam de oscilar. A espada acompanha a mão durante a animação.
+Os personagens preservam suas texturas PBR. Os FBX recebidos não tinham esqueleto: as cópias de teste usam rigs locais compactos de 10 e 16 ossos, com sete movimentos iniciais por fase (repouso, corte, conjuração, caos, ultimate, transformação e morte). Os cenários chegaram brancos; receberam materiais de pedra escura com variação procedural, bronze e lava emissiva oscilante. O segundo cenário usa a iluminação infernal do combate.
 
-Uma reação aditiva da Epic era usada como animação independente, condição que a Unreal informou não suportar no jogo empacotado. Ela foi removida desse caminho. A reação atual usa recuo e inclinação do corpo no momento de impacto, preservando a animação principal. Não há animação de reação autoral final.
+As malhas originais de cerca de 1,9 milhão de faces foram preservadas fora do projeto. As cópias de jogo têm 90 mil faces por personagem e aproximadamente 180 mil por arena. Os FBX otimizados, movimentos e arquivos Blender estão em Design/3D/Akuroth; os recursos importados estão em Content/CharacterModels/Akuroth.
 
-Ainda é um modelo provisório sobre Manny. Não foram entregues rosto, anatomia, texturas, cabelo com mechas modeladas, rig próprio ou acabamento fiel à referência. Os braços, correntes e espada continuam geométricos. Esta alteração melhora o traje de teste; não reproduz a imagem cinematográfica.
+## Verificação desta versão
 
-## Verificação
+Windows compilado, empacotado e executado. 75 verificações de integração e 179 verificações em 12 replays de combate, sem falhas. Foram inspecionadas capturas reais das duas fases, com as texturas do personagem e os materiais dos cenários. Não houve falha de shader de material no teste Windows final.
 
-A compilação do editor e 12 replays reais de combate foram verificados antes do empacotamento, com 179 verificações de vida, duração e horários de áudio, sem falhas. As capturas reais estão em akuroth-costume-previews. A validação da versão Windows atualizada está registrada em migration-validation/akuroth-costume-packaged.log.
+O teste de reimportação FBX confirmou pesos em todos os vértices e dimensões limitadas nos quadros de repouso amostrados. Isso não certifica todos os movimentos como animação final de produção. Não houve gasto adicional de créditos Tripo.
 
-Abra ABRIR-JOGO-UNREAL.cmd e entre na arena de teste do AKUROTH. A segunda fase começa aos 30% de vida.
+## Como ver
 
-A versão Windows foi empacotada e executada: 69 verificações de integração e 179 em 12 replays, sem falhas. O aviso da reação aditiva não apareceu no novo teste. O Blender 5.1.1 instalado foi testado e produziu uma base editável separada em Design/3D/Akuroth; consulte seu LEIA-ME.md. Esses arquivos não são o corpo final nem um recurso já importado no jogo.
+- VER-BATALHA-AKUROTH-TRIPO.cmd: demonstração roteirizada das habilidades usando estados e impactos gerados pelo Core existente. Mantém a janela aberta ao terminar. É uma demonstração, não uma partida interativa.
+- JOGAR-TESTE-AKUROTH-TRIPO.cmd: inicia a arena de Akuroth em modo automático, com os controles de combate disponíveis e um save isolado do progresso normal.
+
+## Limites
+
+É um protótipo com a arte 3D real do boss, não a qualidade final da imagem conceitual. Os movimentos ainda precisam de refinamento, especialmente a articulação das roupas e braços. Os heróis continuam usando modelos provisórios da Epic, e os efeitos de habilidade são os efeitos 3D procedurais existentes. O retarget experimental de Hajun permanece separado e não aprovado; esta atualização não o integra ao combate.

@@ -1,6 +1,6 @@
 # Reality of Enigma — entrega funcional Unreal
 
-Verificado em 14/10/2026. A versão Windows independente foi compilada, empacotada e executada. Use ABRIR-JOGO-UNREAL.cmd; não é necessário abrir o editor para jogar. O jogo permanece em desenvolvimento.
+Verificado em 15/10/2026. A versão Windows independente foi compilada, empacotada e executada. Use ABRIR-JOGO-UNREAL.cmd; não é necessário abrir o editor para jogar. O jogo permanece em desenvolvimento.
 
 ## Sistemas migrados
 
@@ -15,7 +15,7 @@ A Unreal controla apresentação, entrada e áudio. O núcleo original em C# foi
 | Testes das regras na nova base | 441 aprovados |
 | Integração com a DLL nativa | 62 verificações, zero falhas |
 | Todos os 70 encontros da campanha | 141 verificações, zero falhas |
-| Integração no executável Windows | 74 verificações, zero falhas |
+| Integração no executável Windows atual | 75 verificações, zero falhas |
 | Interface no executável Windows | 33 capturas, zero falhas |
 | Replays dos personagens novos no executável | 15 estados de combate, 122 verificações, zero falhas |
 | Compilação e empacotamento Windows | Concluídos com saída 0 |
@@ -24,9 +24,9 @@ O teste dos encontros usa uma equipe de referência de nível 70: venceu 68 de 7
 
 ## Limites visuais
 
-Os personagens em combate são modelos Manny/Quinn provisórios da Epic. Hajun agora tem uma malha real em uma prévia 3D giratória na ficha e um FBX com esqueleto preparado separadamente para retarget; consulte HAJUN-MODELO-3D.md. Os modelos 3D definitivos de AKUROTH e dos heróis ainda não foram criados. As pinturas originais aparecem em menus, fichas, prólogo e fundos distantes; o piso, obstáculos, personagens e efeitos são geometria 3D.
+AKUROTH usa as duas malhas Tripo fornecidas pelo usuário em combate e troca para a segunda forma aos 30% de vida. Os dois cenários Tripo também estão integrados, com materiais de pedra, bronze e lava animada. A versão Windows atual passou por 75 verificações de integração e 179 em 12 replays de AKUROTH, com capturas reais revisadas.
 
-A apresentação atual possui animações básicas e efeitos procedurais. As capturas novas mostram iluminação corrigida, personagens visíveis, roupas e acessórios procedurais e efeitos 3D provisórios. Ainda faltam modelagem fiel à arte, animações autorais, efeitos Niagara finais e acabamento cinematográfico. A imagem conceitual não representa a qualidade atual do executável.
+Os heróis e os outros inimigos ainda usam modelos provisórios da Epic. Hajun tem uma prévia estática com seu modelo real na ficha, mas seu retarget de ataques permanece experimental e não aprovado. Os movimentos locais do novo Akuroth também são iniciais, com rigs compactos e efeitos procedurais; não representam acabamento cinematográfico final. Consulte AKUROTH-ARTE-ATUAL.md para os limites e os atalhos de teste. A imagem conceitual não representa a qualidade final do executável.
 
 ## Arquivos
 
@@ -41,6 +41,6 @@ A apresentação atual possui animações básicas e efeitos procedurais. As cap
 
 A base Godot foi preservada. Esta entrega cobre a migração funcional; a produção artística continua pendente.
 
-O traje provisório do AKUROTH foi ampliado; consulte AKUROTH-ARTE-ATUAL.md para a alteração e seus limites.
+As duas artes 3D do AKUROTH e seus cenários estão em teste no combate; consulte AKUROTH-ARTE-ATUAL.md para a alteração e seus limites.
 
 As artes individuais das fases de Hajun e Zhu Jin estão na galeria, com seleção de fase e proporções preservadas. Consulte ARTES-FASES.md.

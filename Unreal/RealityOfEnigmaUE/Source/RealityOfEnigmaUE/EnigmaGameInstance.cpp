@@ -19,7 +19,7 @@ void UEnigmaGameInstance::Init(){
  auto Request=MakeShared<FJsonObject>();Request->SetStringField(TEXT("command"),TEXT("init"));
  Request->SetStringField(TEXT("data"),FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir()/TEXT("GameData")));
  FString Save=FPaths::ProjectSavedDir()/TEXT("Campaign/save-v1.json");
- if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaUITour="))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaCombatReplay=")))Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
+ if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaAkurothTest"))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaUITour="))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaCombatReplay=")))Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
  Request->SetStringField(TEXT("save"),FPaths::ConvertRelativePathToFull(Save));Execute(Request);
 }
 void UEnigmaGameInstance::Shutdown(){

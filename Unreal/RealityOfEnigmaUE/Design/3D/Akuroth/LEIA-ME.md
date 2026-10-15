@@ -1,9 +1,11 @@
-# Base editável do traje de AKUROTH
+# Akuroth — modelos entregues pelo usuário
 
-Abra AKUROTH-traje-provisorio.blend no Blender 5.1.1. Há 100 objetos de malha organizados por manto, armadura, coroa, correntes e espada, além da arte original incorporada ao arquivo. Os doze painéis do manto têm uma forma de vento animada entre os quadros 1 e 100.
+Fase1 e Fase2 preservam as malhas e texturas Tripo originais em cópias otimizadas de 90 mil triângulos. Fontes recebidas estão preservadas em outputs/Modelos3D/Akuroth-Tripo.
 
-O FBX contém as malhas estáticas e materiais básicos. Não contém corpo, rosto, esqueleto nem a animação de vento do Blender. Não é o modelo final do personagem e não foi importado como recurso no jogo; o jogo atual usa a versão procedural do traje, definida no código Unreal. Este arquivo é uma base separada para refinamento artístico.
+Os FBX originais não continham esqueleto ou animações. As versões de teste receberam um rig local compacto (10 e 16 ossos) e sete movimentos por fase: Idle, Slash, Cast, Chaos, Ultimate, Transform e Death. São animações iniciais específicas para as poses recebidas, com movimentos limitados; não equivalem a um rig humanoide de produção ou captura de movimento.
 
-Medidas em metros, eixo Z para cima. Escala, encaixe sobre o corpo, rig, pesos, texturas e anexação da arma devem ser revisados antes de integração. Não substitua o corpo jogável por este FBX: ele é somente o traje.
+Arena1 e Arena2 chegaram sem texturas. As cópias de jogo têm 180 mil triângulos e materiais de basalto, pedra, bronze e lava emissiva, atribuídos às superfícies e reentrâncias da geometria. O piso central foi alinhado à altura dos combatentes.
 
-Verificação: o .blend foi reaberto, confirmou 100 malhas, 12 formas de vento e referência incorporada; o FBX foi reimportado e confirmou 100 malhas.
+Integração: /Game/CharacterModels/Akuroth. EnigmaTripoPresentation troca a malha e arena conforme o estado ascended do Core. Limiar de 30% e danos permanecem calculados pelo combate existente.
+
+Verificações e capturas serão registradas após executar a batalha real na Unreal. A reimportação FBX das duas malhas confirmou pesos em todos os vértices e dimensões limitadas nos quadros de repouso amostrados. Isso ainda não substitui revisão visual de todos os movimentos.

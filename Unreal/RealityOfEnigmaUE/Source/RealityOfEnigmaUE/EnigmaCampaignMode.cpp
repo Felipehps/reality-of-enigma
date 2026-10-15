@@ -44,6 +44,7 @@ void AEnigmaCampaignMode::BeginPlay(){
   FString Manifest;TArray<TSharedPtr<FJsonValue>> Names;if(FFileHelper::LoadFileToString(Manifest,*(CombatReplayFolder/TEXT("manifest.json")))&&FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Manifest),Names)){for(auto Name:Names)CombatReplayNames.Add(Name->AsString());}else{UE_LOG(LogTemp,Error,TEXT("COMBAT_REPLAY_MANIFEST_FAILED"));FPlatformMisc::RequestExitWithStatus(false,1);}
  }
  if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA")))GetWorldTimerManager().SetTimerForNextTick(this,&AEnigmaCampaignMode::RunChecks);
+ if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaAkurothTest")))GetWorldTimerManager().SetTimerForNextTick([this](){Start(TEXT("akuroth"));Game()->Command(TEXT("begin"));Auto=true;});
 }
 void AEnigmaCampaignMode::SavePreferences(){const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->SetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->SetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);GConfig->Flush(false,Pref);}
 void AEnigmaCampaignMode::Start(const FString& Kind,int32 Stage){
@@ -338,7 +339,7 @@ void AEnigmaCampaignMode::CheckReplayHealth(TSharedPtr<FJsonObject> Sample,const
 }
 void AEnigmaCampaignMode::TickCombatReplay(){
  if(Clock<CombatReplayNext)return;
- if(CombatReplayIndex>=CombatReplayNames.Num()){UE_LOG(LogTemp,Display,TEXT("ENIGMA_COMBAT_REPLAY_RESULT fixtures=%d checks=%d failures=%d"),CombatReplayIndex,CombatReplayChecks,CombatReplayFailures+UIWarnings);FPlatformMisc::RequestExitWithStatus(false,CombatReplayFailures+UIWarnings?1:0);CombatReplayNext=Clock+1000;return;}
+ if(CombatReplayIndex>=CombatReplayNames.Num()){UE_LOG(LogTemp,Display,TEXT("ENIGMA_COMBAT_REPLAY_RESULT fixtures=%d checks=%d failures=%d"),CombatReplayIndex,CombatReplayChecks,CombatReplayFailures+UIWarnings);if(!FParse::Param(FCommandLine::Get(),TEXT("EnigmaKeepReplayOpen")))FPlatformMisc::RequestExitWithStatus(false,CombatReplayFailures+UIWarnings?1:0);CombatReplayNext=FLT_MAX;return;}
  FString Name=CombatReplayNames[CombatReplayIndex++],Text;TSharedPtr<FJsonObject> Fixture;
  if(!FFileHelper::LoadFileToString(Text,*(CombatReplayFolder/(Name+TEXT(".json"))))||!FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Text),Fixture)){CombatReplayFailures++;CombatReplayNext=Clock+1;return;}
  Auto=false;Page=TEXT("battle");BeforeAction=O(Fixture,TEXT("before"));Game()->State=BeforeAction;AnimationAge=-1;AnimationDisplay.Reset();WorldArt->ShowBattle(O(BeforeAction,TEXT("battle")),6);

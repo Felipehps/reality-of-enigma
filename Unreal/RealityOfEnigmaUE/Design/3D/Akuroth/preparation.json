@@ -1,0 +1,58 @@
+{
+  "Fase1": {
+    "source_faces": 1884972,
+    "game_faces": 90000,
+    "height_m": 1.8018842935562134,
+    "floor_source_z": 0,
+    "rig_bones": 10,
+    "animations": [
+      "Idle",
+      "Slash",
+      "Cast",
+      "Chaos",
+      "Ultimate",
+      "Transform",
+      "Death"
+    ],
+    "motion_status": "prototype_requires_visual_verification",
+    "source_preserved": true
+  },
+  "Fase2": {
+    "source_faces": 1949137,
+    "game_faces": 90000,
+    "height_m": 1.7988011837005615,
+    "floor_source_z": 0,
+    "rig_bones": 16,
+    "animations": [
+      "Idle",
+      "Slash",
+      "Cast",
+      "Chaos",
+      "Ultimate",
+      "Transform",
+      "Death"
+    ],
+    "motion_status": "prototype_requires_visual_verification",
+    "source_preserved": true
+  },
+  "Arena1": {
+    "source_faces": 1906030,
+    "game_faces": 179985,
+    "height_m": 10.843425750732422,
+    "floor_source_z": 0.135,
+    "rig_bones": 0,
+    "animations": [],
+    "motion_status": "prototype_requires_visual_verification",
+    "source_preserved": true
+  },
+  "Arena2": {
+    "source_faces": 1912334,
+    "game_faces": 180000,
+    "height_m": 9.573308944702148,
+    "floor_source_z": 0.143,
+    "rig_bones": 0,
+    "animations": [],
+    "motion_status": "prototype_requires_visual_verification",
+    "source_preserved": true
+  }
+}
