@@ -1,4 +1,12 @@
+## Refinamento da interface — 15/10/2026
+
+Título em dourado, fontes e identidade visual comuns nas telas internas, textos revisados, áreas clicáveis centralizadas e navegação por teclado estendida. Atlas, heróis, formação, compêndio, invocação, treinamento, arenas, configurações, prólogo e galeria foram atualizados; o HUD de combate recebeu a tipografia e os controles comuns. Consulte Design/Interface/LEIA-ME.md e validacao.json no projeto. Abra VER-TELA-INICIAL.cmd para experimentar.
+
 # Reality of Enigma — entrega funcional Unreal
+
+## Tela inicial — atualização de 15/10/2026
+
+A primeira etapa visual foi redesenhada: arte própria, tipografia Cinzel, fundo com movimento discreto, partículas, navegação simplificada, extras e confirmação de saída. Execute VER-TELA-INICIAL.cmd. A versão Windows passou por 139 verificações em 1280x720 e 139 em ultrawide, além de 75 verificações de integração, sem falhas. História/mapas e personagens/combate serão tratados nas próximas etapas; as telas internas continuam com o visual anterior.
 
 Verificado em 15/10/2026. A versão Windows independente foi compilada, empacotada e executada. Use ABRIR-JOGO-UNREAL.cmd; não é necessário abrir o editor para jogar. O jogo permanece em desenvolvimento.
 
