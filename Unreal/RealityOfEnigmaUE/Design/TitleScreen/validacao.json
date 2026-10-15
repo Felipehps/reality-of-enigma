@@ -1,0 +1,34 @@
+{
+  "core_checks": 75,
+  "fonts_staged": true,
+  "core_failures": 0,
+  "home": [
+    {
+      "resolution": "1280x720",
+      "failures": 0,
+      "checks": 139,
+      "exit_code": 0,
+      "captures": 14
+    },
+    {
+      "resolution": "2560x1080",
+      "failures": 0,
+      "checks": 139,
+      "exit_code": 0,
+      "captures": 14
+    }
+  ],
+  "visual_review_pending": false,
+  "date": "2026-10-15",
+  "visual_reviewed": [
+    "1280x720 initial menu",
+    "2560x1080 initial menu",
+    "extras menu",
+    "exit confirmation"
+  ],
+  "stage": "1 - title screen",
+  "world_maps_redesigned": false,
+  "character_animations_changed": false,
+  "background_type": "original generated 2D art with runtime parallax and particles",
+  "hardware_gamepad_verified": false
+}

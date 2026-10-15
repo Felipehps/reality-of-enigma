@@ -34,7 +34,7 @@ AEnigmaCampaignMode::AEnigmaCampaignMode(){PrimaryActorTick.bCanEverTick=true;De
 UEnigmaGameInstance* AEnigmaCampaignMode::Game(){return Cast<UEnigmaGameInstance>(GetGameInstance());}
 TSharedPtr<FJsonObject> AEnigmaCampaignMode::DisplayState(){return AnimationAge>=0&&AnimationDisplay?AnimationDisplay:Game()->State;}
 void AEnigmaCampaignMode::BeginPlay(){
- Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
+ Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaHomeTour="),HomeTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
  const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->GetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->GetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);
  WorldArt->ReducedMotion=ReducedMotion;
  if(!UITourFolder.IsEmpty()&&FParse::Param(FCommandLine::Get(),TEXT("EnigmaModelTour"))){UITourIndex=30;UITourNext=1;}
@@ -71,6 +71,7 @@ void AEnigmaCampaignMode::Tick(float Dt){
  Super::Tick(Dt);Clock+=Dt;
  if(ModelPreview)ModelPreview->SetActive(Page==TEXT("reference")&&Selected==TEXT("hajun")&&Reference3D);
  if(!UITourFolder.IsEmpty())TickUITour();
+ if(!HomeTourFolder.IsEmpty())TickHomeTour();
  if(!CombatReplayFolder.IsEmpty())TickCombatReplay();
  if(Page==TEXT("opening")&&OpeningAuto){OpeningAge+=Dt;if(OpeningAge>9)Action(TEXT("openingNext"));}
  if(AnimationAge>=0){AnimationAge+=Dt;UpdateDisplayedHealth();if(AnimationAge>=AnimationDuration){AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),S(Game()->State,TEXT("mode"))==TEXT("campaign")?(int32(N(Game()->State,TEXT("stage")))-1)/10:6);}}
@@ -84,7 +85,9 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
  if(Name==TEXT("modelMotion")){Action(TEXT("reference3D"));if(!ModelPreview||!ModelPreview->PlayMotion(Number))Message=TEXT("Animação de teste indisponível");return;}
  if(Name==TEXT("previewRotate")){if(ModelPreview&&Reference3D)ModelPreview->Rotate(Number);return;}
  if(Name==TEXT("referencePhase")){Reference3D=false;ReferencePhase=FMath::Clamp(Number,0,2);return;}
- if(Name==TEXT("page")){Reference3D=false;ReferencePhase=0;Auto=false;AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();Page=Id;ListPage=0;if(Id==TEXT("opening")){ReplayOpening=true;OpeningShot=0;OpeningAge=0;}WorldArt->HideBattle();return;}
+ if(Name==TEXT("homeQuit")){HomeQuitDialog=true;HomeFocus=0;return;}
+ if(Name==TEXT("homeCancel")){HomeQuitDialog=false;HomeFocus=0;return;}
+ if(Name==TEXT("page")){HomeQuitDialog=false;HomeFocus=0;Reference3D=false;ReferencePhase=0;Auto=false;AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();Page=Id;ListPage=0;if(Id==TEXT("opening")){ReplayOpening=true;OpeningShot=0;OpeningAge=0;}WorldArt->HideBattle();return;}
  if(Name==TEXT("select")){Reference3D=false;ReferencePhase=0;Selected=Id;return;}
  if(Name==TEXT("target")){Target=Id;return;}
  if(Name==TEXT("list")){ListPage=FMath::Max(0,ListPage+Number);return;}
@@ -109,7 +112,7 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
  if(Name==TEXT("volume")){Volume=FMath::Clamp(Volume+Number*.1f,0.f,1.f);SavePreferences();return;}
  if(Name==TEXT("motion")){ReducedMotion=!ReducedMotion;WorldArt->ReducedMotion=ReducedMotion;SavePreferences();return;}
  if(Name==TEXT("fullscreen")){auto Settings=GEngine->GetGameUserSettings();Settings->SetFullscreenMode(Settings->GetFullscreenMode()==EWindowMode::Windowed?EWindowMode::WindowedFullscreen:EWindowMode::Windowed);Settings->ApplySettings(false);Settings->SaveSettings();return;}
- if(Name==TEXT("quit")){Game()->Command(TEXT("save"));FPlatformMisc::RequestExit(false);return;}
+ if(Name==TEXT("quit")){if(!Game()->Command(TEXT("save"))){Message=Game()->Error;return;}FPlatformMisc::RequestExit(false);return;}
  if(Name==TEXT("legacyBoss")){UGameplayStatics::OpenLevel(this,TEXT("/Engine/Maps/Entry"),true,TEXT("game=/Script/RealityOfEnigmaUE.AkurothArenaMode"));return;}
  if(!Game()->Command(Name,Id,Number))Message=Game()->Error;else Message.Reset();
 }
@@ -120,8 +123,12 @@ void AEnigmaCampaignController::BeginPlay(){Super::BeginPlay();bShowMouseCursor=
 void AEnigmaCampaignController::SetupInputComponent(){
  Super::SetupInputComponent();auto Get=[this](){return Cast<AEnigmaCampaignMode>(GetWorld()->GetAuthGameMode());};
  InputComponent->BindKey(EKeys::LeftMouseButton,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([this,Get](){float X,Y;if(GetMousePosition(X,Y)&&Get())Get()->Click(FVector2D(X,Y));});
- InputComponent->BindKey(EKeys::SpaceBar,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->Action(TEXT("act"));});
- InputComponent->BindKey(EKeys::Escape,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->Action(TEXT("page"),TEXT("home"));});
+ InputComponent->BindKey(EKeys::SpaceBar,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get()){if(Get()->Page==TEXT("home")||Get()->Page==TEXT("extras"))Get()->MenuAccept();else Get()->Action(TEXT("act"));}});
+ InputComponent->BindKey(EKeys::Escape,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->MenuBack();});
+ for(const FKey& NavKey:{EKeys::Up,EKeys::Gamepad_DPad_Up})InputComponent->BindKey(NavKey,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->MenuNavigate(-1);});
+ for(const FKey& NavKey:{EKeys::Down,EKeys::Tab,EKeys::Gamepad_DPad_Down})InputComponent->BindKey(NavKey,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->MenuNavigate(1);});
+ for(const FKey& AcceptKey:{EKeys::Enter,EKeys::Gamepad_FaceButton_Bottom})InputComponent->BindKey(AcceptKey,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->MenuAccept();});
+ InputComponent->BindKey(EKeys::Gamepad_FaceButton_Right,IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get](){if(Get())Get()->MenuBack();});
  const FKey Keys[]={EKeys::One,EKeys::Two,EKeys::Three,EKeys::Four,EKeys::Five,EKeys::Six,EKeys::Seven,EKeys::Eight,EKeys::Nine};
  for(int32 I=0;I<9;I++)InputComponent->BindKey(Keys[I],IE_Pressed,this,&AEnigmaCampaignController::NoOp).KeyDelegate.GetDelegateForManualSet().BindLambda([Get,I](){if(Get())Get()->Key(I);});
 }
@@ -138,6 +145,7 @@ void AEnigmaCampaignHUD::DrawHUD(){
  auto Game=Mode->Game();if(!Game||!Game->State){Box(0,0,1280,720,FLinearColor(.02f,.01f,.04f));Wrap(Mode->Message,50,140,110,15);return;}
  auto State=Mode->DisplayState();auto Save=O(State,TEXT("save"));auto Catalog=O(State,TEXT("catalog"));auto Inventory=O(Save,TEXT("Inventory"));
  const FString Page=Mode->Page;
+ if(Page==TEXT("home")||Page==TEXT("extras")){DrawHome();return;}
  if(Page!=TEXT("battle")){
   Box(0,0,1280,720,FLinearColor(.015f,.012f,.028f));
   FString Background=(Page==TEXT("campaign")||Page==TEXT("ending"))?FString::Printf(TEXT("Region_%d"),Mode->Region+1):TEXT("HomeBackground");
@@ -147,19 +155,7 @@ void AEnigmaCampaignHUD::DrawHUD(){
  Text(TEXT("REALITY OF ENIGMA"),35,20,FLinearColor(.98f,.79f,.5f),1.9f);
  Text(FString::Printf(TEXT("Gold %.0f    XP %.0f    Tickets %.0f    Fase %.0f/70"),N(Inventory,TEXT("Gold")),N(Inventory,TEXT("Xp")),N(Inventory,TEXT("Tickets")),N(Save,TEXT("CompletedStage"))),615,27,FLinearColor(.9f,.77f,.6f));
  if(Page!=TEXT("home"))Button(TEXT("Início"),1120,65,120,TEXT("page"),TEXT("home"));
- if(Page==TEXT("home")){
-  Text(TEXT("UM MUNDO PARTIDO. DESTINOS ENTRELAÇADOS."),45,107,FLinearColor(.8f,.75f,.85f));
-  Button(TEXT("Continuar jornada"),45,155,370,TEXT("start"),TEXT("campaign"),FMath::Min(70,int32(N(Save,TEXT("CompletedStage")))+1));
-  const FString Labels[]={TEXT("Mapa da campanha"),TEXT("Equipe e formação"),TEXT("Fichas dos personagens"),TEXT("Invocação"),TEXT("Sala de treinamento"),TEXT("Arenas de teste"),TEXT("Configurações")};
-  const FString Pages[]={TEXT("campaign"),TEXT("team"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("arenas"),TEXT("settings")};
-  for(int32 I=0;I<7;I++)Button(Labels[I],45,204+I*49,370,TEXT("page"),Pages[I]);
-  Button(TEXT("Sair e salvar"),45,551,370,TEXT("quit"));
-  if(auto T=Texture(TEXT("Hero_kael")))DrawTexture(T,470*Scale,150*Scale,760*Scale,480*Scale,0,0,1,1,FLinearColor(.38f,.38f,.42f,.7f));
-  Text(TEXT("UM MUNDO PARTIDO"),510,175,FLinearColor(.98f,.77f,.45f),1.5f);
-  Wrap(TEXT("A ruptura alcançou a Floresta do Limiar. Reúna seus aliados, escolha sua formação e atravesse sete regiões até o confronto com o fim das realidades."),510,225,67,5);
-  Text(TEXT("Sua evolução e as recompensas são salvas automaticamente."),510,395,FLinearColor(.7f,.7f,.8f));
- }
- else if(Page==TEXT("campaign")||Page==TEXT("ending")){
+ if(Page==TEXT("campaign")||Page==TEXT("ending")){
   auto Regions=A(State,TEXT("regions"));int32 Max=FMath::Clamp(int32(N(Save,TEXT("CompletedStage")))/10,0,6);Mode->Region=FMath::Clamp(Mode->Region,0,Max);auto R=Regions[Mode->Region]->AsObject();
   Text(S(R,TEXT("Name")),40,100,FLinearColor(.95f,.8f,.55f),1.6f);Wrap(S(R,TEXT("Summary")),40,147,120,3);
   if(Page==TEXT("ending")){Wrap(S(R,TEXT("Ending")),50,210,110,15);Button(TEXT("Voltar ao mapa"),45,605,250,TEXT("page"),TEXT("campaign"));if(Mode->Region<6&&N(Save,TEXT("CompletedStage"))>=(Mode->Region+1)*10)Button(TEXT("Próxima região"),325,605,250,TEXT("nextRegion"));}

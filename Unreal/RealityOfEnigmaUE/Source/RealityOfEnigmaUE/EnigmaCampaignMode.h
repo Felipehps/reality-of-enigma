@@ -13,6 +13,8 @@ public:
  AEnigmaCampaignMode();virtual void BeginPlay() override;virtual void Tick(float Dt) override;
  void Action(const FString& Name,const FString& Id=TEXT(""),int32 Number=0);
  void Click(FVector2D Position);void Wheel(int32 Direction);void Key(int32 Index);
+ void MenuNavigate(int32 Direction);void MenuAccept();void MenuBack();
+ bool HomeQuitDialog=false;int32 HomeFocus=0;
  FString Page=TEXT("home"),Selected=TEXT("kael"),Target,TrainingBoss=TEXT("varkhan"),Message;
  int32 ReferencePhase=0;bool Reference3D=false;
  UPROPERTY() TObjectPtr<AEnigmaModelPreview> ModelPreview;
@@ -34,6 +36,8 @@ private:
  void TickCombatReplay();void CheckReplayHealth(TSharedPtr<FJsonObject> Sample,const FString& Name);
  FString UITourFolder;int32 UITourIndex=0;float UITourNext=3;int32 UIWarnings=0,UITourCaptures=0;
  void TickUITour();void CaptureUI(const FString& Name);
+ FString HomeTourFolder;int32 HomeTourIndex=0,HomeTourChecks=0,HomeTourFailures=0;float HomeTourNext=3;
+ void TickHomeTour();
  void Start(const FString& Kind,int32 Stage=0);
  void Act(const FString& Skill=TEXT(""),int32 Cell=-1);void SavePreferences();void RunChecks();
 };
@@ -49,6 +53,11 @@ private:
  void Box(float X,float Y,float W,float H,FLinearColor Color);
  void Button(const FString& Label,float X,float Y,float W,const FString& Name,const FString& Id=TEXT(""),int32 Number=0,bool Enabled=true,float H=38);
  void Wrap(const FString& Value,float X,float Y,int32 Width,int32 MaxLines=8);
+ void DrawHome();
+ void MenuText(const FString& Value,float X,float Y,float Size,FLinearColor Color,bool Display=false);
+ void MenuButton(const FString& Label,const FString& Detail,float X,float Y,float W,float H,const FString& Name,const FString& Id=TEXT(""),int32 Number=0,bool Primary=false);
+ float HomeX=0,HomeY=0;FVector2D LastHomeMouse=FVector2D(-1,-1);
+ TMap<FString,float> HomeHover;
 };
 UCLASS()
 class REALITYOFENIGMAUE_API AEnigmaCampaignController:public APlayerController {
