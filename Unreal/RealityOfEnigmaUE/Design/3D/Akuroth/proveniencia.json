@@ -1,0 +1,31 @@
+{
+  "models": "Tripo downloads supplied by user",
+  "sources": [
+    {
+      "form": "Fase1",
+      "source_file": "tripo_convert_dfeedb16-362b-4385-bb65-2481f6766f2e.fbx",
+      "bytes": 55179980,
+      "sha256": "a1160a1c66b340a8bb11be5330b750287781754b4ab7a8fb5ea7865a5e933381"
+    },
+    {
+      "form": "Fase2",
+      "source_file": "tripo_convert_1f59d29e-46d9-4ade-a4a9-7cf9f30db814.fbx",
+      "bytes": 56207788,
+      "sha256": "bab178a06899f7bd541eca0a48c65434b42cb60975170ee9497a4f0ab15ade86"
+    },
+    {
+      "form": "Arena1",
+      "source_file": "demonic arena 3d model.fbx",
+      "bytes": 39043216,
+      "sha256": "aac83700c04d77ec4b48b9a2f864b335f54955df39aea30cbf63f4202c3017cf"
+    },
+    {
+      "form": "Arena2",
+      "source_file": "demonic lava arena 3d model.fbx",
+      "bytes": 38264000,
+      "sha256": "9fb30e40307f72f86537ac087356cd69a61db396b9edc0ed00e7873ce69f8a69"
+    }
+  ],
+  "rig_and_animation": "Local prototype authored for received posed meshes; no new Tripo credits consumed",
+  "arena_materials": "Local procedural Unreal materials, geometry-based slots"
+}

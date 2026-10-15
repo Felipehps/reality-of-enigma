@@ -1,0 +1,9 @@
+{
+  "blender": "5.1.1",
+  "objects": 100,
+  "cloth_panels": 12,
+  "reference_packed": true,
+  "body_included": false,
+  "rig_included": false,
+  "integrated_game_asset": false
+}

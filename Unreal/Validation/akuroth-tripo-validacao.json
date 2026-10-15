@@ -1,0 +1,23 @@
+{
+  "date_local": "2026-10-15",
+  "windows_integration": {
+    "checks": 75,
+    "failures": 0
+  },
+  "native_combat_replays": {
+    "fixtures": 12,
+    "checks": 179,
+    "failures": 0
+  },
+  "real_boss_forms_in_battle": 2,
+  "real_arena_models": 2,
+  "imported_animation_clips": 14,
+  "materials_runtime_confirmed": [
+    "M_Akuroth1",
+    "M_Akuroth2"
+  ],
+  "material_shader_failures": 0,
+  "visual_review": "Both forms, textures and both arenas inspected in Windows battle captures",
+  "quality": "Prototype: compact local rigs and initial motions; Epic hero placeholders; procedural VFX",
+  "extra_Tripo_credits_used": 0
+}

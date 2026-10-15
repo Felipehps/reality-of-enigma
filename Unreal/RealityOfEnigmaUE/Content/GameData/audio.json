@@ -1,0 +1,266 @@
+{
+  "kael": {
+    "Cast": "swing",
+    "Impact": "steel",
+    "Step": "leather",
+    "Pitch": 1.12
+  },
+  "savor": {
+    "Cast": "swing",
+    "Impact": "kick",
+    "Step": "leather",
+    "Pitch": 0.94
+  },
+  "aelia": {
+    "Cast": "chime",
+    "Impact": "heal",
+    "Step": "soft",
+    "Pitch": 1.18
+  },
+  "brakk": {
+    "Cast": "servo",
+    "Impact": "heavy",
+    "Step": "metal",
+    "Pitch": 0.78
+  },
+  "lyra": {
+    "Cast": "ice",
+    "Impact": "ice",
+    "Step": "soft",
+    "Pitch": 1.05
+  },
+  "raizen": {
+    "Cast": "void",
+    "Impact": "void",
+    "Step": "leather",
+    "Pitch": 0.88
+  },
+  "varkhan": {
+    "Cast": "charge",
+    "Impact": "beam",
+    "Step": "leather",
+    "Pitch": 0.83
+  },
+  "varkas": {
+    "Cast": "growl",
+    "Impact": "claw",
+    "Step": "clawstep",
+    "Pitch": 0.9
+  },
+  "enemy_fenda": {
+    "Cast": "growl",
+    "Impact": "claw",
+    "Step": "clawstep",
+    "Pitch": 0.72
+  },
+  "solarius": {
+    "Cast": "charge",
+    "Impact": "fire",
+    "Step": "metal",
+    "Pitch": 0.86
+  },
+  "skill:heel": {
+    "Cast": "swing",
+    "Impact": "fire",
+    "Step": "leather",
+    "Pitch": 0.92
+  },
+  "skill:quake": {
+    "Cast": "servo",
+    "Impact": "heavy",
+    "Step": "metal",
+    "Pitch": 0.62
+  },
+  "skill:ashes": {
+    "Cast": "void",
+    "Impact": "fire",
+    "Step": "leather",
+    "Pitch": 0.79
+  },
+  "skill:flame": {
+    "Cast": "charge",
+    "Impact": "void",
+    "Step": "leather",
+    "Pitch": 0.94
+  },
+  "skill:marked": {
+    "Cast": "growl",
+    "Impact": "claw",
+    "Step": "clawstep",
+    "Pitch": 0.73
+  },
+  "skill:lacerate": {
+    "Cast": "growl",
+    "Impact": "heavy",
+    "Step": "clawstep",
+    "Pitch": 0.7
+  },
+  "skill:slash": {
+    "Impact": "slice",
+    "Pitch": 1,
+    "Cast": "swing",
+    "Step": "leather"
+  },
+  "skill:rush": {
+    "Impact": "slash",
+    "Pitch": 1,
+    "Cast": "swing",
+    "Step": "leather"
+  },
+  "skill:solar": {
+    "Impact": "explosion",
+    "Pitch": 1,
+    "Cast": "charge",
+    "Step": "metal"
+  },
+  "skill:martial_basic": {
+    "Impact": "kick",
+    "Pitch": 1,
+    "Cast": "swing",
+    "Step": "leather"
+  },
+  "skill:martial_impact": {
+    "Impact": "kick",
+    "Pitch": 1,
+    "Cast": "swing",
+    "Step": "leather"
+  },
+  "skill:martial_beast": {
+    "Impact": "kick",
+    "Pitch": 1,
+    "Cast": "swing",
+    "Step": "leather"
+  },
+  "skill:martial_extreme": {
+    "Impact": "explosion",
+    "Pitch": 1,
+    "Cast": "swing",
+    "Step": "leather"
+  },
+  "nerathis": {
+    "Cast": "charge",
+    "Pitch": 1,
+    "Impact": "fire",
+    "Step": "soft"
+  },
+  "skill:flower_sleep": {
+    "Cast": "chime",
+    "Pitch": 1,
+    "Impact": "void",
+    "Step": "soft"
+  },
+  "sevrin": {
+    "Cast": "swing",
+    "Impact": "slice",
+    "Step": "leather",
+    "Pitch": 1
+  },
+  "maltherion": {
+    "Cast": "charge",
+    "Impact": "clash",
+    "Step": "leather",
+    "Pitch": 1
+  },
+  "skill:eclipse_final": {
+    "Cast": "charge",
+    "Impact": "explosion",
+    "Step": "leather",
+    "Pitch": 1
+  },
+  "akuroth": {
+    "Cast": "akuroth-cast",
+    "Impact": "akuroth-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_cut": {
+    "Cast": "akuroth-cut-cast",
+    "Impact": "akuroth-cut-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_waves": {
+    "Cast": "akuroth-waves-cast",
+    "Impact": "akuroth-waves-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_prison": {
+    "Cast": "akuroth-prison-cast",
+    "Impact": "akuroth-prison-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_meteor": {
+    "Cast": "akuroth-meteor-cast",
+    "Impact": "akuroth-meteor-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_rift": {
+    "Cast": "akuroth-rift-cast",
+    "Impact": "akuroth-rift-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_chaos": {
+    "Cast": "akuroth-chaos-cast",
+    "Impact": "akuroth-chaos-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_collapse": {
+    "Cast": "akuroth-collapse-cast",
+    "Impact": "akuroth-collapse-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_rain": {
+    "Cast": "akuroth-rain-cast",
+    "Impact": "akuroth-rain-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_rewrite": {
+    "Cast": "akuroth-rewrite-cast",
+    "Impact": "akuroth-rewrite-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "skill:akuroth_annihilation": {
+    "Cast": "akuroth-annihilation-cast",
+    "Impact": "akuroth-annihilation-impact",
+    "Step": "soft",
+    "Pitch": 1
+  },
+  "mazakin": {
+    "Cast": "akuroth-rift-cast",
+    "Impact": "akuroth-meteor-impact",
+    "Step": "heavy",
+    "Pitch": 0.8
+  },
+  "hajun": {
+    "Cast": "swing",
+    "Impact": "steel",
+    "Step": "heavy",
+    "Pitch": 0.85
+  },
+  "zhujin": {
+    "Cast": "chime",
+    "Impact": "sizzle",
+    "Step": "soft",
+    "Pitch": 1.1
+  },
+  "tenrin": {
+    "Cast": "chime",
+    "Impact": "beam",
+    "Step": "leather",
+    "Pitch": 1
+  },
+  "zevalon": {
+    "Cast": "charge",
+    "Impact": "beam",
+    "Step": "soft",
+    "Pitch": 1.05
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "source": "Adobe Mixamo",
+  "clip": "Reaction",
+  "download_cost": 0,
+  "fbx_bytes": 35232784,
+  "armatures": 1,
+  "bones": [
+    65
+  ],
+  "meshes": 1,
+  "actions": [
+    {
+      "name": "Armature|mixamo.com|Layer0",
+      "range": [
+        1.0,
+        56.0
+      ]
+    }
+  ],
+  "integrated_in_game": false
+}

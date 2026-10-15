@@ -1,0 +1,19 @@
+{
+  "kind": "2d-reference-images",
+  "generated_with": "image_gen built-in",
+  "characters": {
+    "hajun": [
+      "hajun_phase1.png",
+      "hajun_phase2.png"
+    ],
+    "zhujin": [
+      "zhujin_phase1.png",
+      "zhujin_phase2.png"
+    ],
+    "akuroth": [
+      "akuroth_phase1.png",
+      "akuroth_phase2.png"
+    ]
+  },
+  "models_3d": false
+}
