@@ -17,3 +17,7 @@ O FBX corrigido e seu relatório estão em Design/3D/Hajun/Rig. Os Blender edit�
 ## Validação da prévia
 
 Compilação e empacotamento Windows concluídos com saída 0. A versão Windows passou em 74 verificações de integração e 33 capturas/verificações de interface, sem falhas. As imagens de frente, costas e retorno à fase 2 foram conferidas. Logs: migration-validation/hajun-model-integration.log, hajun-model-ui.log e hajun-model-package.log.
+
+## Atualização experimental
+
+Foi criado um teste de retarget com cinco movimentos no editor, ainda não aprovado por apresentar deslocamentos exagerados. Consulte HAJUN-TESTE-ANIMACAO.md. Isso não altera o executável Windows estável ou os personagens do combate.

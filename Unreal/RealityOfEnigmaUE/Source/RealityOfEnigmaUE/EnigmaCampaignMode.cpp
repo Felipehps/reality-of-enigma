@@ -38,6 +38,7 @@ void AEnigmaCampaignMode::BeginPlay(){
  const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->GetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->GetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);
  WorldArt->ReducedMotion=ReducedMotion;
  if(!UITourFolder.IsEmpty()&&FParse::Param(FCommandLine::Get(),TEXT("EnigmaModelTour"))){UITourIndex=30;UITourNext=1;}
+ if(!UITourFolder.IsEmpty()&&FParse::Param(FCommandLine::Get(),TEXT("EnigmaMotionTour"))){UITourIndex=33;UITourNext=1;}
  if(!Game()||!Game()->State.IsValid())Message=Game()?Game()->Error:TEXT("GameInstance não configurado");
  if(!CombatReplayFolder.IsEmpty()){
   FString Manifest;TArray<TSharedPtr<FJsonValue>> Names;if(FFileHelper::LoadFileToString(Manifest,*(CombatReplayFolder/TEXT("manifest.json")))&&FJsonSerializer::Deserialize(TJsonReaderFactory<>::Create(Manifest),Names)){for(auto Name:Names)CombatReplayNames.Add(Name->AsString());}else{UE_LOG(LogTemp,Error,TEXT("COMBAT_REPLAY_MANIFEST_FAILED"));FPlatformMisc::RequestExitWithStatus(false,1);}
@@ -78,7 +79,8 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
  if(!Game()||!Game()->State)return;
  if(Name==TEXT("moveMenu")){MoveMenu=!MoveMenu;return;}
  if(Name==TEXT("reposition")){Act(TEXT(""),Number);return;}
- if(Name==TEXT("reference3D")){if(Selected!=TEXT("hajun"))return;if(!ModelPreview)ModelPreview=GetWorld()->SpawnActor<AEnigmaModelPreview>();Reference3D=ModelPreview&&ModelPreview->Ready();ReferencePhase=1;return;}
+ if(Name==TEXT("reference3D")){if(Selected!=TEXT("hajun"))return;if(!ModelPreview)ModelPreview=GetWorld()->SpawnActor<AEnigmaModelPreview>();Reference3D=ModelPreview&&ModelPreview->Ready();ReferencePhase=1;if(ModelPreview)ModelPreview->ShowStatic();return;}
+ if(Name==TEXT("modelMotion")){Action(TEXT("reference3D"));if(!ModelPreview||!ModelPreview->PlayMotion(Number))Message=TEXT("Animação de teste indisponível");return;}
  if(Name==TEXT("previewRotate")){if(ModelPreview&&Reference3D)ModelPreview->Rotate(Number);return;}
  if(Name==TEXT("referencePhase")){Reference3D=false;ReferencePhase=FMath::Clamp(Number,0,2);return;}
  if(Name==TEXT("page")){Reference3D=false;ReferencePhase=0;Auto=false;AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();Page=Id;ListPage=0;if(Id==TEXT("opening")){ReplayOpening=true;OpeningShot=0;OpeningAge=0;}WorldArt->HideBattle();return;}
@@ -207,10 +209,11 @@ void AEnigmaCampaignHUD::DrawHUD(){
   if(HasPhases){Button(TEXT("Ficha original"),45,155,185,TEXT("referencePhase"),TEXT(""),0);Button(TEXT("Fase 1"),45,205,185,TEXT("referencePhase"),TEXT(""),1);Button(TEXT("Fase 2"),45,255,185,TEXT("referencePhase"),TEXT(""),2);Text(Mode->ReferencePhase?FString::Printf(TEXT("FASE %d"),Mode->ReferencePhase):TEXT("FICHA ORIGINAL"),45,315,FLinearColor(.95f,.77f,.5f));}
   Box(250,140,770,495,FLinearColor(.025f,.025f,.035f,.98f));
   if(Mode->Selected==TEXT("hajun")){Button(TEXT("Modelo 3D • fase 1"),45,365,185,TEXT("reference3D"));}
-  if(Mode->Reference3D&&Mode->ModelPreview){DrawTexture(Mode->ModelPreview->Texture(),397.5f*Scale,150*Scale,475*Scale,475*Scale,0,0,1,1,FLinearColor::White,BLEND_Opaque);Button(TEXT("Girar à esquerda"),45,420,185,TEXT("previewRotate"),TEXT(""),-45);Button(TEXT("Girar à direita"),45,470,185,TEXT("previewRotate"),TEXT(""),45);Text(TEXT("MODELO 3D • SEM ANIMAÇÃO"),270,610,FLinearColor(.95f,.77f,.5f));}
+  if(Mode->Reference3D&&Mode->ModelPreview){DrawTexture(Mode->ModelPreview->Texture(),397.5f*Scale,150*Scale,475*Scale,475*Scale,0,0,1,1,FLinearColor::White,BLEND_Opaque);Button(TEXT("Girar à esquerda"),45,420,185,TEXT("previewRotate"),TEXT(""),-45);Button(TEXT("Girar à direita"),45,470,185,TEXT("previewRotate"),TEXT(""),45);Text(Mode->ModelPreview->ShowingMotion()?TEXT("TESTE DE ATAQUE • MODELO TRIPO"):TEXT("MODELO 3D • SEM ANIMAÇÃO"),270,610,FLinearColor(.95f,.77f,.5f));}
   else if(auto T=Texture(ArtName)){float Fit=FMath::Min(750.f/T->GetSizeX(),475.f/T->GetSizeY());float W=T->GetSizeX()*Fit,H=T->GetSizeY()*Fit;DrawTexture(T,(635-W*.5f)*Scale,(387.5f-H*.5f)*Scale,W*Scale,H*Scale,0,0,1,1,FLinearColor::White);}
   else Text(TEXT("Arte indisponível"),390,330,FLinearColor(.9f,.3f,.3f));
-  Button(TEXT("Voltar à ficha"),45,650,260,TEXT("page"),TEXT("cards"));
+  Button(TEXT("Voltar à ficha"),45,650,185,TEXT("page"),TEXT("cards"));
+  if(Mode->Selected==TEXT("hajun")){const TCHAR* Labels[]={TEXT("Repouso"),TEXT("Ataque 1"),TEXT("Ataque 2"),TEXT("Combo"),TEXT("Carregado")};for(int32 I=0;I<5;I++)Button(Labels[I],270+I*145,650,135,TEXT("modelMotion"),TEXT(""),I);}
  }
  else if(Page==TEXT("formation")){
   Text(TEXT("FORMAÇÃO • escolha um membro e depois uma casa"),45,118,FLinearColor(.95f,.8f,.5f),1.3f);
@@ -265,7 +268,7 @@ void AEnigmaCampaignMode::RunChecks(){
  int32 Checks=0,Failures=0;auto Check=[&](bool Ok,const TCHAR* Name){Checks++;if(!Ok){Failures++;UE_LOG(LogTemp,Error,TEXT("MIGRATION_QA_FAIL %s: %s"),Name,*Game()->Error);}};
  auto G=Game();Check(G&&G->State.IsValid(),TEXT("native_library_loaded"));if(!G||!G->State){FPlatformMisc::RequestExitWithStatus(false,1);return;}
  for(const TCHAR* ArtName:{TEXT("Hero_hajun_phase1"),TEXT("Hero_hajun_phase2"),TEXT("Hero_zhujin_phase1"),TEXT("Hero_zhujin_phase2")}){FString Name(ArtName);Check(LoadObject<UTexture2D>(nullptr,*(TEXT("/Game/GameArt/")+Name+TEXT(".")+Name))!=nullptr,ArtName);}
- auto Preview=GetWorld()->SpawnActor<AEnigmaModelPreview>();Check(Preview&&Preview->Ready(),TEXT("hajun_static_model_and_material"));if(Preview)Preview->Destroy();
+ auto Preview=GetWorld()->SpawnActor<AEnigmaModelPreview>();Check(Preview&&Preview->Ready(),TEXT("hajun_static_model_and_material"));Check(Preview&&Preview->MotionReady(),TEXT("hajun_rig_and_retargeted_clips"));if(Preview)Preview->Destroy();
  Check(A(O(G->State,TEXT("catalog")),TEXT("Stages")).Num()==70,TEXT("seventy_stages"));Check(A(G->State,TEXT("regions")).Num()==7,TEXT("seven_regions"));Check(A(G->State,TEXT("opening")).Num()==8,TEXT("eight_opening_shots"));
  Check(A(O(G->State,TEXT("save")),TEXT("Roster")).Num()==5,TEXT("starting_roster"));Check(G->Command(TEXT("level"),TEXT("kael")),TEXT("level_call"));Check(N(Find(A(O(G->State,TEXT("save")),TEXT("Roster")),TEXT("kael")),TEXT("Level"))==2,TEXT("level_rule"));
  const double Gold=N(O(O(G->State,TEXT("save")),TEXT("Inventory")),TEXT("Gold"));Check(G->Command(TEXT("summon"),TEXT(""),10),TEXT("summon_ten"));Check(N(O(O(G->State,TEXT("save")),TEXT("Inventory")),TEXT("Gold"))==Gold-9000,TEXT("summon_cost"));
@@ -289,7 +292,7 @@ void AEnigmaCampaignMode::CaptureUI(const FString& Name){
 }
 void AEnigmaCampaignMode::TickUITour(){
  if(Clock<UITourNext)return;UITourNext=Clock+3.5f;
- const FString Names[]={TEXT("home"),TEXT("campaign"),TEXT("team"),TEXT("formation"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("settings"),TEXT("arenas"),TEXT("opening-1"),TEXT("opening-8"),TEXT("battle-formation"),TEXT("battle-ready"),TEXT("battle-action"),TEXT("floral"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon"),TEXT("mazakin-art"),TEXT("hajun-art"),TEXT("zhujin-art"),TEXT("tenrin-art"),TEXT("zevalon-art"),TEXT("hajun-phase1-art"),TEXT("hajun-phase2-art"),TEXT("zhujin-phase1-art"),TEXT("zhujin-phase2-art"),TEXT("hajun-3d-front"),TEXT("hajun-3d-back"),TEXT("hajun-3d-exit")};
+ const FString Names[]={TEXT("home"),TEXT("campaign"),TEXT("team"),TEXT("formation"),TEXT("cards"),TEXT("summon"),TEXT("training"),TEXT("settings"),TEXT("arenas"),TEXT("opening-1"),TEXT("opening-8"),TEXT("battle-formation"),TEXT("battle-ready"),TEXT("battle-action"),TEXT("floral"),TEXT("akuroth"),TEXT("mazakin"),TEXT("hajun"),TEXT("zhujin"),TEXT("tenrin"),TEXT("zevalon"),TEXT("mazakin-art"),TEXT("hajun-art"),TEXT("zhujin-art"),TEXT("tenrin-art"),TEXT("zevalon-art"),TEXT("hajun-phase1-art"),TEXT("hajun-phase2-art"),TEXT("zhujin-phase1-art"),TEXT("zhujin-phase2-art"),TEXT("hajun-3d-front"),TEXT("hajun-3d-back"),TEXT("hajun-3d-exit"),TEXT("hajun-idle"),TEXT("hajun-attack1"),TEXT("hajun-attack2"),TEXT("hajun-combo"),TEXT("hajun-charged")};
  if(UITourIndex>=UE_ARRAY_COUNT(Names)){UE_LOG(LogTemp,Display,TEXT("ENIGMA_UI_QA_RESULT captures=%d failures=%d"),UITourCaptures,UIWarnings);FPlatformMisc::RequestExitWithStatus(false,UIWarnings?1:0);return;}
  FString Name=Names[UITourIndex];
  if(UITourIndex<9){Action(TEXT("page"),Name);}
@@ -305,6 +308,9 @@ void AEnigmaCampaignMode::TickUITour(){
  else if(UITourIndex==15){Start(TEXT("akuroth"));Game()->Command(TEXT("begin"));}
  else if(UITourIndex<21){Start(Name);Game()->Command(TEXT("begin"));}
  else if(UITourIndex<26){Selected=Name.LeftChop(4);Action(TEXT("page"),TEXT("reference"));}
+ else if(UITourIndex>=33){
+  Selected=TEXT("hajun");Action(TEXT("page"),TEXT("reference"));const int32 Clip=UITourIndex-33;FTimerHandle MotionHandle;GetWorldTimerManager().SetTimer(MotionHandle,[this,Clip](){auto Choice=Buttons.FindByPredicate([Clip](const FButton& B){return B.Name==TEXT("modelMotion")&&B.Number==Clip&&B.Enabled;});if(Choice)Click(Choice->Min+Choice->Size*.5f);else UIWarnings++;if(!ModelPreview||!ModelPreview->MotionReady()){UIWarnings++;return;}if(Clip>0){FTimerHandle First;GetWorldTimerManager().SetTimer(First,[this](){const FVector Before=ModelPreview->HandLocation();FTimerHandle Second;GetWorldTimerManager().SetTimer(Second,[this,Before](){const FVector After=ModelPreview->HandLocation();const float Delta=(After-Before).Size();if(After.ContainsNaN()||Delta<1.f||Delta>350.f)UIWarnings++;UE_LOG(LogTemp,Display,TEXT("HAJUN_MOTION_HAND_DELTA %.3f"),Delta);},.4f,false);},.1f,false);}},.3f,false);
+ }
  else if(UITourIndex>=30){
   Selected=TEXT("hajun");Action(TEXT("page"),TEXT("reference"));const int32 Step=UITourIndex;FTimerHandle PreviewHandle;GetWorldTimerManager().SetTimer(PreviewHandle,[this,Step](){auto Choice=Buttons.FindByPredicate([](const FButton& B){return B.Name==TEXT("reference3D")&&B.Enabled;});if(Choice)Click(Choice->Min+Choice->Size*.5f);else UIWarnings++;if(Step==31)Action(TEXT("previewRotate"),TEXT(""),180);if(Step==32){Action(TEXT("referencePhase"),TEXT(""),2);if(Reference3D)UIWarnings++;}if(!ModelPreview||!ModelPreview->Ready())UIWarnings++;},.3f,false);
  }

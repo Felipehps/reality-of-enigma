@@ -1,0 +1,24 @@
+{
+  "mesh": "/Game/CharacterModels/Hajun/SK_HajunPhase1.SK_HajunPhase1",
+  "height_cm": 95.97781450512412,
+  "animations": [
+    "/Game/CharacterModels/Hajun/Animations/Hajun_MM_Idle",
+    "/Game/CharacterModels/Hajun/Animations/Hajun_MM_Attack_01",
+    "/Game/CharacterModels/Hajun/Animations/Hajun_MM_Attack_02",
+    "/Game/CharacterModels/Hajun/Animations/Hajun_MM_Attack_03",
+    "/Game/CharacterModels/Hajun/Animations/Hajun_MM_ChargedAttack"
+  ],
+  "method": "Unreal IK Retargeter auto-characterization, exact chains, auto aligned target pose",
+  "combat_integrated": false,
+  "status": "experimental_not_approved",
+  "hand_displacement_cm": [
+    2494.363,
+    2213.046,
+    3989.272,
+    594.044
+  ],
+  "maximum_expected_displacement_cm": 350,
+  "physical_motion_failures": 4,
+  "editor_load_click_checks": 5,
+  "windows_release_updated": false
+}
