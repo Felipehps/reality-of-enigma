@@ -1,3 +1,7 @@
+## Refinamento da interface — 15/10/2026
+
+Título em dourado, fontes e identidade visual comuns nas telas internas, textos revisados, áreas clicáveis centralizadas e navegação por teclado estendida. Atlas, heróis, formação, compêndio, invocação, treinamento, arenas, configurações, prólogo e galeria foram atualizados; o HUD de combate recebeu a tipografia e os controles comuns. Consulte Design/Interface/LEIA-ME.md e validacao.json no projeto. Abra VER-TELA-INICIAL.cmd para experimentar.
+
 # Reality of Enigma — entrega funcional Unreal
 
 ## Tela inicial — atualização de 15/10/2026

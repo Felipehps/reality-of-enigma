@@ -19,12 +19,26 @@ TSharedPtr<FJsonObject> Object(const TSharedPtr<FJsonObject>& O,const TCHAR* Key
 bool Seen(const TSharedPtr<FJsonObject>& O){bool V=false;return O&&O->TryGetBoolField(TEXT("OpeningSeen"),V)&&V;}
 }
 
-void AEnigmaCampaignHUD::MenuText(const FString& Value,float X,float Y,float Size,FLinearColor Color,bool Display){
+namespace {
+FSlateFontInfo MenuFont(float Size,bool Display){
  const FString Font=Display?FPaths::ProjectContentDir()/TEXT("UI/Fonts/Cinzel.ttf"):FPaths::EngineContentDir()/TEXT("Slate/Fonts/Roboto-Regular.ttf");
  static TMap<FString,TSharedPtr<const FCompositeFont>> Fonts;
  auto& Composite=Fonts.FindOrAdd(Font);
  if(!Composite.IsValid())Composite=MakeShared<FCompositeFont>(FName(TEXT("Regular")),Font,EFontHinting::Default,EFontLoadingPolicy::LazyLoad);
- FSlateFontInfo Info(Composite,FMath::Max(8.f,Size*Scale),FName(TEXT("Regular")));
+ return FSlateFontInfo(Composite,FMath::Max(8.f,Size),FName(TEXT("Regular")));
+}
+struct FMeasuredMenuText: FCanvasTextItem {
+ using FCanvasTextItem::FCanvasTextItem;
+ float Width()const{return GetTextSize(1.f).X;}
+};
+}
+float AEnigmaCampaignHUD::MenuTextWidth(const FString& Value,float Size,bool Display){
+ FMeasuredMenuText Item(FVector2D::ZeroVector,FText::FromString(Value),GEngine->GetMediumFont(),FLinearColor::White);
+ Item.SlateFontInfo=MenuFont(Size*Scale,Display);
+ return Item.Width()/Scale;
+}
+void AEnigmaCampaignHUD::MenuText(const FString& Value,float X,float Y,float Size,FLinearColor Color,bool Display){
+ const FSlateFontInfo Info=MenuFont(Size*Scale,Display);
  FCanvasTextItem Item(FVector2D(HomeX+X*Scale,HomeY+Y*Scale),FText::FromString(Value),GEngine->GetMediumFont(),Color);
  Item.SlateFontInfo=Info;
  Item.EnableShadow(FLinearColor(0,0,0,.65f),FVector2D(0,1));
@@ -97,11 +111,11 @@ void AEnigmaCampaignHUD::DrawHome(){
  Line(C+FVector2D(-10,0),C+FVector2D(0,-15),Gold);Line(C+FVector2D(2,-12),C+FVector2D(12,0),Gold);
  Line(C+FVector2D(10,3),C+FVector2D(0,15),Gold);Line(C+FVector2D(-2,12),C+FVector2D(-12,0),Gold);
  MenuText(TEXT("O LIMIAR ENTRE REALIDADES"),108,43,10,FLinearColor(.71f,.73f,.69f));
- MenuText(TEXT("REALITY OF ENIGMA"),979,43,10,FLinearColor(.78f,.79f,.74f),true);
+ MenuText(TEXT("REALITY OF ENIGMA"),979,43,10,Gold,true);
  const bool Extras=Mode->Page==TEXT("extras");
  if(!Extras){
-  MenuText(TEXT("REALITY"),72,139,59,Ivory,true);
-  MenuText(TEXT("OF ENIGMA"),75,207,44,Ivory,true);
+  MenuText(TEXT("REALITY"),72,139,59,Gold,true);
+  MenuText(TEXT("OF ENIGMA"),75,207,44,Gold,true);
   Rect(76,281,36,1.5f,Gold);MenuText(TEXT("UM MUNDO PARTIDO. DESTINOS ENTRELAÇADOS."),127,275,9.5f,FLinearColor(.7f,.74f,.74f));
   auto Save=Object(Mode->Game()->State,TEXT("save"));const int32 Completed=Number(Save,TEXT("CompletedStage"));
   const bool Started=Seen(Save)||Completed>0;
@@ -157,11 +171,11 @@ void AEnigmaCampaignHUD::DrawHome(){
 }
 
 void AEnigmaCampaignMode::MenuNavigate(int32 Direction){
- if(Page!=TEXT("home")&&Page!=TEXT("extras"))return;
- if(Buttons.Num())HomeFocus=(HomeFocus+Direction+Buttons.Num())%Buttons.Num();
+ if(Page==TEXT("battle"))return;
+ for(int32 I=0;I<Buttons.Num();I++){HomeFocus=(HomeFocus+Direction+Buttons.Num())%Buttons.Num();if(Buttons[HomeFocus].Enabled)break;}
 }
 void AEnigmaCampaignMode::MenuAccept(){
- if(Page!=TEXT("home")&&Page!=TEXT("extras"))return;
+ if(Page==TEXT("battle"))return;
  if(Buttons.IsValidIndex(HomeFocus)){const FButton Choice=Buttons[HomeFocus];if(Choice.Enabled)Action(Choice.Name,Choice.Id,Choice.Number);}
 }
 void AEnigmaCampaignMode::MenuBack(){
@@ -176,6 +190,12 @@ void AEnigmaCampaignMode::TickHomeTour(){
  auto Capture=[this](const FString& Name){FTimerHandle H;GetWorldTimerManager().SetTimer(H,[this,Name](){
   int32 W=0,Ht=0;UGameplayStatics::GetPlayerController(this,0)->GetViewportSize(W,Ht);
   for(const auto& B:Buttons){HomeTourChecks++;if(B.Min.X<0||B.Min.Y<0||B.Min.X+B.Size.X>W+.5f||B.Min.Y+B.Size.Y>Ht+.5f){HomeTourFailures++;UE_LOG(LogTemp,Error,TEXT("HOME_QA_BOUNDS %s"),*Name);}}
+  for(int32 I=0;I<Buttons.Num();I++)for(int32 J=I+1;J<Buttons.Num();J++){
+   const auto& P=Buttons[I];const auto& Q=Buttons[J];
+   const float OverlapWidth=FMath::Min(P.Min.X+P.Size.X,Q.Min.X+Q.Size.X)-FMath::Max(P.Min.X,Q.Min.X);
+   const float OverlapHeight=FMath::Min(P.Min.Y+P.Size.Y,Q.Min.Y+Q.Size.Y)-FMath::Max(P.Min.Y,Q.Min.Y);
+   HomeTourChecks++;if(OverlapWidth>1&&OverlapHeight>1){HomeTourFailures++;UE_LOG(LogTemp,Error,TEXT("HOME_QA_OVERLAP %s %s %s"),*Name,*P.Name,*Q.Name);}
+  }
   FScreenshotRequest::RequestScreenshot(FPaths::ConvertRelativePathToFull(HomeTourFolder/(Name+TEXT(".png"))),true,false);
  },.35f,false);};
  switch(HomeTourIndex++){
@@ -199,6 +219,14 @@ void AEnigmaCampaignMode::TickHomeTour(){
   case 17:HomeFocus=3;MenuAccept();Check(Page==TEXT("settings"),TEXT("settings_route"));Capture(TEXT("13-configuracoes"));break;
   case 18:MenuBack();HomeQuitDialog=true;HomeFocus=0;break;
   case 19:Check(Buttons.Num()==2,TEXT("modal_owns_input"));if(Buttons.Num()==2){const FButton Cancel=Buttons[0];Click(Cancel.Min+Cancel.Size*.5f);}Check(!HomeQuitDialog,TEXT("mouse_cancel_exit"));Capture(TEXT("14-inicio-validado"));break;
+  case 20:Action(TEXT("page"),TEXT("formation"));Capture(TEXT("15-formacao"));break;
+  case 21:Check(Buttons.Num()==16,TEXT("formation_actions"));HomeFocus=1;MenuNavigate(1);Check(Buttons.IsValidIndex(HomeFocus)&&Buttons[HomeFocus].Enabled,TEXT("inner_keyboard_navigation"));Selected=TEXT("hajun");Action(TEXT("page"),TEXT("reference"));Capture(TEXT("16-galeria"));break;
+  case 22:Action(TEXT("page"),TEXT("opening"));OpeningAuto=false;Capture(TEXT("17-prologo"));break;
+  case 23:Action(TEXT("page"),TEXT("ending"));Capture(TEXT("18-cronicas"));break;
+  case 24:Action(TEXT("page"),TEXT("campaign"));HomeFocus=1;Capture(TEXT("19-atlas-teclado"));break;
+  case 25:MenuNavigate(1);Check(Buttons.IsValidIndex(HomeFocus)&&Buttons[HomeFocus].Enabled&&Buttons[HomeFocus].Name==TEXT("region"),TEXT("locked_stages_skipped"));Start(TEXT("demo"));Capture(TEXT("20-combate"));break;
+  case 26:Action(TEXT("page"),TEXT("settings"));HomeFocus=1;ReducedMotion=true;Capture(TEXT("21-configuracoes-acessiveis"));break;
+  case 27:MenuNavigate(1);Check(Buttons.IsValidIndex(HomeFocus)&&Buttons[HomeFocus].Name==TEXT("volume")&&Buttons[HomeFocus].Number==1,TEXT("settings_keyboard_navigation"));Action(TEXT("page"),TEXT("home"));ReducedMotion=false;Capture(TEXT("22-inicio-dourado"));break;
   default:UE_LOG(LogTemp,Display,TEXT("ENIGMA_HOME_QA_RESULT checks=%d failures=%d"),HomeTourChecks,HomeTourFailures);FPlatformMisc::RequestExitWithStatus(false,HomeTourFailures?1:0);break;
  }
 }

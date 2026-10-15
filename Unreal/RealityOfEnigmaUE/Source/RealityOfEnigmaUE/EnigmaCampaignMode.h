@@ -53,7 +53,9 @@ private:
  void Box(float X,float Y,float W,float H,FLinearColor Color);
  void Button(const FString& Label,float X,float Y,float W,const FString& Name,const FString& Id=TEXT(""),int32 Number=0,bool Enabled=true,float H=38);
  void Wrap(const FString& Value,float X,float Y,int32 Width,int32 MaxLines=8);
- void DrawHome();
+ void DrawHome();void DrawMenuFrame(const FString& Page);
+ float ScreenX=0,ScreenY=0;
+ float MenuTextWidth(const FString& Value,float Size,bool Display=false);
  void MenuText(const FString& Value,float X,float Y,float Size,FLinearColor Color,bool Display=false);
  void MenuButton(const FString& Label,const FString& Detail,float X,float Y,float W,float H,const FString& Name,const FString& Id=TEXT(""),int32 Number=0,bool Primary=false);
  float HomeX=0,HomeY=0;FVector2D LastHomeMouse=FVector2D(-1,-1);

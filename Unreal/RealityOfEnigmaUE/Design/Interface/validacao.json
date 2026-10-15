@@ -1,0 +1,41 @@
+{
+  "home": [
+    {
+      "captures": 22,
+      "resolution": "1280x720",
+      "exit_code": 0,
+      "failures": 0,
+      "checks": 1556
+    },
+    {
+      "captures": 22,
+      "resolution": "2560x1080",
+      "exit_code": 0,
+      "failures": 0,
+      "checks": 1556
+    }
+  ],
+  "date": "2026-10-15",
+  "core_checks": 75,
+  "fonts_staged": true,
+  "visual_review_pending": false,
+  "core_failures": 0,
+  "visual_reviewed": [
+    "home",
+    "atlas",
+    "heroes",
+    "formation",
+    "compendium",
+    "gallery",
+    "settings",
+    "arenas",
+    "summon",
+    "training",
+    "prologue",
+    "chronicles",
+    "battle HUD"
+  ],
+  "physical_gamepad_verified": false,
+  "world_geometry_changed": false,
+  "character_animations_changed": false
+}

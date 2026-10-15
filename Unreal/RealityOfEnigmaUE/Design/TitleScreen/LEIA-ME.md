@@ -1,3 +1,5 @@
+> Atualização: os menus internos também receberam a identidade visual. Consulte ../Interface/LEIA-ME.md e a validação atual de 22 capturas por resolução. Os números abaixo registram a primeira entrega da tela inicial.
+
 # Tela inicial — primeira etapa
 
 Verificada em 15/10/2026 no executável Windows. Abra VER-TELA-INICIAL.cmd, na pasta de entrega, ou ABRIR-JOGO-UNREAL.cmd.
