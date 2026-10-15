@@ -14,7 +14,7 @@
       "Transform",
       "Death"
     ],
-    "motion_status": "prototype_requires_visual_verification",
+    "motion_status": "Windows battle captures reviewed; initial prototype, production refinement pending",
     "source_preserved": true
   },
   "Fase2": {
@@ -32,7 +32,7 @@
       "Transform",
       "Death"
     ],
-    "motion_status": "prototype_requires_visual_verification",
+    "motion_status": "Windows battle captures reviewed; initial prototype, production refinement pending",
     "source_preserved": true
   },
   "Arena1": {
@@ -42,7 +42,7 @@
     "floor_source_z": 0.135,
     "rig_bones": 0,
     "animations": [],
-    "motion_status": "prototype_requires_visual_verification",
+    "motion_status": "Windows battle captures reviewed; initial prototype, production refinement pending",
     "source_preserved": true
   },
   "Arena2": {
@@ -52,7 +52,7 @@
     "floor_source_z": 0.143,
     "rig_bones": 0,
     "animations": [],
-    "motion_status": "prototype_requires_visual_verification",
+    "motion_status": "Windows battle captures reviewed; initial prototype, production refinement pending",
     "source_preserved": true
   }
 }

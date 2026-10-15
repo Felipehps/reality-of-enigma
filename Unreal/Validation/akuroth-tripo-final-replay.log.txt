@@ -677,7 +677,7 @@ LogConfig: Set CVar [[con.DebugEarlyDefault:1]]
 [2026.10.15-02.25.09:999][  0]LogD3D12RHI: Integrated GPU (iGPU): false
 [2026.10.15-02.25.09:999][  0]LogD3D12RHI: Display: Creating D3D12 RHI with Max Feature Level SM5
 [2026.10.15-02.25.10:058][  0]LogD3D12RHI: AMD asicFamily=0
-[2026.10.15-02.25.10:058][  0]LogRHI: Display: Timeout Detection and Recovery (TDR) summary: 
+[2026.10.15-02.25.10:058][  0]LogRHI: Display: Timeout Detection and Recovery (TDR) summary:
 	- TDR settings OK - Level: Recover, Delay: 2, DdiDelay: 5
 [2026.10.15-02.25.10:058][  0]LogWindows: Attached monitors:
 [2026.10.15-02.25.10:058][  0]LogWindows:     resolution: 3440x1440, work area: (0, 0) -> (3440, 1392), device: '\\.\DISPLAY1' [PRIMARY]
