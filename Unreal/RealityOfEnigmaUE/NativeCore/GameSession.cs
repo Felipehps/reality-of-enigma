@@ -8,7 +8,7 @@ public sealed class GameSession
     Game? game;
     Battle? battle;
     TrainingRun? training;
-    JsonNode? catalogJson,regions,stories,opening;
+    JsonNode? catalogJson,regions,stories,opening,chronicles;
     string savePath="",mode="",notice="";
     int stage;
     bool awarded;
@@ -26,6 +26,7 @@ public sealed class GameSession
             regions=JsonNode.Parse(File.ReadAllText(Path.Combine(data,"regions.json")));
             stories=JsonNode.Parse(File.ReadAllText(Path.Combine(data,"hero-stories.json")));
             opening=JsonNode.Parse(File.ReadAllText(Path.Combine(data,"opening.json")));
+            chronicles=JsonNode.Parse(File.ReadAllText(Path.Combine(data,"chronicles.json")));
             game=new Game(Catalog.Load(text),Persistence.Read(savePath));
             notice="Jornada carregada.";
         }
@@ -87,6 +88,12 @@ public sealed class GameSession
                 var definition=c.Stages.Single(x=>x.Number==requested);
                 if(requested<=10)allies=Team(new[]{"kael","savor","aelia","brakk","raizen"},kind=="story"?1:null);
                 enemies=definition.Enemies.Select((e,i)=>new Unit(c.Hero(e.CharacterId),e.Level,e.IsBoss,e.CharacterId is "nerathis" or "maltherion"?1:i%3,e.CharacterId is "nerathis" or "maltherion"?1:i/3)).ToList();break;
+            case "chronicle":
+                if(requested<1||requested>chronicles!.AsArray().Count)throw new InvalidOperationException("Rota desconhecida");
+                var route=chronicles[requested-1]!;
+                string previousRoute=route["Previous"]!.GetValue<string>();
+                if(g.Save.CompletedStage<route["RequiredStage"]!.GetValue<int>()||(previousRoute.Length>0&&!g.Save.ChronicleWins.Contains(previousRoute)))throw new InvalidOperationException("Conclua a jornada anterior para abrir esta rota");
+                enemies=new(){new(c.Hero(route["Id"]!.GetValue<string>()),route["Level"]!.GetValue<int>(),true,1,1)};break;
             case "training":
                 nextTraining=g.BeginTraining(bossId)??throw new InvalidOperationException("Treino bloqueado");
                 allies=nextTraining.Current.Allies;enemies=nextTraining.Current.Enemies;break;
@@ -114,6 +121,14 @@ public sealed class GameSession
         if(battle==null||!battle.Finished||awarded||training!=null&&battle.Won&&training.Wave<3)return;
         awarded=true;
         if(mode=="campaign") {game!.RewardCampaignEncounter(stage,battle.Won,DateTimeOffset.UtcNow,battle.Allies.Select(x=>x.Id));if(battle.Won)notice=game.LastCampaignReward;Persistence.Write(savePath,game.Save);}
+        if(mode=="chronicle"&&battle.Won){
+            var route=chronicles![stage-1]!;string routeId=route["Id"]!.GetValue<string>();
+            if(game!.Save.ChronicleWins.Add(routeId)){
+                game.Save.Inventory.Gold+=route["Gold"]!.GetValue<int>();game.Save.Inventory.Xp+=route["Xp"]!.GetValue<int>();
+                notice=$"Rota concluída · +{route["Gold"]} de ouro · +{route["Xp"]} XP";
+            }else notice="Rota revisitada · A recompensa desta história já foi recebida";
+            Persistence.Write(savePath,game.Save);
+        }
         if(training!=null){notice=training.ClaimReward()?"Três ondas vencidas: recompensas concedidas":"Treino encerrado sem recompensa";Persistence.Write(savePath,game!.Save);}
     }
     JsonObject UnitState(Unit u)=>new() {
@@ -129,7 +144,7 @@ public sealed class GameSession
         var result=new JsonObject {
             ["ok"]=true,["notice"]=notice,["mode"]=mode,["stage"]=stage,
             ["save"]=JsonSerializer.SerializeToNode(game!.Save,GameJsonContext.Default.SaveData),
-            ["catalog"]=catalogJson!.DeepClone(),["regions"]=regions!.DeepClone(),["stories"]=stories!.DeepClone(),["opening"]=opening!.DeepClone()
+            ["catalog"]=catalogJson!.DeepClone(),["regions"]=regions!.DeepClone(),["stories"]=stories!.DeepClone(),["opening"]=opening!.DeepClone(),["chronicles"]=chronicles!.DeepClone()
         };
         if(battle is {} b) {
             var actor=b.NextActor;

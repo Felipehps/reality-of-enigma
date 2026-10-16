@@ -66,6 +66,7 @@ public class SaveData
     public List<int> FormationCells{get;set;}=new(){0,1,3,4,6};
     public List<string> Team{get;set;}=new(){"kael","savor","aelia","brakk","lyra"};
     public HashSet<string> Training{get;set;}=new();
+    public HashSet<string> ChronicleWins{get;set;}=new();
     public HashSet<string> TrainingWins{get;set;}=new();
     public DateTimeOffset IdleAt{get;set;}=DateTimeOffset.UtcNow;
     public decimal PendingGold{get;set;}

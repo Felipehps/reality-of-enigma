@@ -1,3 +1,7 @@
+## Mapas e história — primeira base de 16/10/2026
+
+Rotas da Ruptura liga Zhu Jin, Hajun, Mazakin e Akuroth ao pós-Ato I, com introdução, confronto, consequência, desbloqueios e recompensas únicas. Interface de progressão em 2D; sem novos cenários 3D nesta entrega. A prévia TESTAR-ROTAS-HISTORIA.cmd usa save isolado. Documentação e limites em Design/StoryMaps/LEIA-ME.md.
+
 ## Refinamento da interface — 15/10/2026
 
 Título em dourado, fontes e identidade visual comuns nas telas internas, textos revisados, áreas clicáveis centralizadas e navegação por teclado estendida. Atlas, heróis, formação, compêndio, invocação, treinamento, arenas, configurações, prólogo e galeria foram atualizados; o HUD de combate recebeu a tipografia e os controles comuns. Consulte Design/Interface/LEIA-ME.md e validacao.json no projeto. Abra VER-TELA-INICIAL.cmd para experimentar.

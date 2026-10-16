@@ -1,0 +1,27 @@
+{
+  "visual_review_pending": false,
+  "date": "2026-10-16",
+  "core_failures": 0,
+  "maps": [
+    {
+      "captures": 9,
+      "failures": 0,
+      "resolution": "1280x720",
+      "checks": 70
+    },
+    {
+      "captures": 9,
+      "failures": 0,
+      "resolution": "2560x1080",
+      "checks": 70
+    }
+  ],
+  "core_checks": 75,
+  "native_checks": 91,
+  "native_failures": 0,
+  "scope": "first narrative route map with four boss encounters",
+  "new_3d_world_maps": false,
+  "new_character_art_generated": false,
+  "production_balance_certified": false,
+  "preview_save_isolated": true
+}

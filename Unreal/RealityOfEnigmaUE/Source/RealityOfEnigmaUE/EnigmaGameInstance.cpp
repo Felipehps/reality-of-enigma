@@ -3,6 +3,8 @@
 #include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "Misc/FileHelper.h"
+#include "HAL/FileManager.h"
 #include "Serialization/JsonSerializer.h"
 #include "Serialization/JsonWriter.h"
 void UEnigmaGameInstance::Init(){
@@ -20,6 +22,11 @@ void UEnigmaGameInstance::Init(){
  Request->SetStringField(TEXT("data"),FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir()/TEXT("GameData")));
  FString Save=FPaths::ProjectSavedDir()/TEXT("Campaign/save-v1.json");
  if(FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaHomeTour="))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaAkurothTest"))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaUITour="))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaCombatReplay=")))Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
+ if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaChroniclePreview"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaChronicleTour="))){
+  Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
+  IFileManager::Get().MakeDirectory(*FPaths::GetPath(Save),true);
+  FString Fixture;if(!FFileHelper::LoadFileToString(Fixture,*(FPaths::ProjectContentDir()/TEXT("GameData/chronicle-preview-save.json")))||!FFileHelper::SaveStringToFile(Fixture,*Save)){Error=TEXT("Não foi possível preparar a prévia isolada das rotas");return;}
+ }
  Request->SetStringField(TEXT("save"),FPaths::ConvertRelativePathToFull(Save));Execute(Request);
 }
 void UEnigmaGameInstance::Shutdown(){

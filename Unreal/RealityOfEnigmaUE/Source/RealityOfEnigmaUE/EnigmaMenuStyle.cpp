@@ -21,7 +21,7 @@ void AEnigmaCampaignHUD::DrawMenuFrame(const FString& Page){
  Box(40,59,55,2,Gold);
  Box(40,642,1200,1,FLinearColor(.42f,.54f,.56f,.23f));
  const TCHAR* Section=Page==TEXT("campaign")?TEXT("ATLAS DOS MUNDOS"):Page==TEXT("ending")?TEXT("CRÔNICAS DA JORNADA"):Page==TEXT("team")?TEXT("OS QUE ATRAVESSAM O LIMIAR"):Page==TEXT("cards")?TEXT("ARQUIVO DAS REALIDADES"):Page==TEXT("formation")?TEXT("PREPARAÇÃO DE COMBATE"):Page==TEXT("summon")?TEXT("NOVOS DESTINOS"):Page==TEXT("training")?TEXT("CAMINHO DO APERFEIÇOAMENTO"):Page==TEXT("arenas")?TEXT("DESAFIOS DO LIMIAR"):Page==TEXT("settings")?TEXT("SUA EXPERIÊNCIA"):Page==TEXT("reference")?TEXT("GALERIA DO ELENCO"):TEXT("O INÍCIO DA RUPTURA");
- Text(Section,45,75,Muted,.72f);
+ Text(Page==TEXT("routes")||Page==TEXT("routestory")||Page==TEXT("routeoutcome")?TEXT("CRÔNICAS DA RUPTURA"):Section,45,75,Muted,.72f);
  Text(TEXT("PROGRESSO SALVO AUTOMATICAMENTE"),45,685,FLinearColor(.47f,.59f,.61f),.65f);
  Text(TEXT("ESC  Início     TAB / DIRECIONAIS  Navegar     ENTER  Selecionar"),755,685,FLinearColor(.47f,.59f,.61f),.65f);
  auto Panel=[&](float X,float Y,float W,float H){Box(X,Y,W,H,FLinearColor(.014f,.031f,.041f,.88f));Box(X,Y,W,1,FLinearColor(.83f,.62f,.32f,.2f));};
