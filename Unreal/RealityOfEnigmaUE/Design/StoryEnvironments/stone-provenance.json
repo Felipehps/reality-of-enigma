@@ -1,0 +1,44 @@
+{
+  "source": "https://polyhaven.com/a/dark_rock",
+  "author": "Amal Kumar",
+  "license": "CC0",
+  "license_url": "https://polyhaven.com/license",
+  "api_credit": "Powered by Poly Haven",
+  "files": [
+    {
+      "map": "Diffuse",
+      "file": "dark_rock_diff_2k.jpg",
+      "size": 2159653,
+      "md5": "980167324d1d407197227619a80cfb71",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_rock/dark_rock_diff_2k.jpg"
+    },
+    {
+      "map": "nor_dx",
+      "file": "dark_rock_nor_dx_2k.png",
+      "size": 25483263,
+      "md5": "e04f9f7d0e5b8e5d2436d80a55d9de2e",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/dark_rock/dark_rock_nor_dx_2k.png"
+    },
+    {
+      "map": "Rough",
+      "file": "dark_rock_rough_2k.jpg",
+      "size": 2312590,
+      "md5": "375269be32375407880ab60ac0154ea5",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_rock/dark_rock_rough_2k.jpg"
+    },
+    {
+      "map": "AO",
+      "file": "dark_rock_ao_2k.jpg",
+      "size": 2284209,
+      "md5": "4b177914921e1330f99ca37dc1de4510",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/dark_rock/dark_rock_ao_2k.jpg"
+    },
+    {
+      "map": "Displacement",
+      "file": "dark_rock_disp_2k.png",
+      "size": 5698235,
+      "md5": "f6f16f9d5497675db1330580cd61657e",
+      "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/dark_rock/dark_rock_disp_2k.png"
+    }
+  ]
+}

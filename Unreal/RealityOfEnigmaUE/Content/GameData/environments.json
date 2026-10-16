@@ -1,0 +1,338 @@
+[
+  {
+    "Id": "meadow",
+    "Title": "Campos de Vaelorn",
+    "Story": "Antes da ruptura, Kael dividia seus dias entre o trabalho no campo e a família. A casa, a cerca e a mata assinalam a vida que deixou para trás.",
+    "Theme": "meadow",
+    "Region": -1,
+    "HasPhase": false,
+    "Stone": [
+      0.17,
+      0.14,
+      0.08
+    ],
+    "Accent": [
+      0.8,
+      0.56,
+      0.15
+    ],
+    "Vegetation": [
+      0.12,
+      0.22,
+      0.07
+    ],
+    "Sky": [
+      0.13,
+      0.22,
+      0.29
+    ]
+  },
+  {
+    "Id": "forest",
+    "Title": "Floresta do Limiar",
+    "Story": "A ruptura silenciou a mata. Kael e os mercenários seguem as marcas deixadas pelos predadores.",
+    "Theme": "forest",
+    "Region": 0,
+    "HasPhase": false,
+    "Stone": [
+      0.09,
+      0.12,
+      0.09
+    ],
+    "Accent": [
+      0.35,
+      0.12,
+      0.85
+    ],
+    "Vegetation": [
+      0.035,
+      0.17,
+      0.085
+    ],
+    "Sky": [
+      0.025,
+      0.06,
+      0.075
+    ]
+  },
+  {
+    "Id": "canyon",
+    "Title": "Desfiladeiro dos Ecos",
+    "Story": "Pontes partidas levam à sentinela Varkhan. Uma vontade estranha fala por trás de seus olhos.",
+    "Theme": "canyon",
+    "Region": 1,
+    "HasPhase": false,
+    "Stone": [
+      0.28,
+      0.17,
+      0.09
+    ],
+    "Accent": [
+      0.9,
+      0.46,
+      0.12
+    ],
+    "Vegetation": [
+      0.1,
+      0.09,
+      0.04
+    ],
+    "Sky": [
+      0.19,
+      0.12,
+      0.09
+    ]
+  },
+  {
+    "Id": "ash",
+    "Title": "Vale das Cinzas",
+    "Story": "A estrada de volta cruza casas queimadas. Para Kael, a ameaça deixa de ser distante.",
+    "Theme": "ash",
+    "Region": 2,
+    "HasPhase": false,
+    "Stone": [
+      0.08,
+      0.065,
+      0.06
+    ],
+    "Accent": [
+      1,
+      0.16,
+      0.035
+    ],
+    "Vegetation": [
+      0.06,
+      0.04,
+      0.03
+    ],
+    "Sky": [
+      0.07,
+      0.045,
+      0.04
+    ]
+  },
+  {
+    "Id": "snow",
+    "Title": "Serra do Véu Branco",
+    "Story": "O caminho do palácio desapareceu sob o gelo. A travessia exige manter o grupo unido.",
+    "Theme": "snow",
+    "Region": 3,
+    "HasPhase": false,
+    "Stone": [
+      0.13,
+      0.22,
+      0.32
+    ],
+    "Accent": [
+      0.2,
+      0.6,
+      1
+    ],
+    "Vegetation": [
+      0.5,
+      0.65,
+      0.73
+    ],
+    "Sky": [
+      0.11,
+      0.22,
+      0.34
+    ]
+  },
+  {
+    "Id": "archive",
+    "Title": "Arquivo das Marés",
+    "Story": "Velmora enraizou-se nos arquivos inundados. Seu pólen protege os registros do Devorador de Mundos.",
+    "Theme": "archive",
+    "Region": 4,
+    "HasPhase": false,
+    "Stone": [
+      0.11,
+      0.2,
+      0.21
+    ],
+    "Accent": [
+      0.2,
+      0.7,
+      0.65
+    ],
+    "Vegetation": [
+      0.16,
+      0.23,
+      0.08
+    ],
+    "Sky": [
+      0.025,
+      0.07,
+      0.1
+    ]
+  },
+  {
+    "Id": "eclipse",
+    "Title": "Travessia do Eclipse",
+    "Story": "Maltherion guarda a última ponte solar. Sua armadura aprisiona fragmentos de um eclipse que Nhal’Zor nunca permitiu terminar.",
+    "Theme": "eclipse",
+    "Region": 5,
+    "HasPhase": false,
+    "Stone": [
+      0.095,
+      0.08,
+      0.16
+    ],
+    "Accent": [
+      0.5,
+      0.13,
+      0.85
+    ],
+    "Vegetation": [
+      0.065,
+      0.03,
+      0.08
+    ],
+    "Sky": [
+      0.035,
+      0.02,
+      0.065
+    ]
+  },
+  {
+    "Id": "palace",
+    "Title": "Palácio do Sol Partido",
+    "Story": "Solarius ocupa o palácio onde enfrentava Nhal’Zor. O grupo chega preparado para lutar.",
+    "Theme": "palace",
+    "Region": 6,
+    "HasPhase": false,
+    "Stone": [
+      0.27,
+      0.22,
+      0.13
+    ],
+    "Accent": [
+      1,
+      0.58,
+      0.09
+    ],
+    "Vegetation": [
+      0.17,
+      0.1,
+      0.045
+    ],
+    "Sky": [
+      0.15,
+      0.095,
+      0.06
+    ]
+  },
+  {
+    "Id": "zhujin",
+    "Title": "Jardim da Última Flor",
+    "Story": "O pólen atravessou o selo solar. Uma flor cresce onde as memórias deveriam repousar.",
+    "Theme": "garden",
+    "Region": -1,
+    "HasPhase": true,
+    "Stone": [
+      0.1,
+      0.15,
+      0.13
+    ],
+    "Accent": [
+      0.65,
+      0.35,
+      0.22
+    ],
+    "Vegetation": [
+      0.55,
+      0.4,
+      0.11
+    ],
+    "Sky": [
+      0.02,
+      0.045,
+      0.055
+    ]
+  },
+  {
+    "Id": "hajun",
+    "Title": "Fosso do Carrasco",
+    "Story": "As correntes do jardim terminam num tribunal. O carrasco transforma a dor dos prisioneiros em poder.",
+    "Theme": "tribunal",
+    "Region": -1,
+    "HasPhase": true,
+    "Stone": [
+      0.11,
+      0.055,
+      0.05
+    ],
+    "Accent": [
+      1,
+      0.08,
+      0.025
+    ],
+    "Vegetation": [
+      0.07,
+      0.02,
+      0.025
+    ],
+    "Sky": [
+      0.045,
+      0.012,
+      0.02
+    ]
+  },
+  {
+    "Id": "mazakin",
+    "Title": "Corte do Abismo",
+    "Story": "Um exército de almas condenadas se reúne sob a marcha do Rei do Abismo.",
+    "Theme": "abyss",
+    "Region": -1,
+    "HasPhase": true,
+    "Stone": [
+      0.095,
+      0.04,
+      0.045
+    ],
+    "Accent": [
+      1,
+      0.035,
+      0.025
+    ],
+    "Vegetation": [
+      0.055,
+      0.015,
+      0.025
+    ],
+    "Sky": [
+      0.05,
+      0.009,
+      0.012
+    ]
+  },
+  {
+    "Id": "akuroth",
+    "Title": "Cicatriz das Realidades",
+    "Story": "No centro da ferida, Akuroth oferece um fim a todos os mundos — e a toda possibilidade de escolha.",
+    "Theme": "void",
+    "Region": -1,
+    "HasPhase": true,
+    "Stone": [
+      0.065,
+      0.035,
+      0.09
+    ],
+    "Accent": [
+      1,
+      0.018,
+      0.085
+    ],
+    "Vegetation": [
+      0.08,
+      0.01,
+      0.045
+    ],
+    "Sky": [
+      0.014,
+      0.005,
+      0.03
+    ]
+  }
+]

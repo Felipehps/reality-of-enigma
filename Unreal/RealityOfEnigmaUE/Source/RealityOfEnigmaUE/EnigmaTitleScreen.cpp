@@ -47,7 +47,7 @@ void AEnigmaCampaignHUD::MenuText(const FString& Value,float X,float Y,float Siz
 
 void AEnigmaCampaignHUD::MenuButton(const FString& Label,const FString& Detail,float X,float Y,float W,float H,const FString& Name,const FString& Id,int32 NumberValue,bool Primary){
  const int32 Index=Mode->Buttons.Num();
- const FVector2D Min(HomeX+X*Scale,HomeY+Y*Scale),Size(W*Scale,H*Scale);
+ const FVector2D Min=Mode->ButtonOrigin+FVector2D(HomeX+X*Scale,HomeY+Y*Scale),Size(W*Scale,H*Scale);
  float MX=0,MY=0;auto PC=GetOwningPlayerController();
  const bool Mouse=PC&&PC->GetMousePosition(MX,MY);
  const bool Over=Mouse&&MX>=Min.X&&MX<Min.X+Size.X&&MY>=Min.Y&&MY<Min.Y+Size.Y;
@@ -145,6 +145,7 @@ void AEnigmaCampaignHUD::DrawHome(){
   MenuButton(TEXT("Compêndio"),TEXT("Conheça os heróis e as ameaças deste mundo"),76,499,400,54,TEXT("page"),TEXT("cards"));
   MenuButton(TEXT("Rever prólogo"),TEXT(""),76,600,122,35,TEXT("page"),TEXT("opening"));
   MenuButton(TEXT("Voltar ao início"),TEXT(""),240,600,142,35,TEXT("page"),TEXT("home"));
+  MenuButton(TEXT("Cenários da jornada"),TEXT("Contemple os lugares marcados pela ruptura"),760,450,430,60,TEXT("scenery"));
  }
  if(!Mode->ReducedMotion){
   for(int32 I=0;I<26;I++){
@@ -175,7 +176,7 @@ void AEnigmaCampaignMode::MenuNavigate(int32 Direction){
  for(int32 I=0;I<Buttons.Num();I++){HomeFocus=(HomeFocus+Direction+Buttons.Num())%Buttons.Num();if(Buttons[HomeFocus].Enabled)break;}
 }
 void AEnigmaCampaignMode::MenuAccept(){
- if(Page==TEXT("battle"))return;
+ if(Page==TEXT("battle")||!ButtonLayoutCurrent())return;
  if(Buttons.IsValidIndex(HomeFocus)){const FButton Choice=Buttons[HomeFocus];if(Choice.Enabled)Action(Choice.Name,Choice.Id,Choice.Number);}
 }
 void AEnigmaCampaignMode::MenuBack(){
@@ -204,7 +205,7 @@ void AEnigmaCampaignMode::TickHomeTour(){
   case 2:Action(TEXT("page"),TEXT("home"));HomeFocus=2;Capture(TEXT("03-personagens-foco"));break;
   case 3:MenuAccept();Check(Page==TEXT("team"),TEXT("characters_route"));Capture(TEXT("04-equipe"));break;
   case 4:Action(TEXT("page"),TEXT("extras"));Check(Page==TEXT("extras"),TEXT("extras_route"));Capture(TEXT("05-extras"));break;
-  case 5:Check(Buttons.Num()==6,TEXT("extras_navigation_count"));HomeFocus=0;MenuAccept();Check(Page==TEXT("training"),TEXT("training_route"));Capture(TEXT("06-treinamento"));break;
+  case 5:Check(Buttons.Num()==7,TEXT("extras_navigation_count"));HomeFocus=0;MenuAccept();Check(Page==TEXT("training"),TEXT("training_route"));Capture(TEXT("06-treinamento"));break;
   case 6:Action(TEXT("page"),TEXT("home"));HomeQuitDialog=true;HomeFocus=0;Capture(TEXT("07-sair-confirmacao"));break;
   case 7:MenuBack();Check(!HomeQuitDialog,TEXT("exit_cancel"));ReducedMotion=true;Capture(TEXT("08-movimento-reduzido"));break;
   case 8:HomeFocus=0;MenuAccept();Check(Page==TEXT("opening"),TEXT("new_campaign_opening"));MenuBack();Check(Page==TEXT("home"),TEXT("back_to_home"));ReducedMotion=false;Capture(TEXT("09-inicio-final"));break;

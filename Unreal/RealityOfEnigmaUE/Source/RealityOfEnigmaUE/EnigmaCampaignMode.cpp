@@ -5,6 +5,7 @@
 #include "Misc/FileHelper.h"
 #include "EnigmaGameInstance.h"
 #include "EnigmaWorldPresentation.h"
+#include "EnigmaStoryEnvironment.h"
 #include "Engine/Canvas.h"
 #include "Engine/Texture2D.h"
 #include "UnrealClient.h"
@@ -12,6 +13,7 @@
 #include "Serialization/JsonWriter.h"
 #include "Engine/Engine.h"
 #include "Engine/Font.h"
+#include "SceneView.h"
 #include "GameFramework/GameUserSettings.h"
 #include "Components/InputComponent.h"
 #include "InputCoreTypes.h"
@@ -35,7 +37,7 @@ AEnigmaCampaignMode::AEnigmaCampaignMode(){PrimaryActorTick.bCanEverTick=true;De
 UEnigmaGameInstance* AEnigmaCampaignMode::Game(){return Cast<UEnigmaGameInstance>(GetGameInstance());}
 TSharedPtr<FJsonObject> AEnigmaCampaignMode::DisplayState(){return AnimationAge>=0&&AnimationDisplay?AnimationDisplay:Game()->State;}
 void AEnigmaCampaignMode::BeginPlay(){
- Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaChronicleTour="),ChronicleTourFolder);if(!ChronicleTourFolder.IsEmpty()||FParse::Param(FCommandLine::Get(),TEXT("EnigmaChroniclePreview")))Page=TEXT("routes");FParse::Value(FCommandLine::Get(),TEXT("EnigmaHomeTour="),HomeTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
+ Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaSceneryTour="),SceneryTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaMouseTour="),MouseTourFolder);if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaMousePreview")))GetWorldTimerManager().SetTimerForNextTick([this](){Start(TEXT("demo"));Action(TEXT("page"),TEXT("home"));});FParse::Value(FCommandLine::Get(),TEXT("EnigmaChronicleTour="),ChronicleTourFolder);if(!ChronicleTourFolder.IsEmpty()||FParse::Param(FCommandLine::Get(),TEXT("EnigmaChroniclePreview")))Page=TEXT("routes");FParse::Value(FCommandLine::Get(),TEXT("EnigmaHomeTour="),HomeTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
  const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->GetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->GetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);
  WorldArt->ReducedMotion=ReducedMotion;
  if(!UITourFolder.IsEmpty()&&FParse::Param(FCommandLine::Get(),TEXT("EnigmaModelTour"))){UITourIndex=30;UITourNext=1;}
@@ -72,8 +74,11 @@ void AEnigmaCampaignMode::Tick(float Dt){
  Super::Tick(Dt);Clock+=Dt;
  if(ModelPreview)ModelPreview->SetActive(Page==TEXT("reference")&&Selected==TEXT("hajun")&&Reference3D);
  if(!UITourFolder.IsEmpty())TickUITour();
+ if(!SceneryTourFolder.IsEmpty())TickSceneryTour();
+ if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaSceneryPreview"))&&Clock<1&&Page==TEXT("home"))Action(TEXT("scenery"));
  if(!HomeTourFolder.IsEmpty())TickHomeTour();
  if(!ChronicleTourFolder.IsEmpty())TickChronicleTour();
+ if(!MouseTourFolder.IsEmpty())TickMouseTour();
  if(!CombatReplayFolder.IsEmpty())TickCombatReplay();
  if(Page==TEXT("opening")&&OpeningAuto){OpeningAge+=Dt;if(OpeningAge>9)Action(TEXT("openingNext"));}
  if(AnimationAge>=0){AnimationAge+=Dt;UpdateDisplayedHealth();if(AnimationAge>=AnimationDuration){AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),BattleRegion());}}
@@ -81,6 +86,12 @@ void AEnigmaCampaignMode::Tick(float Dt){
 }
 void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Number){
  if(!Game()||!Game()->State)return;
+ if(Name==TEXT("scenery")||Name==TEXT("sceneryNext")||Name==TEXT("sceneryPhase")){
+  const auto& Rows=AEnigmaStoryEnvironment::Definitions();if(Rows.Num()==0){Message=TEXT("Cenários indisponíveis nesta instalação");return;}
+  if(Name==TEXT("sceneryNext"))SceneryIndex=(SceneryIndex+Number+Rows.Num())%Rows.Num();
+  if(Name==TEXT("sceneryPhase"))SceneryPhase=!SceneryPhase;else SceneryPhase=false;
+  Action(TEXT("page"),TEXT("scenery"));WorldArt->PreviewEnvironment(Rows[SceneryIndex].Id,SceneryPhase);return;
+ }
  if(Name==TEXT("chronicle")){SelectedChronicle=FMath::Clamp(Number,0,3);Action(TEXT("page"),TEXT("routestory"));return;}
  if(Name==TEXT("routeFight")){Start(TEXT("chronicle"),SelectedChronicle+1);return;}
  if(Name==TEXT("routeOutcome")){SelectedChronicle=FMath::Clamp(int32(N(Game()->State,TEXT("stage")))-1,0,3);Action(TEXT("page"),TEXT("routeoutcome"));return;}
@@ -121,7 +132,23 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
  if(Name==TEXT("legacyBoss")){UGameplayStatics::OpenLevel(this,TEXT("/Engine/Maps/Entry"),true,TEXT("game=/Script/RealityOfEnigmaUE.AkurothArenaMode"));return;}
  if(!Game()->Command(Name,Id,Number))Message=Game()->Error;else Message.Reset();
 }
-void AEnigmaCampaignMode::Click(FVector2D P){for(auto& B:Buttons)if(B.Enabled&&P.X>=B.Min.X&&P.X<=B.Min.X+B.Size.X&&P.Y>=B.Min.Y&&P.Y<=B.Min.Y+B.Size.Y){Action(B.Name,B.Id,B.Number);return;}}
+bool AEnigmaCampaignMode::ButtonLayoutCurrent() const {
+ auto PC=GetWorld()?GetWorld()->GetFirstPlayerController():nullptr;int32 Width=0,Height=0;
+ if(PC)PC->GetViewportSize(Width,Height);
+ return ButtonPage==Page&&ButtonModal==HomeQuitDialog&&Width>0&&Height>0&&ButtonViewport==FIntPoint(Width,Height);
+}
+int32 AEnigmaCampaignMode::ButtonAtViewport(FVector2D Position) const {
+ if(!ButtonLayoutCurrent())return INDEX_NONE;
+ // Hit boxes are in viewport pixels, including the camera's pillarbox/letterbox origin.
+ for(int32 I=Buttons.Num()-1;I>=0;--I){const FButton& B=Buttons[I];
+  if(Position.X>=B.Min.X&&Position.X<B.Min.X+B.Size.X&&Position.Y>=B.Min.Y&&Position.Y<B.Min.Y+B.Size.Y)return B.Enabled?I:INDEX_NONE;
+ }
+ return INDEX_NONE;
+}
+void AEnigmaCampaignMode::Click(FVector2D Position){
+ const int32 Index=ButtonAtViewport(Position);if(Index==INDEX_NONE)return;
+ const FButton Choice=Buttons[Index];Action(Choice.Name,Choice.Id,Choice.Number);
+}
 void AEnigmaCampaignMode::Wheel(int32 D){ListPage=FMath::Max(0,ListPage+D);}
 void AEnigmaCampaignMode::Key(int32 I){if(Page!=TEXT("battle")||!Game()->State)return;auto Skills=A(O(Game()->State,TEXT("battle")),TEXT("skills"));if(Skills.IsValidIndex(I))Act(S(Skills[I]->AsObject(),TEXT("id")));}
 void AEnigmaCampaignController::BeginPlay(){Super::BeginPlay();bShowMouseCursor=true;FInputModeGameAndUI Input;Input.SetHideCursorDuringCapture(false);Input.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);SetInputMode(Input);}
@@ -144,7 +171,7 @@ void AEnigmaCampaignHUD::Box(float X,float Y,float W,float H,FLinearColor C){Dra
 void AEnigmaCampaignHUD::Button(const FString& Label,float X,float Y,float W,const FString& Name,const FString& Id,int32 Number,bool Enabled,float H){
  const bool Battle=Mode->Page==TEXT("battle");
  const int32 Index=Mode->Buttons.Num();float MX=0,MY=0;auto PC=GetOwningPlayerController();
- const FVector2D Min(ScreenX+X*Scale,ScreenY+Y*Scale),Size(W*Scale,H*Scale);
+ const FVector2D Min=Mode->ButtonOrigin+FVector2D(ScreenX+X*Scale,ScreenY+Y*Scale),Size(W*Scale,H*Scale);
  const bool Over=PC&&PC->GetMousePosition(MX,MY)&&MX>=Min.X&&MY>=Min.Y&&MX<Min.X+Size.X&&MY<Min.Y+Size.Y;
  if(!Battle&&Enabled&&Over&&FVector2D::DistSquared(LastHomeMouse,FVector2D(MX,MY))>1)Mode->HomeFocus=Index;
  bool Selected=(Name==TEXT("select")&&Id==Mode->Selected)||(Name==TEXT("slot")&&Number==Mode->TeamSlot)||(Name==TEXT("region")&&Number==Mode->Region)||(Name==TEXT("target")&&Id==Mode->Target);
@@ -183,10 +210,17 @@ void AEnigmaCampaignHUD::Wrap(const FString& V,float X,float Y,int32 Width,int32
 UTexture2D* AEnigmaCampaignHUD::Texture(const FString& Name){if(auto Found=Art.Find(Name))return *Found;const FString Path=TEXT("/Game/GameArt/")+Name+TEXT(".")+Name;auto Value=LoadObject<UTexture2D>(nullptr,*Path);Art.Add(Name,Value);return Value;}
 void AEnigmaCampaignHUD::DrawHUD(){
  Super::DrawHUD();Mode=Cast<AEnigmaCampaignMode>(GetWorld()->GetAuthGameMode());if(!Mode)return;Scale=FMath::Min(Canvas->ClipX/1280.f,Canvas->ClipY/720.f);ScreenX=(Canvas->ClipX-1280*Scale)*.5f;ScreenY=(Canvas->ClipY-720*Scale)*.5f;Mode->Buttons.Reset();
+ // UE renders a HUD relative to UnscaledViewRect, while mouse input is relative to the full viewport.
+ // Also include the safe-zone translation applied by UCanvas before DrawHUD.
+ const FIntPoint ViewOrigin=Canvas->SceneView?Canvas->SceneView->UnscaledViewRect.Min:FIntPoint::ZeroValue;
+ Mode->ButtonOrigin=FVector2D(ViewOrigin)+FVector2D(FMath::Max(0.f,float(Canvas->SafeZonePadX)-float(ViewOrigin.X)-Canvas->OrgX),FMath::Max(0.f,float(Canvas->SafeZonePadY)-float(ViewOrigin.Y)-Canvas->OrgY));
+ int32 ViewWidth=0,ViewHeight=0;if(auto PC=GetOwningPlayerController())PC->GetViewportSize(ViewWidth,ViewHeight);
+ Mode->ButtonViewport=FIntPoint(ViewWidth,ViewHeight);Mode->ButtonPage=Mode->Page;Mode->ButtonModal=Mode->HomeQuitDialog;
  auto Game=Mode->Game();if(!Game||!Game->State){Box(0,0,1280,720,FLinearColor(.02f,.01f,.04f));Wrap(Mode->Message,50,140,110,15);return;}
  auto State=Mode->DisplayState();auto Save=O(State,TEXT("save"));auto Catalog=O(State,TEXT("catalog"));auto Inventory=O(Save,TEXT("Inventory"));
  auto HeroName=[&](const FString& Id){const FString Name=S(Find(A(Catalog,TEXT("Characters")),Id),TEXT("Name"));return Name.IsEmpty()?Id:Name;};
  const FString Page=Mode->Page;
+ if(Page==TEXT("scenery")){DrawEnvironmentPreview();return;}
  if(Page==TEXT("home")||Page==TEXT("extras")){DrawHome();return;}
  if(Page!=TEXT("battle"))DrawMenuFrame(Page);
  Text(TEXT("REALITY OF ENIGMA"),40,24,FLinearColor(.83f,.62f,.32f),1.5f);

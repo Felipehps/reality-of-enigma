@@ -21,7 +21,7 @@ void UEnigmaGameInstance::Init(){
  auto Request=MakeShared<FJsonObject>();Request->SetStringField(TEXT("command"),TEXT("init"));
  Request->SetStringField(TEXT("data"),FPaths::ConvertRelativePathToFull(FPaths::ProjectContentDir()/TEXT("GameData")));
  FString Save=FPaths::ProjectSavedDir()/TEXT("Campaign/save-v1.json");
- if(FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaHomeTour="))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaAkurothTest"))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaUITour="))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaCombatReplay=")))Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
+ if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaSceneryPreview"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaSceneryTour="))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaMousePreview"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaMouseTour="))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaHomeTour="))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaAkurothTest"))||FParse::Param(FCommandLine::Get(),TEXT("EnigmaMigrationQA"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaUITour="))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaCombatReplay=")))Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
  if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaChroniclePreview"))||FCString::Strstr(FCommandLine::Get(),TEXT("EnigmaChronicleTour="))){
   Save=FPaths::ProjectSavedDir()/TEXT("MigrationQA")/(FGuid::NewGuid().ToString()+TEXT(".json"));
   IFileManager::Get().MakeDirectory(*FPaths::GetPath(Save),true);

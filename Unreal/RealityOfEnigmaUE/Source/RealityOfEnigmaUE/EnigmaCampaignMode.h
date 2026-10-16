@@ -12,8 +12,11 @@ class REALITYOFENIGMAUE_API AEnigmaCampaignMode:public AGameModeBase {
 public:
  AEnigmaCampaignMode();virtual void BeginPlay() override;virtual void Tick(float Dt) override;
  void Action(const FString& Name,const FString& Id=TEXT(""),int32 Number=0);
+ bool ButtonLayoutCurrent() const;int32 ButtonAtViewport(FVector2D Position) const;
+ FVector2D ButtonOrigin=FVector2D::ZeroVector;FIntPoint ButtonViewport=FIntPoint::ZeroValue;FString ButtonPage;bool ButtonModal=false;
  void Click(FVector2D Position);void Wheel(int32 Direction);void Key(int32 Index);
  void MenuNavigate(int32 Direction);void MenuAccept();void MenuBack();
+ int32 SceneryIndex=0;bool SceneryPhase=false;
  int32 SelectedChronicle=0;int32 BattleRegion();
  bool HomeQuitDialog=false;int32 HomeFocus=0;
  FString Page=TEXT("home"),Selected=TEXT("kael"),Target,TrainingBoss=TEXT("varkhan"),Message;
@@ -39,6 +42,8 @@ private:
  void TickUITour();void CaptureUI(const FString& Name);
  FString HomeTourFolder;int32 HomeTourIndex=0,HomeTourChecks=0,HomeTourFailures=0;float HomeTourNext=3;
  void TickHomeTour();
+ FString SceneryTourFolder;int32 SceneryTourIndex=0,SceneryChecks=0,SceneryFailures=0;float SceneryNext=3;void TickSceneryTour();
+ FString MouseTourFolder;int32 MouseTourIndex=0,MouseChecks=0,MouseFailures=0;float MouseTourNext=3;void TickMouseTour();
  FString ChronicleTourFolder;int32 ChronicleTourIndex=0,ChronicleChecks=0,ChronicleFailures=0;float ChronicleNext=3;void TickChronicleTour();
  void Start(const FString& Kind,int32 Stage=0);
  void Act(const FString& Skill=TEXT(""),int32 Cell=-1);void SavePreferences();void RunChecks();
@@ -55,6 +60,7 @@ private:
  void Box(float X,float Y,float W,float H,FLinearColor Color);
  void Button(const FString& Label,float X,float Y,float W,const FString& Name,const FString& Id=TEXT(""),int32 Number=0,bool Enabled=true,float H=38);
  void Wrap(const FString& Value,float X,float Y,int32 Width,int32 MaxLines=8);
+ void DrawEnvironmentPreview();
  void DrawHome();void DrawMenuFrame(const FString& Page);void DrawStoryMap();
  float ScreenX=0,ScreenY=0;
  float MenuTextWidth(const FString& Value,float Size,bool Display=false);

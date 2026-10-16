@@ -1,4 +1,5 @@
 #include "EnigmaWorldPresentation.h"
+#include "EnigmaStoryEnvironment.h"
 #include "EnigmaCombatTiming.h"
 #include "Components/DirectionalLightComponent.h"
 #include "ProceduralMeshComponent.h"
@@ -81,9 +82,9 @@ void AEnigmaWorldPresentation::ShowBattle(TSharedPtr<FJsonObject> Battle,int32 R
   }
  }
  for(int32 I=0;I<Units.Num();I++){auto U=Units[I]->AsObject();bool Enemy=I>=A(Battle,TEXT("allies")).Num();Homes[I]=FVector((Enemy?1:-1)*(450+float(N(U,TEXT("layer")))*120),(float(N(U,TEXT("column")))-1)*190,0);Bodies[I]->SetVisibility(true);FString Id=S(U,TEXT("id"));bool BossForm=(Id==TEXT("akuroth")||Id==TEXT("mazakin")||Id==TEXT("hajun"))&&B(U,TEXT("ascended"))||Id==TEXT("zhujin")&&B(U,TEXT("crimson"));if(BossForm&&!Ascended){Ascended=true;TransformBoss=Id;AscendedBossKey=S(U,TEXT("key"));TransformAge=0;PlayCue(Id==TEXT("zhujin")?TEXT("chime"):TEXT("akuroth-transform"),1,.7f);if(Backdrop&&Id!=TEXT("zhujin"))Backdrop->SetMaterial(0,LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Akuroth/Environment/M_InfernoBackdrop.M_InfernoBackdrop")));}}
- Snapshot=Battle;SyncTripoArt();SetActorHiddenInGame(false);
+ Snapshot=Battle;SyncTripoArt();SyncEnvironment(Battle,Region);SetActorHiddenInGame(false);
 }
-void AEnigmaWorldPresentation::HideBattle(){SetActorHiddenInGame(true);Age=-1;Snapshot.Reset();StopSounds();}
+void AEnigmaWorldPresentation::HideBattle(){if(StoryEnvironment)StoryEnvironment->SetActorHiddenInGame(true);SetActorHiddenInGame(true);Age=-1;Snapshot.Reset();StopSounds();}
 void AEnigmaWorldPresentation::PlayAction(TSharedPtr<FJsonObject> Battle,float Volume){
  if(!Battle)return;
  BeforeHealth.Reset();if(Snapshot){auto Units=A(Snapshot,TEXT("allies"));Units.Append(A(Snapshot,TEXT("enemies")));for(auto Unit:Units)BeforeHealth.Add(S(Unit->AsObject(),TEXT("key")),N(Unit->AsObject(),TEXT("hp")));}
@@ -110,6 +111,7 @@ void AEnigmaWorldPresentation::PlayAction(TSharedPtr<FJsonObject> Battle,float V
    if(B(Hit,TEXT("critical"))){Event=FString::Printf(TEXT("%d:critical"),FMath::RoundToInt(At*1000));if(!Events.Contains(Event)){Events.Add(Event);SoundEvents.Add({At,TEXT("critical"),1,.2f});}}
   }
  }
+ if(StoryEnvironment)StoryEnvironment->Impact(.65f);
  Snapshot=Battle;
 }
 void AEnigmaWorldPresentation::Ball(UInstancedStaticMeshComponent* Batch,FVector P,float Radius){Batch->AddInstance(FTransform(FRotator::ZeroRotator,P,FVector(Radius/50.f)),true);}
@@ -188,3 +190,21 @@ void AEnigmaWorldPresentation::PlayCue(const FString& Cue,float Pitch,float Gain
 }
 
 bool AEnigmaWorldPresentation::HasImpactCueAt(float At) const{return SoundEvents.ContainsByPredicate([At](const FSoundEvent& Event){return FMath::IsNearlyEqual(Event.At,At,.001f);});}
+
+void AEnigmaWorldPresentation::PreviewEnvironment(const FString& Id,bool PhaseTwo){
+ if(!StoryEnvironment)StoryEnvironment=GetWorld()->SpawnActor<AEnigmaStoryEnvironment>();
+ if(!StoryEnvironment||!StoryEnvironment->Configure(Id,PhaseTwo))return;
+ StoryEnvironment->SetReducedMotion(ReducedMotion);StoryEnvironment->SetActorHiddenInGame(false);
+ if(!Camera){Camera=GetWorld()->SpawnActor<ACameraActor>();Camera->GetCameraComponent()->SetFieldOfView(58);}
+ Camera->SetActorLocation(FVector(0,3200,1500));Camera->SetActorRotation((FVector(0,-350,320)-Camera->GetActorLocation()).Rotation());
+ if(auto PC=UGameplayStatics::GetPlayerController(this,0))PC->SetViewTarget(Camera);
+ Light->SetLightColor(StoryEnvironment->KeyColor());KeyLight->SetLightColor(StoryEnvironment->KeyColor());RimLight->SetLightColor(StoryEnvironment->RimColor());
+ for(auto C:Scenery)C->SetVisibility(false);if(TripoArena)TripoArena->SetVisibility(false);TripoArenaEnabled=false;
+ for(auto C:Bodies)C->SetVisibility(false);SetActorHiddenInGame(false);
+}
+void AEnigmaWorldPresentation::SyncEnvironment(TSharedPtr<FJsonObject> Battle,int32 Region){
+ const auto& Enemies=A(Battle,TEXT("enemies"));const FString Id=AEnigmaStoryEnvironment::ForBattle(Region,Enemies);
+ bool PhaseTwo=false;for(auto E:Enemies){auto U=E->AsObject();if(S(U,TEXT("id"))==Id)PhaseTwo=B(U,TEXT("ascended"))||B(U,TEXT("crimson"));}
+ if(!PhaseTwo&&Ascended){Ascended=false;TransformAge=-1;TransformBoss.Reset();AscendedBossKey.Reset();TripoTransformPending=false;}
+ PreviewEnvironment(Id,PhaseTwo);for(auto Body:Bodies)Body->SetVisibility(true);
+}

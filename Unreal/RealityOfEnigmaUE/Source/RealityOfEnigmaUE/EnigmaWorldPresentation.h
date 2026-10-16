@@ -3,7 +3,7 @@
 #include "GameFramework/Actor.h"
 #include "Dom/JsonObject.h"
 #include "EnigmaWorldPresentation.generated.h"
-class UProceduralMeshComponent;class UDirectionalLightComponent;class USoundWave;class UAudioComponent;class UStaticMeshComponent;class USkeletalMeshComponent;class UInstancedStaticMeshComponent;class UMaterialInterface;class UStaticMesh;class UAnimSequence;class ACameraActor;class UPointLightComponent;
+class AEnigmaStoryEnvironment;class UProceduralMeshComponent;class UDirectionalLightComponent;class USoundWave;class UAudioComponent;class UStaticMeshComponent;class USkeletalMeshComponent;class UInstancedStaticMeshComponent;class UMaterialInterface;class UStaticMesh;class UAnimSequence;class ACameraActor;class UPointLightComponent;
 UCLASS()
 class REALITYOFENIGMAUE_API AEnigmaWorldPresentation:public AActor {
  GENERATED_BODY()
@@ -11,9 +11,13 @@ public:
  AEnigmaWorldPresentation();virtual void BeginPlay() override;virtual void Tick(float Dt) override;
  void ShowBattle(TSharedPtr<FJsonObject> Battle,int32 Region);
  void PlayAction(TSharedPtr<FJsonObject> Battle,float Volume);void HideBattle();
+ void PreviewEnvironment(const FString& Id,bool PhaseTwo);
+ AEnigmaStoryEnvironment* Environment() const{return StoryEnvironment;}
  bool ReducedMotion=false;bool HasImpactCueAt(float At) const;
  bool Ready=false;bool Transforming() const{return TransformAge>=0&&TransformAge<3;}
 private:
+ UPROPERTY() TObjectPtr<AEnigmaStoryEnvironment> StoryEnvironment;
+ void SyncEnvironment(TSharedPtr<FJsonObject> Battle,int32 Region);
  UPROPERTY() TObjectPtr<UStaticMeshComponent> TripoArena;
  UPROPERTY() TMap<FString,TObjectPtr<UAnimSequence>> TripoClips;
  bool IsTripoBody(int32 Index) const;
