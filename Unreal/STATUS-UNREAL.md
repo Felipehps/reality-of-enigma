@@ -1,3 +1,7 @@
+## Cenários 3D da história — 16/10/2026
+
+Doze locais: Campos de Vaelorn, sete regiões do Ato I e quatro arenas pós-Ato I, com quatro variações de transformação. VER-CENARIOS-HISTORIA.cmd abre a galeria com save isolado. No jogo, use Início → Extras → Cenários da jornada. Os ambientes foram ligados às batalhas existentes e usam geometria procedural, pedra PBR CC0, névoa e partículas. É uma base artística de palcos de combate em desenvolvimento, com água ainda opaca e sem mapas exploráveis ou novas animações de personagens. A correção do deslocamento do mouse também está incluída. Detalhes e validação em Design/StoryEnvironments.
+
 ## Mapas e história — primeira base de 16/10/2026
 
 Rotas da Ruptura liga Zhu Jin, Hajun, Mazakin e Akuroth ao pós-Ato I, com introdução, confronto, consequência, desbloqueios e recompensas únicas. Interface de progressão em 2D; sem novos cenários 3D nesta entrega. A prévia TESTAR-ROTAS-HISTORIA.cmd usa save isolado. Documentação e limites em Design/StoryMaps/LEIA-ME.md.

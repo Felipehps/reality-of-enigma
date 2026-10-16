@@ -20,12 +20,15 @@ bool Ready(const TSharedPtr<FJsonObject>& Save,const TSharedPtr<FJsonObject>& En
 
 int32 AEnigmaCampaignMode::BattleRegion(){
  using namespace Story;const auto State=Game()->State;
- if(S(State,TEXT("mode"))==TEXT("campaign"))return FMath::Clamp((int32(N(State,TEXT("stage")))-1)/10,0,6);
+ const FString Kind=S(State,TEXT("mode"));
+ if(Kind==TEXT("campaign")||Kind==TEXT("story"))return FMath::Clamp((int32(N(State,TEXT("stage")))-1)/10,0,6);
  if(S(State,TEXT("mode"))==TEXT("chronicle")){
   const auto& Routes=A(State,TEXT("chronicles"));int32 Index=int32(N(State,TEXT("stage")))-1;
   if(Routes.IsValidIndex(Index))return FMath::Clamp(int32(N(Routes[Index]->AsObject(),TEXT("BattleRegion"))),0,6);
  }
- return S(State,TEXT("mode"))==TEXT("floral")?0:6;
+ if(Kind==TEXT("floral"))return 4;if(Kind==TEXT("eclipse"))return 5;if(Kind==TEXT("demo"))return 1;
+ if(Kind==TEXT("training")){if(TrainingBoss==TEXT("varkhan"))return 1;if(TrainingBoss==TEXT("nerathis"))return 4;if(TrainingBoss==TEXT("maltherion"))return 5;}
+ return 6;
 }
 
 void AEnigmaCampaignHUD::DrawStoryMap(){

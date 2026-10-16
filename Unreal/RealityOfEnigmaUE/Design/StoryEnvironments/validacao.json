@@ -1,0 +1,47 @@
+{
+  "core_checks": 75,
+  "core_failures": 0,
+  "visual_review_pending": false,
+  "date": "2026-10-16",
+  "scenery": [
+    {
+      "captures": 21,
+      "failures": 0,
+      "checks": 97,
+      "resolution": "1280x720"
+    },
+    {
+      "captures": 21,
+      "failures": 0,
+      "checks": 97,
+      "resolution": "2560x1080"
+    }
+  ],
+  "mouse": [
+    {
+      "failures": 0,
+      "checks": 19,
+      "resolution": "1280x720"
+    },
+    {
+      "failures": 0,
+      "checks": 19,
+      "resolution": "2560x1080"
+    },
+    {
+      "failures": 0,
+      "checks": 19,
+      "resolution": "3440x1440"
+    },
+    {
+      "failures": 0,
+      "checks": 19,
+      "resolution": "1024x768"
+    }
+  ],
+  "art_stage": "First procedural 3D blockout; artistic refinement pending",
+  "explorable_maps": false,
+  "native_encounter_capture_stage": "formation before first turn",
+  "hardware_mouse_clicks_tested": false,
+  "review": "16 environment views and 5 native encounter preparations per format; contact sheets reviewed, plus full-size regional and transformed views. Water remains opaque and foliage is faceted."
+}
