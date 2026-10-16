@@ -1,0 +1,77 @@
+{
+  "Version": 1,
+  "CompletedStage": 70,
+  "ActComplete": true,
+  "OpeningSeen": true,
+  "ForestEncounterSeen": true,
+  "Inventory": {
+    "Gold": 10000,
+    "Xp": 5000,
+    "Jokers": 0,
+    "Tickets": 3,
+    "Fragments": {}
+  },
+  "Roster": [
+    {
+      "Id": "kael",
+      "Level": 70,
+      "Stars": 6,
+      "Copies": 0,
+      "BattleXp": 0,
+      "Path": "base"
+    },
+    {
+      "Id": "savor",
+      "Level": 70,
+      "Stars": 6,
+      "Copies": 0,
+      "BattleXp": 0,
+      "Path": "base"
+    },
+    {
+      "Id": "aelia",
+      "Level": 70,
+      "Stars": 6,
+      "Copies": 0,
+      "BattleXp": 0,
+      "Path": "base"
+    },
+    {
+      "Id": "brakk",
+      "Level": 70,
+      "Stars": 6,
+      "Copies": 0,
+      "BattleXp": 0,
+      "Path": "base"
+    },
+    {
+      "Id": "lyra",
+      "Level": 70,
+      "Stars": 6,
+      "Copies": 0,
+      "BattleXp": 0,
+      "Path": "base"
+    }
+  ],
+  "CampaignGuests": [],
+  "FormationCells": [
+    0,
+    1,
+    3,
+    4,
+    6
+  ],
+  "Team": [
+    "kael",
+    "savor",
+    "aelia",
+    "brakk",
+    "lyra"
+  ],
+  "Training": [],
+  "ChronicleWins": [],
+  "TrainingWins": [],
+  "IdleAt": "2026-10-16T04:20:15.298284+00:00",
+  "PendingGold": 0,
+  "PendingXp": 0
+}

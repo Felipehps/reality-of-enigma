@@ -1,6 +1,7 @@
 @echo off
 setlocal
 if /I "%~1"=="--editor" goto editor
+if exist "%~dp0RealityOfEnigma-Unreal-Atualizado\Windows\RealityOfEnigmaUE.exe" (call "%~dp0VER-TELA-INICIAL.cmd" & exit /b)
 set "GAME=%~dp0RealityOfEnigma-Unreal\Windows\RealityOfEnigmaUE.exe"
 if exist "%GAME%" (
  start "Reality of Enigma" "%GAME%" -windowed -ResX=1280 -ResY=720

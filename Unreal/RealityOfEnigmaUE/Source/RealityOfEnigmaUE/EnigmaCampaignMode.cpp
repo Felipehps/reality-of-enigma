@@ -35,7 +35,7 @@ AEnigmaCampaignMode::AEnigmaCampaignMode(){PrimaryActorTick.bCanEverTick=true;De
 UEnigmaGameInstance* AEnigmaCampaignMode::Game(){return Cast<UEnigmaGameInstance>(GetGameInstance());}
 TSharedPtr<FJsonObject> AEnigmaCampaignMode::DisplayState(){return AnimationAge>=0&&AnimationDisplay?AnimationDisplay:Game()->State;}
 void AEnigmaCampaignMode::BeginPlay(){
- Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaHomeTour="),HomeTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
+ Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaChronicleTour="),ChronicleTourFolder);if(!ChronicleTourFolder.IsEmpty()||FParse::Param(FCommandLine::Get(),TEXT("EnigmaChroniclePreview")))Page=TEXT("routes");FParse::Value(FCommandLine::Get(),TEXT("EnigmaHomeTour="),HomeTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
  const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->GetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->GetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);
  WorldArt->ReducedMotion=ReducedMotion;
  if(!UITourFolder.IsEmpty()&&FParse::Param(FCommandLine::Get(),TEXT("EnigmaModelTour"))){UITourIndex=30;UITourNext=1;}
@@ -54,7 +54,7 @@ void AEnigmaCampaignMode::Start(const FString& Kind,int32 Stage){
  auto Request=MakeShared<FJsonObject>();Request->SetStringField(TEXT("command"),TEXT("start"));Request->SetStringField(TEXT("id"),Kind);Request->SetNumberField(TEXT("number"),Stage);Request->SetStringField(TEXT("boss"),TrainingBoss);
  if(!Game()->Execute(Request)){Message=Game()->Error;return;}
  Page=TEXT("battle");MoveMenu=false;Target.Reset();BeforeAction.Reset();AnimationAge=-1;Auto=false;Message.Reset();
- WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),Kind==TEXT("campaign")?(Stage-1)/10:Kind==TEXT("floral")?0:6);
+ WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),BattleRegion());
 }
 void AEnigmaCampaignMode::Act(const FString& Skill,int32 Cell){
  if(AnimationAge>=0||WorldArt->Transforming()||!Game()||!Game()->State)return;
@@ -73,13 +73,17 @@ void AEnigmaCampaignMode::Tick(float Dt){
  if(ModelPreview)ModelPreview->SetActive(Page==TEXT("reference")&&Selected==TEXT("hajun")&&Reference3D);
  if(!UITourFolder.IsEmpty())TickUITour();
  if(!HomeTourFolder.IsEmpty())TickHomeTour();
+ if(!ChronicleTourFolder.IsEmpty())TickChronicleTour();
  if(!CombatReplayFolder.IsEmpty())TickCombatReplay();
  if(Page==TEXT("opening")&&OpeningAuto){OpeningAge+=Dt;if(OpeningAge>9)Action(TEXT("openingNext"));}
- if(AnimationAge>=0){AnimationAge+=Dt;UpdateDisplayedHealth();if(AnimationAge>=AnimationDuration){AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),S(Game()->State,TEXT("mode"))==TEXT("campaign")?(int32(N(Game()->State,TEXT("stage")))-1)/10:6);}}
+ if(AnimationAge>=0){AnimationAge+=Dt;UpdateDisplayedHealth();if(AnimationAge>=AnimationDuration){AnimationAge=-1;BeforeAction.Reset();AnimationDisplay.Reset();WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),BattleRegion());}}
  if(Page==TEXT("battle")&&Auto&&AnimationAge<0&&!WorldArt->Transforming()){AutoAge+=Dt;if(AutoAge>.45f){AutoAge=0;auto Battle=O(Game()->State,TEXT("battle"));if(B(Battle,TEXT("finished"))&&B(Battle,TEXT("won"))&&Repeat&&S(Game()->State,TEXT("mode"))==TEXT("training")&&N(Battle,TEXT("wave"))==3){Start(TEXT("training"));Game()->Command(TEXT("begin"));Auto=true;}else if(B(Battle,TEXT("finished"))&&!(S(Game()->State,TEXT("mode"))==TEXT("training")&&B(Battle,TEXT("won"))&&N(Battle,TEXT("wave"))<3))Auto=false;else Act();}}
 }
 void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Number){
  if(!Game()||!Game()->State)return;
+ if(Name==TEXT("chronicle")){SelectedChronicle=FMath::Clamp(Number,0,3);Action(TEXT("page"),TEXT("routestory"));return;}
+ if(Name==TEXT("routeFight")){Start(TEXT("chronicle"),SelectedChronicle+1);return;}
+ if(Name==TEXT("routeOutcome")){SelectedChronicle=FMath::Clamp(int32(N(Game()->State,TEXT("stage")))-1,0,3);Action(TEXT("page"),TEXT("routeoutcome"));return;}
  if(Name==TEXT("moveMenu")){MoveMenu=!MoveMenu;return;}
  if(Name==TEXT("reposition")){Act(TEXT(""),Number);return;}
  if(Name==TEXT("reference3D")){if(Selected!=TEXT("hajun"))return;if(!ModelPreview)ModelPreview=GetWorld()->SpawnActor<AEnigmaModelPreview>();Reference3D=ModelPreview&&ModelPreview->Ready();ReferencePhase=1;if(ModelPreview)ModelPreview->ShowStatic();return;}
@@ -105,7 +109,7 @@ void AEnigmaCampaignMode::Action(const FString& Name,const FString& Id,int32 Num
  if(Name==TEXT("auto")){Auto=!Auto;return;}
  if(Name==TEXT("repeat")){Repeat=!Repeat;return;}
  if(Name==TEXT("log")){LogVisible=!LogVisible;return;}
- if(Name==TEXT("battleCell")){if(!Game()->Command(TEXT("move"),Target,Number))Message=Game()->Error;else WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),Region);return;}
+ if(Name==TEXT("battleCell")){if(!Game()->Command(TEXT("move"),Target,Number))Message=Game()->Error;else WorldArt->ShowBattle(O(Game()->State,TEXT("battle")),BattleRegion());return;}
  if(Name==TEXT("cell")){
   auto Save=O(Game()->State,TEXT("save"));TArray<TSharedPtr<FJsonValue>> Cells=A(Save,TEXT("FormationCells"));
   if(Cells.IsValidIndex(TeamSlot)){int32 Old=int32(Cells[TeamSlot]->AsNumber());for(int32 I=0;I<Cells.Num();I++)if(I!=TeamSlot&&int32(Cells[I]->AsNumber())==Number)Cells[I]=MakeShared<FJsonValueNumber>(Old);Cells[TeamSlot]=MakeShared<FJsonValueNumber>(Number);auto Req=MakeShared<FJsonObject>();Req->SetStringField(TEXT("command"),TEXT("formation"));Req->SetArrayField(TEXT("cells"),Cells);Game()->Execute(Req);}return;
@@ -188,13 +192,15 @@ void AEnigmaCampaignHUD::DrawHUD(){
  Text(TEXT("REALITY OF ENIGMA"),40,24,FLinearColor(.83f,.62f,.32f),1.5f);
  Text(FString::Printf(TEXT("OURO  %.0f     XP  %.0f     TICKETS  %.0f     JORNADA  %.0f/70"),N(Inventory,TEXT("Gold")),N(Inventory,TEXT("Xp")),N(Inventory,TEXT("Tickets")),N(Save,TEXT("CompletedStage"))),615,30,FLinearColor(.72f,.77f,.73f),.85f);
  if(Page!=TEXT("home")&&Page!=TEXT("battle"))Button(TEXT("Início"),1120,65,120,TEXT("page"),TEXT("home"));
- if(Page==TEXT("campaign")||Page==TEXT("ending")){
+ if(Page==TEXT("routes")||Page==TEXT("routestory")||Page==TEXT("routeoutcome")){DrawStoryMap();}
+ else if(Page==TEXT("campaign")||Page==TEXT("ending")){
   auto Regions=A(State,TEXT("regions"));int32 Max=FMath::Clamp(int32(N(Save,TEXT("CompletedStage")))/10,0,6);Mode->Region=FMath::Clamp(Mode->Region,0,Max);auto R=Regions[Mode->Region]->AsObject();
   Text(S(R,TEXT("Name")),40,100,FLinearColor(.95f,.8f,.55f),1.6f);Wrap(S(R,TEXT("Summary")),40,147,120,3);
   if(Page==TEXT("ending")){Wrap(S(R,TEXT("Ending")),50,210,110,15);Button(TEXT("Retornar ao atlas"),45,605,250,TEXT("page"),TEXT("campaign"));if(Mode->Region<6&&N(Save,TEXT("CompletedStage"))>=(Mode->Region+1)*10)Button(TEXT("Explorar próxima região"),325,605,250,TEXT("nextRegion"));}
   else {
    for(int32 I=0;I<10;I++){int32 Stage=Mode->Region*10+I+1;int32 Done=N(Save,TEXT("CompletedStage"));bool Allowed=Stage<=Done+1&&(Stage>Done||Stage%10!=0);FString L=FString::Printf(TEXT("%02d  ·  %s"),Stage,Stage%10==0?TEXT("Confronto final"):Stage<=Done?TEXT("Concluída"):Stage==Done+1?TEXT("Próxima travessia"):TEXT("Não explorada"));Button(L,45+(I%5)*235,260+(I/5)*95,220,TEXT("start"),TEXT("campaign"),Stage,Allowed,65);}
    if(N(Save,TEXT("CompletedStage"))>=(Mode->Region+1)*10)Button(TEXT("Crônicas da região"),45,475,260,TEXT("page"),TEXT("ending"));
+   Button(TEXT("Rotas da Ruptura"),970,475,250,TEXT("page"),TEXT("routes"));
    for(int32 I=0;I<7;I++)Button(FString::Printf(TEXT("Região %d"),I+1),45+I*170,550,155,TEXT("region"),TEXT(""),I,I<=Max);
   }
  }
@@ -288,12 +294,12 @@ void AEnigmaCampaignHUD::DrawHUD(){
   auto Actor=Find(Allies,S(Battle,TEXT("actor")),TEXT("key"));if(!S(Actor,TEXT("key")).IsEmpty()){FString Detail;if(S(Actor,TEXT("id"))==TEXT("zevalon"))Detail=FString::Printf(TEXT("Energia celestial: %.0f/5"),N(Actor,TEXT("energy")));if(S(Actor,TEXT("id"))==TEXT("tenrin"))Detail=FString::Printf(TEXT("Aura do Leão: %.0f/5"),N(Actor,TEXT("divineFocus")));if(!Detail.IsEmpty())Text(Detail,360,480,FLinearColor(.98f,.78f,.35f),1.1f);}
   auto Skills=A(Battle,TEXT("skills"));bool Allowed=B(Battle,TEXT("locked"))&&B(Battle,TEXT("allyTurn"))&&!B(Battle,TEXT("finished"))&&Mode->AnimationAge<0;
   for(int32 I=0;I<Skills.Num()&&I<9;I++){auto Ability=Skills[I]->AsObject();Button(FString::Printf(TEXT("%d • %s"),I+1,*S(Ability,TEXT("name"))),30+(I%5)*245,613+(I/5)*43,230,TEXT("act"),S(Ability,TEXT("id")),0,Allowed&&S(Ability,TEXT("reason")).IsEmpty());}
-  if(B(Battle,TEXT("finished"))){Text(B(Battle,TEXT("won"))?TEXT("VITÓRIA"):TEXT("DERROTA"),500,170,B(Battle,TEXT("won"))?FLinearColor(.95f,.8f,.4f):FLinearColor(.9f,.2f,.2f),2);if(S(State,TEXT("mode"))==TEXT("campaign")){int32 Stage=N(State,TEXT("stage"));if(B(Battle,TEXT("won"))&&Stage<70)Button(TEXT("Próxima fase"),460,232,330,TEXT("start"),TEXT("campaign"),Stage+1);if(Stage%10==0&&B(Battle,TEXT("won"))){Mode->Region=(Stage-1)/10;Button(TEXT("Crônicas da região"),460,279,330,TEXT("page"),TEXT("ending"));}}}
+  if(B(Battle,TEXT("finished"))){Text(B(Battle,TEXT("won"))?TEXT("VITÓRIA"):TEXT("DERROTA"),500,170,B(Battle,TEXT("won"))?FLinearColor(.95f,.8f,.4f):FLinearColor(.9f,.2f,.2f),2);if(S(State,TEXT("mode"))==TEXT("chronicle")&&B(Battle,TEXT("won")))Button(TEXT("Conclusão da rota"),460,232,330,TEXT("routeOutcome"));if(S(State,TEXT("mode"))==TEXT("campaign")){int32 Stage=N(State,TEXT("stage"));if(B(Battle,TEXT("won"))&&Stage<70)Button(TEXT("Próxima fase"),460,232,330,TEXT("start"),TEXT("campaign"),Stage+1);if(Stage%10==0&&B(Battle,TEXT("won"))){Mode->Region=(Stage-1)/10;Button(TEXT("Crônicas da região"),460,279,330,TEXT("page"),TEXT("ending"));}}}
   if(Mode->LogVisible){Box(350,320,580,210,FLinearColor(.015f,.01f,.025f,.96f));auto Logs=A(Battle,TEXT("log"));for(int32 I=0;I<Logs.Num()&&I<9;I++)Text(Logs[I]->AsString().Left(78),362,330+I*22,FLinearColor(.85f,.78f,.65f),.85f);}
   if(!Mode->Target.IsEmpty()){auto U=Find(Allies,Mode->Target,TEXT("key"));if(S(U,TEXT("key")).IsEmpty())U=Find(Enemies,Mode->Target,TEXT("key"));FString Status=TEXT("Alvo: ")+S(U,TEXT("name"));for(auto V:A(U,TEXT("statuses")))Status+=TEXT(" • ")+S(V->AsObject(),TEXT("id"))+FString::Printf(TEXT(" (%.0f)"),N(V->AsObject(),TEXT("turns")));Text(Status.Left(100),360,505,FLinearColor(.9f,.8f,.65f),.9f);}
  }
  const FString Notice=Mode->Message.IsEmpty()?S(Game->State,TEXT("notice")):Mode->Message;
- if(Page!=TEXT("battle")){if(Notice!=TEXT("Jornada carregada."))Wrap(Notice,45,651,96,2);float MX=0,MY=0;if(GetOwningPlayerController()&&GetOwningPlayerController()->GetMousePosition(MX,MY))LastHomeMouse=FVector2D(MX,MY);}else Text(Notice.Replace(TEXT("\n"),TEXT(" • ")).Left(145),25,145,FLinearColor(.95f,.72f,.4f),.8f);
+ if(Page!=TEXT("battle")){if(Notice!=TEXT("Jornada carregada.")&&((Page!=TEXT("routes")&&Page!=TEXT("routestory"))||!Mode->Message.IsEmpty()))Wrap(Notice,45,651,96,2);float MX=0,MY=0;if(GetOwningPlayerController()&&GetOwningPlayerController()->GetMousePosition(MX,MY))LastHomeMouse=FVector2D(MX,MY);}else Text(Notice.Replace(TEXT("\n"),TEXT(" • ")).Left(145),25,145,FLinearColor(.95f,.72f,.4f),.8f);
 }
 void AEnigmaCampaignMode::RunChecks(){
  int32 Checks=0,Failures=0;auto Check=[&](bool Ok,const TCHAR* Name){Checks++;if(!Ok){Failures++;UE_LOG(LogTemp,Error,TEXT("MIGRATION_QA_FAIL %s: %s"),Name,*Game()->Error);}};

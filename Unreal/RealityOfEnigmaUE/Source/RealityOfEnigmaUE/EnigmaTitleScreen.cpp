@@ -119,7 +119,7 @@ void AEnigmaCampaignHUD::DrawHome(){
   Rect(76,281,36,1.5f,Gold);MenuText(TEXT("UM MUNDO PARTIDO. DESTINOS ENTRELAÇADOS."),127,275,9.5f,FLinearColor(.7f,.74f,.74f));
   auto Save=Object(Mode->Game()->State,TEXT("save"));const int32 Completed=Number(Save,TEXT("CompletedStage"));
   const bool Started=Seen(Save)||Completed>0;
-  MenuButton(Completed>=70?TEXT("Jornada concluída"):Started?TEXT("Continuar jornada"):TEXT("Começar jornada"),Completed>=70?TEXT("Revisite o mundo e descubra novos desafios"):Started?FString::Printf(TEXT("Campanha  /  Etapa %02d de 70"),FMath::Min(70,Completed+1)):TEXT("Atravesse o limiar. Sua história começa aqui."),76,344,374,68,Completed>=70?TEXT("page"):TEXT("start"),TEXT("campaign"),FMath::Min(70,Completed+1),true);
+  MenuButton(Completed>=70?TEXT("Além do Sol Partido"):Started?TEXT("Continuar jornada"):TEXT("Começar jornada"),Completed>=70?TEXT("Ato II  /  Abra as Rotas da Ruptura"):Started?FString::Printf(TEXT("Campanha  /  Etapa %02d de 70"),FMath::Min(70,Completed+1)):TEXT("Atravesse o limiar. Sua história começa aqui."),76,344,374,68,Completed>=70?TEXT("page"):TEXT("start"),Completed>=70?TEXT("routes"):TEXT("campaign"),FMath::Min(70,Completed+1),true);
   MenuButton(TEXT("Explorar o mundo"),TEXT("Descubra as sete regiões da campanha"),76,428,374,58,TEXT("page"),TEXT("campaign"));
   MenuButton(TEXT("Personagens"),TEXT("Reúna seus heróis. Escolha sua formação."),76,496,374,58,TEXT("page"),TEXT("team"));
   Rect(76,584,374,.7f,FLinearColor(.4f,.49f,.5f,.38f));
