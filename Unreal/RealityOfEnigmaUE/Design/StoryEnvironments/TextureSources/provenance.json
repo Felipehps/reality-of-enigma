@@ -1,0 +1,66 @@
+[
+  {
+    "file": "bark_brown_01_diff_2k.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bark_brown_01/bark_brown_01_diff_2k.jpg",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/bark_brown_01",
+    "sha256": "0cdd066f34d357fdbf7eb99159e668a6dc346bb7fd093a9e27058eb827d09b9a",
+    "bytes": 2667267
+  },
+  {
+    "file": "bark_brown_01_nor_dx_2k.png",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/bark_brown_01/bark_brown_01_nor_dx_2k.png",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/bark_brown_01",
+    "sha256": "7cfdc2dfd223024e238b9c8ef13e96823be6d7809fe55f17332c2cff380d9718",
+    "bytes": 8953706
+  },
+  {
+    "file": "bark_brown_01_rough_2k.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bark_brown_01/bark_brown_01_rough_2k.jpg",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/bark_brown_01",
+    "sha256": "8ce13f1be85940fcb9a3dc78afd1529755c6aec6b52e683656bffa92820887d8",
+    "bytes": 812553
+  },
+  {
+    "file": "bark_brown_01_ao_2k.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/bark_brown_01/bark_brown_01_ao_2k.jpg",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/bark_brown_01",
+    "sha256": "981f77a874306cc1a1605163412df0a6e34bb91b4afebd274b3edee9daa32fd7",
+    "bytes": 2087917
+  },
+  {
+    "file": "forrest_ground_01_diff_2k.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/forrest_ground_01/forrest_ground_01_diff_2k.jpg",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/forrest_ground_01",
+    "sha256": "e4d557ff61a0b42712a58e8a2e91c6010738977d4e172b7af47abd7d406ae735",
+    "bytes": 3077552
+  },
+  {
+    "file": "forrest_ground_01_nor_dx_2k.png",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/png/2k/forrest_ground_01/forrest_ground_01_nor_dx_2k.png",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/forrest_ground_01",
+    "sha256": "fa8233b73f9831bb467b5082f3e5c9936645d16463c3a6c8ecf7021c5b43ecdc",
+    "bytes": 27037387
+  },
+  {
+    "file": "forrest_ground_01_rough_2k.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/forrest_ground_01/forrest_ground_01_rough_2k.jpg",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/forrest_ground_01",
+    "sha256": "e09258c7f055156a7607f1b21dccf38c7efd847e7d030271d5ffcc4a722df37d",
+    "bytes": 920422
+  },
+  {
+    "file": "forrest_ground_01_ao_2k.jpg",
+    "url": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/forrest_ground_01/forrest_ground_01_ao_2k.jpg",
+    "license": "CC0",
+    "source": "https://polyhaven.com/a/forrest_ground_01",
+    "sha256": "3da52f2f2182f2cf0a7b417e10764ee1ff446df0bc9fb12d49c4e3570ea3effe",
+    "bytes": 2493578
+  }
+]

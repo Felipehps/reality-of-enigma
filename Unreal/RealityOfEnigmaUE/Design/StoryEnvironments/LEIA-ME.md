@@ -1,6 +1,6 @@
-# Cenários da jornada — 16/10/2026
+# Cenários da jornada — 17/10/2026
 
-Primeira versão tridimensional dos 12 locais definidos pela história atual. Não são níveis de exploração: os ambientes funcionam como palcos de combate por turnos e como uma galeria navegável. O prólogo mantém suas ilustrações narrativas; Campos de Vaelorn pode ser visto na galeria. Os sete ambientes do Ato I são selecionados pela região da batalha. Os quatro bosses adicionais substituem o ambiente regional quando estão entre os inimigos, incluindo arenas de treinamento. Heróis aliados com os mesmos IDs não selecionam arenas inimigas.
+Refinamento artístico dos 12 locais definidos pela história atual. Não são níveis de exploração: os ambientes funcionam como palcos de combate por turnos e como uma galeria navegável. O prólogo mantém suas ilustrações narrativas; Campos de Vaelorn pode ser visto na galeria. Os sete ambientes do Ato I são selecionados pela região da batalha. Os quatro bosses adicionais substituem o ambiente regional quando estão entre os inimigos, incluindo arenas de treinamento. Heróis aliados com os mesmos IDs não selecionam arenas inimigas.
 
 ## Relação com a história
 
@@ -23,7 +23,9 @@ Geometria procedural original, materiais por região, pedra PBR com texturas CC0
 
 As quatro transformações usam os sinalizadores do combate existente (ascended / crimson), sem alterar os limiares de HP ou o balanceamento. Mudanças de cor, céu e iluminação acompanham a fase; o jardim também abre sua flor, e as arenas do Submundo ganham espinhos e fendas. Nesta versão a troca de geometria é instantânea no evento de transformação. Não há transição filmada nova nem animação de terreno deformável.
 
-É uma base artística estilizada para avaliação de composição, diferente de um cenário final de grande produção. Ainda são necessários refinamento de materiais, vegetação e arquitetura, água com reflexos/refração (a superfície atual é opaca), áudio ambiente e revisão artística. Não foram adicionados novos modelos ou animações de personagens nesta etapa. O modelo Tripo dos personagens permanece; o palco procedural passa a ser usado na campanha. As arenas Tripo continuam nos arquivos e a arena cinematográfica legada separada permanece disponível.
+Esta etapa substitui o chão retangular por terreno contínuo nas regiões naturais e por plataformas circulares nas arenas. Há folhas curvas com nervuras e vento, raízes contínuas, troncos com casca, colunas perfiladas, detalhes metálicos, livros com páginas, água translúcida com ondulação, lava com crostas e chamas animadas. Onze materiais novos combinam recursos procedurais da Unreal com texturas PBR CC0 de casca de árvore e solo de floresta da Poly Haven, além da pedra existente. TextureSources/provenance.json registra origem, licença, URLs e hashes dos oito mapas incluídos. A iluminação, névoa, bloom e vinheta foram ajustados por tema. As malhas seguem a orientação de faces da Unreal; essa correção também resolve superfícies iluminadas pelo lado incorreto.
+
+Continua sendo arte procedural estilizada em desenvolvimento, sem acabamento final equivalente ao de grandes produções. A água ainda não tem refração física nem tratamento de margem; árvores, rochas e arquitetura precisam de escultura e texturas adicionais para alcançar mais realismo. Não há áudio ambiente novo. Não foram adicionados novos modelos ou animações de personagens nesta etapa. O modelo Tripo dos personagens permanece; o palco procedural passa a ser usado na campanha. As arenas Tripo continuam nos arquivos e a arena cinematográfica legada separada permanece disponível.
 
 ## Como ver
 
@@ -31,9 +33,9 @@ Abra VER-CENARIOS-HISTORIA.cmd para uma prévia com save isolado, ou use Início
 
 ## Reprodução
 
-environments.json contém os textos, a ligação às regiões e as paletas. EnigmaStoryEnvironment gera os elementos 3D; EnigmaWorldPresentation faz a seleção em combate; EnigmaEnvironmentPreview implementa a galeria e a verificação. create-materials.py recria o material no editor usando as quatro texturas incluídas em ArtLibrary/FreeResources. A procedência CC0 está em stone-provenance.json. Não há dependência de assinatura ou recurso pago.
+environments.json contém os textos, a ligação às regiões e as paletas. EnigmaStoryEnvironment gera os elementos 3D; EnigmaWorldPresentation faz a seleção em combate; EnigmaEnvironmentPreview implementa a galeria e a verificação. create-art-materials.py recria os onze novos materiais; create-materials.py recria o material de pedra no editor usando as quatro texturas incluídas em ArtLibrary/FreeResources. A procedência CC0 está em stone-provenance.json. Não há dependência de assinatura ou recurso pago.
 
-O teste -EnigmaSceneryTour=<pasta> percorre 16 vistas (12 locais e quatro transformações), mais cinco encontros reais de teste do núcleo nativo, verifica seleção regional, seleção de bosses, retorno à primeira fase, ocultação e limite de geometria. As verificações de seleção de bosses usam snapshots de teste alterados, sem atestar o balanceamento ou todas as animações de uma batalha completa. -EnigmaMigrationQA verifica o núcleo existente. Logs e resultados acompanham a entrega.
+O teste -EnigmaSceneryTour=<pasta> percorre 16 vistas (12 locais e quatro transformações), mais cinco encontros reais de teste do núcleo nativo, verifica seleção regional, seleção de bosses, retorno à primeira fase, ocultação, carregamento da biblioteca artística, orientação das faces e limite de 350 mil triângulos por ambiente. As verificações de seleção de bosses usam snapshots de teste alterados, sem atestar o balanceamento ou todas as animações de uma batalha completa. -EnigmaMigrationQA verifica o núcleo existente. Logs e resultados acompanham a entrega.
 
 ## Correção de mouse incluída
 

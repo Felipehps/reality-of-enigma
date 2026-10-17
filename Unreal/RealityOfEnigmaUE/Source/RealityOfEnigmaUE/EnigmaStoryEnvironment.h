@@ -2,7 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "EnigmaStoryEnvironment.generated.h"
-class UProceduralMeshComponent;class UInstancedStaticMeshComponent;class UMaterialInstanceDynamic;class UPointLightComponent;class UExponentialHeightFogComponent;class USkyLightComponent;
+class UPostProcessComponent;class UProceduralMeshComponent;class UInstancedStaticMeshComponent;class UMaterialInstanceDynamic;class UPointLightComponent;class UExponentialHeightFogComponent;class USkyLightComponent;
 struct FEnigmaEnvironment {
  FString Id,Title,Story,Theme;int32 Region=-1;bool HasPhase=false;
  FLinearColor Stone,Accent,Vegetation,Sky;
@@ -15,11 +15,14 @@ public:
  static const TArray<FEnigmaEnvironment>& Definitions();
  static FString ForBattle(int32 Region,const TArray<TSharedPtr<class FJsonValue>>& Enemies);
  bool Configure(const FString& Id,bool PhaseTwo);
+ void SetPresentationVisible(bool Visible);
  void SetReducedMotion(bool Value){ReducedMotion=Value;}
  void Impact(float Strength){Pulse=FMath::Max(Pulse,Strength);}
+ int32 ArtMaterialCount=0,TerrainVertices=0,SurfaceFacingErrors=0;
  FString CurrentId;bool Phase=false;int32 TriangleCount=0;float AmbientTime=0;
  FLinearColor KeyColor() const;FLinearColor RimColor() const;
 private:
+ UPROPERTY() TObjectPtr<UPostProcessComponent> Lens;
  UPROPERTY() TObjectPtr<UProceduralMeshComponent> Architecture;
  UPROPERTY() TObjectPtr<UProceduralMeshComponent> Horizon;
  UPROPERTY() TObjectPtr<USkyLightComponent> AmbientLight;
