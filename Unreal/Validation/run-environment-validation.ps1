@@ -37,5 +37,5 @@ $job=Start-Process -FilePath $gameExe -ArgumentList @('-EnigmaMigrationQA','-Ren
 $job.WaitForExit()
 $match=[regex]::Match((Get-Content -Raw -LiteralPath $coreLog),'ENIGMA_MIGRATION_QA_RESULT checks=(\d+) failures=(\d+)')
 if($job.ExitCode -ne 0 -or !$match.Success -or $match.Groups[2].Value -ne '0'){throw 'Falha na integracao do jogo.'}
-@{date='2026-10-16';scenery=$scenery;mouse=$results;core_checks=[int]$match.Groups[1].Value;core_failures=0;visual_review_pending=$true}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $taskRoot 'outputs/Cenarios-validacao.json') -Encoding utf8
+@{date='2026-10-17';scenery=$scenery;mouse=$results;core_checks=[int]$match.Groups[1].Value;core_failures=0;visual_review_pending=$true}|ConvertTo-Json -Depth 6|Set-Content -LiteralPath (Join-Path $taskRoot 'outputs/Cenarios-validacao.json') -Encoding utf8
 Write-Output ('SCENERY_CORE_OK checks='+$match.Groups[1].Value)

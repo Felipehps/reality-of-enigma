@@ -84,7 +84,7 @@ void AEnigmaWorldPresentation::ShowBattle(TSharedPtr<FJsonObject> Battle,int32 R
  for(int32 I=0;I<Units.Num();I++){auto U=Units[I]->AsObject();bool Enemy=I>=A(Battle,TEXT("allies")).Num();Homes[I]=FVector((Enemy?1:-1)*(450+float(N(U,TEXT("layer")))*120),(float(N(U,TEXT("column")))-1)*190,0);Bodies[I]->SetVisibility(true);FString Id=S(U,TEXT("id"));bool BossForm=(Id==TEXT("akuroth")||Id==TEXT("mazakin")||Id==TEXT("hajun"))&&B(U,TEXT("ascended"))||Id==TEXT("zhujin")&&B(U,TEXT("crimson"));if(BossForm&&!Ascended){Ascended=true;TransformBoss=Id;AscendedBossKey=S(U,TEXT("key"));TransformAge=0;PlayCue(Id==TEXT("zhujin")?TEXT("chime"):TEXT("akuroth-transform"),1,.7f);if(Backdrop&&Id!=TEXT("zhujin"))Backdrop->SetMaterial(0,LoadObject<UMaterialInterface>(nullptr,TEXT("/Game/Akuroth/Environment/M_InfernoBackdrop.M_InfernoBackdrop")));}}
  Snapshot=Battle;SyncTripoArt();SyncEnvironment(Battle,Region);SetActorHiddenInGame(false);
 }
-void AEnigmaWorldPresentation::HideBattle(){if(StoryEnvironment)StoryEnvironment->SetActorHiddenInGame(true);SetActorHiddenInGame(true);Age=-1;Snapshot.Reset();StopSounds();}
+void AEnigmaWorldPresentation::HideBattle(){if(StoryEnvironment)StoryEnvironment->SetPresentationVisible(false);SetActorHiddenInGame(true);Age=-1;Snapshot.Reset();StopSounds();}
 void AEnigmaWorldPresentation::PlayAction(TSharedPtr<FJsonObject> Battle,float Volume){
  if(!Battle)return;
  BeforeHealth.Reset();if(Snapshot){auto Units=A(Snapshot,TEXT("allies"));Units.Append(A(Snapshot,TEXT("enemies")));for(auto Unit:Units)BeforeHealth.Add(S(Unit->AsObject(),TEXT("key")),N(Unit->AsObject(),TEXT("hp")));}
@@ -194,9 +194,9 @@ bool AEnigmaWorldPresentation::HasImpactCueAt(float At) const{return SoundEvents
 void AEnigmaWorldPresentation::PreviewEnvironment(const FString& Id,bool PhaseTwo){
  if(!StoryEnvironment)StoryEnvironment=GetWorld()->SpawnActor<AEnigmaStoryEnvironment>();
  if(!StoryEnvironment||!StoryEnvironment->Configure(Id,PhaseTwo))return;
- StoryEnvironment->SetReducedMotion(ReducedMotion);StoryEnvironment->SetActorHiddenInGame(false);
+ StoryEnvironment->SetReducedMotion(ReducedMotion);StoryEnvironment->SetPresentationVisible(true);
  if(!Camera){Camera=GetWorld()->SpawnActor<ACameraActor>();Camera->GetCameraComponent()->SetFieldOfView(58);}
- Camera->SetActorLocation(FVector(0,3200,1500));Camera->SetActorRotation((FVector(0,-350,320)-Camera->GetActorLocation()).Rotation());
+ Camera->SetActorLocation(FVector(120,3050,1320));Camera->SetActorRotation((FVector(0,-400,400)-Camera->GetActorLocation()).Rotation());
  if(auto PC=UGameplayStatics::GetPlayerController(this,0))PC->SetViewTarget(Camera);
  Light->SetLightColor(StoryEnvironment->KeyColor());KeyLight->SetLightColor(StoryEnvironment->KeyColor());RimLight->SetLightColor(StoryEnvironment->RimColor());
  for(auto C:Scenery)C->SetVisibility(false);if(TripoArena)TripoArena->SetVisibility(false);TripoArenaEnabled=false;

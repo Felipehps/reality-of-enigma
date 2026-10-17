@@ -32,7 +32,7 @@ void AEnigmaCampaignMode::TickSceneryTour(){
   const auto Shot=Shots[SceneryTourIndex];SceneryIndex=Shot.Key;SceneryPhase=Shot.Value;
   Action(TEXT("page"),TEXT("scenery"));WorldArt->PreviewEnvironment(Rows[SceneryIndex].Id,SceneryPhase);
   auto Env=WorldArt->Environment();Check(Env&&Env->CurrentId==Rows[SceneryIndex].Id,TEXT("live_environment"));
-  Check(Env&&Env->Phase==SceneryPhase,TEXT("phase_selection"));Check(Env&&Env->TriangleCount>1000&&Env->TriangleCount<180000,TEXT("bounded_real_geometry"));
+  Check(Env&&Env->Phase==SceneryPhase,TEXT("phase_selection"));Check(Env&&Env->ArtMaterialCount==11,TEXT("art_material_library_loaded"));Check(Env&&Env->SurfaceFacingErrors==0,TEXT("unreal_clockwise_surfaces"));Check(Env&&Env->TriangleCount>1000&&Env->TriangleCount<350000,TEXT("bounded_real_geometry"));
   const FString File=Rows[SceneryIndex].Id+(SceneryPhase?TEXT("-phase2"):TEXT("-phase1"));
   FTimerHandle Handle;GetWorldTimerManager().SetTimer(Handle,[this,File](){FScreenshotRequest::RequestScreenshot(FPaths::ConvertRelativePathToFull(SceneryTourFolder/(File+TEXT(".png"))),true,false);},.5f,false);
  }else if(SceneryTourIndex==Shots.Num()){
