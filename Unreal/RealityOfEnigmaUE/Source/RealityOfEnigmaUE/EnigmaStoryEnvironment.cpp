@@ -1,5 +1,7 @@
 #include "EnigmaStoryEnvironment.h"
 #include "EnigmaEnvironmentGeometry.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/HierarchicalInstancedStaticMeshComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "ProceduralMeshComponent.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -31,6 +33,9 @@ FString AEnigmaStoryEnvironment::ForBattle(int32 Region,const TArray<TSharedPtr<
 AEnigmaStoryEnvironment::AEnigmaStoryEnvironment(){
  PrimaryActorTick.bCanEverTick=true;
  Architecture=CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("StoryArchitecture"));SetRootComponent(Architecture);Architecture->SetCollisionEnabled(ECollisionEnabled::NoCollision);Architecture->bUseAsyncCooking=true;
+ ForestSet=CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BlenderForestSet"));ForestSet->SetupAttachment(RootComponent);ForestSet->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+ ForestTrees=CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("BlenderCanopy"));ForestTrees->SetupAttachment(RootComponent);ForestTrees->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+ ForestFerns=CreateDefaultSubobject<UHierarchicalInstancedStaticMeshComponent>(TEXT("BlenderUnderstory"));ForestFerns->SetupAttachment(RootComponent);ForestFerns->SetCollisionEnabled(ECollisionEnabled::NoCollision);
  Horizon=CreateDefaultSubobject<UProceduralMeshComponent>(TEXT("DistantHorizon"));Horizon->SetupAttachment(RootComponent);Horizon->SetCastShadow(false);Horizon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
  AmbientLight=CreateDefaultSubobject<USkyLightComponent>(TEXT("StoryAmbientLight"));AmbientLight->SetupAttachment(RootComponent);AmbientLight->SourceType=SLS_SpecifiedCubemap;AmbientLight->SetCubemap(LoadObject<UTextureCube>(nullptr,TEXT("/Engine/MapTemplates/Sky/DaylightAmbientCubemap.DaylightAmbientCubemap")));AmbientLight->SetIntensity(.9f);AmbientLight->SetCastShadows(false);
  Motes=CreateDefaultSubobject<UInstancedStaticMeshComponent>(TEXT("AmbientMotes"));Motes->SetupAttachment(RootComponent);Motes->SetCollisionEnabled(ECollisionEnabled::NoCollision);Motes->SetCastShadow(false);Motes->SetStaticMesh(LoadObject<UStaticMesh>(nullptr,TEXT("/Engine/BasicShapes/Sphere.Sphere")));
@@ -41,11 +46,12 @@ AEnigmaStoryEnvironment::AEnigmaStoryEnvironment(){
  Lens->Settings.bOverride_AmbientOcclusionIntensity=true;Lens->Settings.AmbientOcclusionIntensity=.65f;
  Atmosphere=CreateDefaultSubobject<UExponentialHeightFogComponent>(TEXT("StoryAtmosphere"));Atmosphere->SetupAttachment(RootComponent);Atmosphere->SetRelativeLocation(FVector(0,0,-150));Atmosphere->SetFogDensity(.014f);Atmosphere->SetFogHeightFalloff(.3f);Atmosphere->SetStartDistance(1300);Atmosphere->SetFogMaxOpacity(.65f);
 }
-FLinearColor AEnigmaStoryEnvironment::KeyColor() const{return Phase?FLinearColor(.78f,.23f,.18f):Definition.Theme==TEXT("forest")?FLinearColor(.72f,.86f,1):Definition.Theme==TEXT("snow")?FLinearColor(.65f,.8f,1):FLinearColor(1,.85f,.66f);}
-FLinearColor AEnigmaStoryEnvironment::RimColor() const{return Phase?FLinearColor(.65f,.08f,.3f):Definition.Accent;}
+FLinearColor AEnigmaStoryEnvironment::KeyColor() const{return Phase?FLinearColor(.78f,.23f,.18f):Definition.Theme==TEXT("forest")?FLinearColor(1,.83f,.58f):Definition.Theme==TEXT("snow")?FLinearColor(.65f,.8f,1):FLinearColor(1,.85f,.66f);}
+FLinearColor AEnigmaStoryEnvironment::RimColor() const{if(CurrentId==TEXT("forest"))return FLinearColor(.18f,.35f,.45f);return Phase?FLinearColor(.65f,.08f,.3f):Definition.Accent;}
 bool AEnigmaStoryEnvironment::Configure(const FString& Id,bool PhaseTwo){
  if(CurrentId==Id&&Phase==PhaseTwo&&TriangleCount>0)return true;
  const FEnigmaEnvironment* Found=Definitions().FindByPredicate([&](const FEnigmaEnvironment& D){return D.Id==Id;});if(!Found)return false;
+ BlenderForestLoaded=false;ForestTreeCount=0;ForestFernCount=0;ForestSet->SetVisibility(false);ForestTrees->SetVisibility(false);ForestFerns->SetVisibility(false);ForestTrees->ClearInstances();ForestFerns->ClearInstances();Atmosphere->SetVolumetricFog(false);Lens->Settings.bOverride_ColorContrast=false;Lens->Settings.ColorSaturation=FVector4(.96f,.96f,.96f,1);
  Definition=*Found;CurrentId=Id;Phase=PhaseTwo&&Found->HasPhase;AmbientTime=0;Pulse=0;
  Architecture->ClearAllMeshSections();Horizon->ClearAllMeshSections();for(auto Lamp:Lamps)Lamp->DestroyComponent();Lamps.Reset();Materials.Reset();Motes->ClearInstances();MoteSeeds.Reset();
  using namespace Scenery;Mesh Geo[17];FRandomStream Rand(1741+GetTypeHash(Id)%10000);
@@ -178,11 +184,11 @@ bool AEnigmaStoryEnvironment::Configure(const FString& Id,bool PhaseTwo){
  }
  // Small foreground ruins frame the shot, while the central battle lanes stay unobstructed.
  for(int Side:{-1,1}){if(!Forest)Column(FVector(Side*1650,200,-30),320);else Geo[3].Tube(FVector(Side*1600,180,-10),FVector(Side*1630,200,100),45,40,9);for(int I=0;I<6;I++)Geo[0].Rock(FVector(Side*(1400+I*85),200-I*170,-30),FVector(80,80,70+I*15),I+333);}
- TriangleCount=0;SurfaceFacingErrors=0;
- for(int I=0;I<17;I++){Geo[I].FinishForUnreal();SurfaceFacingErrors+=Geo[I].FacingErrors();auto Target=I==5?Horizon.Get():Architecture.Get();const int Section=I==5?0:I;Target->CreateMeshSection_LinearColor(Section,Geo[I].V,Geo[I].T,Geo[I].N,Geo[I].UV,Geo[I].C,Geo[I].Tangents,false);Target->SetMaterial(Section,Materials[I]);TriangleCount+=Geo[I].T.Num()/3;}
+ TriangleCount=0;SurfaceFacingErrors=0;BlenderForestLoaded=Id==TEXT("forest")&&ConfigureBlenderForest();
+ for(int I=0;I<17;I++){if(BlenderForestLoaded&&I!=5)continue;Geo[I].FinishForUnreal();SurfaceFacingErrors+=Geo[I].FacingErrors();auto Target=I==5?Horizon.Get():Architecture.Get();const int Section=I==5?0:I;Target->CreateMeshSection_LinearColor(Section,Geo[I].V,Geo[I].T,Geo[I].N,Geo[I].UV,Geo[I].C,Geo[I].Tangents,false);Target->SetMaterial(Section,Materials[I]);TriangleCount+=Geo[I].T.Num()/3;}
  Motes->SetMaterial(0,Materials[4]);
  for(int I=0;I<96;I++){FVector Seed(Rand.FRandRange(-2400,2400),Rand.FRandRange(-1500,800),Rand.FRandRange(30,1100));MoteSeeds.Add(Seed);Motes->AddInstance(FTransform(FRotator::ZeroRotator,Seed,FVector(.025f,.025f,.025f)));}
- for(int I=0;I<4;I++){auto Lamp=NewObject<UPointLightComponent>(this);AddInstanceComponent(Lamp);Lamp->SetupAttachment(RootComponent);Lamp->SetRelativeLocation(FVector((I-1.5f)*800,-850,200));Lamp->SetLightColor(Accent);Lamp->SetIntensity(16000);Lamp->SetAttenuationRadius(900);Lamp->SetCastShadows(false);Lamp->RegisterComponent();Lamps.Add(Lamp);}
+ if(!BlenderForestLoaded)for(int I=0;I<4;I++){auto Lamp=NewObject<UPointLightComponent>(this);AddInstanceComponent(Lamp);Lamp->SetupAttachment(RootComponent);Lamp->SetRelativeLocation(FVector((I-1.5f)*800,-850,200));Lamp->SetLightColor(Accent);Lamp->SetIntensity(16000);Lamp->SetAttenuationRadius(900);Lamp->SetCastShadows(false);Lamp->RegisterComponent();Lamps.Add(Lamp);}
  UE_LOG(LogTemp,Display,TEXT("STORY_ENVIRONMENT id=%s phase=%d triangles=%d art_materials=%d facing_errors=%d"),*CurrentId,Phase?2:1,TriangleCount,ArtMaterialCount,SurfaceFacingErrors);return TriangleCount>0;
 }
 void AEnigmaStoryEnvironment::SetPresentationVisible(bool Visible){SetActorHiddenInGame(!Visible);if(Lens)Lens->bEnabled=Visible;}
@@ -197,6 +203,7 @@ void AEnigmaStoryEnvironment::Tick(float Delta){
  }
  Motes->MarkRenderStateDirty();
  for(int Index:{2,5,6,9,10,12,15})if(Materials.IsValidIndex(Index))Materials[Index]->SetScalarParameterValue(TEXT("SceneTime"),AmbientTime);
+ for(int Index=17;Index<Materials.Num();Index++)Materials[Index]->SetScalarParameterValue(TEXT("SceneTime"),AmbientTime);
  for(int I=0;I<Lamps.Num();I++)Lamps[I]->SetIntensity(16000*(1+(Fire&&!ReducedMotion?.12f*FMath::Sin(AmbientTime*5+I):0)+Pulse*.35f));
  if(Materials.IsValidIndex(4))Materials[4]->SetScalarParameterValue(TEXT("Glow"),1.8f+Pulse*.5f);
 }

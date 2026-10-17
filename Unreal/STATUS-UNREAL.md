@@ -1,3 +1,7 @@
+## Floresta do Limiar no Blender — 17/10/2026
+
+Primeira região reconstruída com composição própria no Blender, ruína, terreno, raízes, riacho, grama e vegetação CC0 preparada para o jogo. São 79 árvores e 433 samambaias instanciadas. VER-FLORESTA-LIMIAR.cmd abre o local com save isolado. Arquivo .blend editável com imagens incorporadas, fontes, pesquisa de jogos atuais e capturas reais em Design/ForestLimiar. Este é um palco de combate/galeria; não adiciona exploração livre nem muda a arte dos personagens. Os outros cenários conservam o acabamento anterior.
+
 ## Refinamento artístico dos cenários — 17/10/2026
 
 Terreno contínuo, vegetação curva com vento, raízes contínuas, arquitetura perfilada, onze materiais novos com solo e casca PBR CC0, água translúcida, lava e chamas animadas. Correção da orientação das superfícies e revisão da iluminação. VER-CENARIOS-HISTORIA.cmd abre a versão nova em save isolado. Comparação e capturas reais em Design/StoryEnvironments. Arte procedural estilizada em desenvolvimento; esta etapa não adiciona modelos ou animações de personagens nem mapas exploráveis.

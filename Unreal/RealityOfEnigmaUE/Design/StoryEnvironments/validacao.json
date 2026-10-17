@@ -7,13 +7,13 @@
     {
       "captures": 21,
       "failures": 0,
-      "checks": 129,
+      "checks": 131,
       "resolution": "1280x720"
     },
     {
       "captures": 21,
       "failures": 0,
-      "checks": 129,
+      "checks": 131,
       "resolution": "2560x1080"
     }
   ],
@@ -40,13 +40,18 @@
     }
   ],
   "visual_review": {
-    "reviewed": "2026-10-17",
-    "captures": 42,
-    "formats": [
-      "1280x720",
-      "2560x1080"
-    ],
-    "notes": "Reviewed all environment/phase and native encounter contact sheets; full forest, garden and transformed arena captures; no shader placeholders. Procedural art remains stylized and unfinished."
+    "date": "2026-10-17",
+    "captures_with_interface": 42,
+    "clean_photo": "1600x900",
+    "notes": "Reviewed all locations/phase and native encounter contact sheets, clean forest photo, full native forest formation and ultrawide gallery; final stone moss uses surface shading, with no world-grid placeholders."
   },
-  "art_stage": "Refined procedural environments; character art and final realism remain separate work"
+  "art_stage": "Blender-authored forest with CC0 vegetation; other regions retain the previous art pass",
+  "forest": {
+    "unique_mesh_triangles": 186054,
+    "trees": 79,
+    "ferns": 433,
+    "embedded_blender_images": 17,
+    "reference_notes": "Design/ForestLimiar/REFERENCIAS.md",
+    "game_photo": "Design/ForestLimiar/floresta-na-unreal.png"
+  }
 }

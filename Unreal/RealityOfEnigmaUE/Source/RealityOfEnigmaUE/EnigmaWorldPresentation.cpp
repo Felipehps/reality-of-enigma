@@ -196,7 +196,8 @@ void AEnigmaWorldPresentation::PreviewEnvironment(const FString& Id,bool PhaseTw
  if(!StoryEnvironment||!StoryEnvironment->Configure(Id,PhaseTwo))return;
  StoryEnvironment->SetReducedMotion(ReducedMotion);StoryEnvironment->SetPresentationVisible(true);
  if(!Camera){Camera=GetWorld()->SpawnActor<ACameraActor>();Camera->GetCameraComponent()->SetFieldOfView(58);}
- Camera->SetActorLocation(FVector(120,3050,1320));Camera->SetActorRotation((FVector(0,-400,400)-Camera->GetActorLocation()).Rotation());
+ Camera->SetActorLocation(Id==TEXT("forest")?FVector(120,3100,850):FVector(120,3050,1320));Camera->SetActorRotation(((Id==TEXT("forest")?FVector(0,-1400,400):FVector(0,-400,400))-Camera->GetActorLocation()).Rotation());
+ KeyLight->SetRelativeRotation(Id==TEXT("forest")?FRotator(-28,-35,0):FRotator(-38,-90,0));
  if(auto PC=UGameplayStatics::GetPlayerController(this,0))PC->SetViewTarget(Camera);
  Light->SetLightColor(StoryEnvironment->KeyColor());KeyLight->SetLightColor(StoryEnvironment->KeyColor());RimLight->SetLightColor(StoryEnvironment->RimColor());
  for(auto C:Scenery)C->SetVisibility(false);if(TripoArena)TripoArena->SetVisibility(false);TripoArenaEnabled=false;

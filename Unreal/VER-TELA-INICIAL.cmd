@@ -17,6 +17,11 @@ if exist "%~dp0RealityOfEnigma-Unreal-Arte\Windows\RealityOfEnigmaUE.exe" (
  set "GAME=%~dp0RealityOfEnigma-Unreal-Arte\Windows\RealityOfEnigmaUE.exe"
  set "NEW_SAVE=%~dp0RealityOfEnigma-Unreal-Arte\Windows\RealityOfEnigmaUE\Saved"
 )
+if exist "%~dp0RealityOfEnigma-Unreal-Floresta\Windows\RealityOfEnigmaUE.exe" (
+ if exist "%~dp0RealityOfEnigma-Unreal-Arte\Windows\RealityOfEnigmaUE\Saved\Campaign\save-v1.json" set "OLD_SAVE=%~dp0RealityOfEnigma-Unreal-Arte\Windows\RealityOfEnigmaUE\Saved"
+ set "GAME=%~dp0RealityOfEnigma-Unreal-Floresta\Windows\RealityOfEnigmaUE.exe"
+ set "NEW_SAVE=%~dp0RealityOfEnigma-Unreal-Floresta\Windows\RealityOfEnigmaUE\Saved"
+)
 if not exist "%NEW_SAVE%" mkdir "%NEW_SAVE%"
 if not exist "%NEW_SAVE%\Campaign\save-v1.json" if exist "%OLD_SAVE%\Campaign\save-v1.json" (
  if not exist "%NEW_SAVE%\Campaign" mkdir "%NEW_SAVE%\Campaign"

@@ -38,6 +38,15 @@ UEnigmaGameInstance* AEnigmaCampaignMode::Game(){return Cast<UEnigmaGameInstance
 TSharedPtr<FJsonObject> AEnigmaCampaignMode::DisplayState(){return AnimationAge>=0&&AnimationDisplay?AnimationDisplay:Game()->State;}
 void AEnigmaCampaignMode::BeginPlay(){
  Super::BeginPlay();FParse::Value(FCommandLine::Get(),TEXT("EnigmaSceneryTour="),SceneryTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaMouseTour="),MouseTourFolder);if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaMousePreview")))GetWorldTimerManager().SetTimerForNextTick([this](){Start(TEXT("demo"));Action(TEXT("page"),TEXT("home"));});FParse::Value(FCommandLine::Get(),TEXT("EnigmaChronicleTour="),ChronicleTourFolder);if(!ChronicleTourFolder.IsEmpty()||FParse::Param(FCommandLine::Get(),TEXT("EnigmaChroniclePreview")))Page=TEXT("routes");FParse::Value(FCommandLine::Get(),TEXT("EnigmaHomeTour="),HomeTourFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaCombatReplay="),CombatReplayFolder);FParse::Value(FCommandLine::Get(),TEXT("EnigmaUITour="),UITourFolder);WorldArt=GetWorld()->SpawnActor<AEnigmaWorldPresentation>();
+ FString ForestCapture;if(FParse::Value(FCommandLine::Get(),TEXT("EnigmaForestCapture="),ForestCapture)){
+  FTimerHandle Photo;GetWorldTimerManager().SetTimer(Photo,[this,ForestCapture](){
+   const auto Env=WorldArt?WorldArt->Environment():nullptr;const bool Ready=Page==TEXT("scenery")&&Env&&Env->BlenderForestLoaded;
+   UE_LOG(LogTemp,Display,TEXT("FOREST_PHOTO_RESULT ready=%d trees=%d ferns=%d"),Ready?1:0,Env?Env->ForestTreeCount:0,Env?Env->ForestFernCount:0);
+   if(Ready)FScreenshotRequest::RequestScreenshot(FPaths::ConvertRelativePathToFull(ForestCapture),true,false);
+   FTimerHandle Exit;GetWorldTimerManager().SetTimer(Exit,[Ready](){FPlatformMisc::RequestExitWithStatus(false,Ready?0:1);},1.4f,false);
+  },7.f,false);
+ }
+
  const FString Pref=FPaths::ProjectSavedDir()/TEXT("EnigmaPreferences.ini");GConfig->GetFloat(TEXT("Audio"),TEXT("Volume"),Volume,Pref);GConfig->GetBool(TEXT("Visual"),TEXT("ReducedMotion"),ReducedMotion,Pref);
  WorldArt->ReducedMotion=ReducedMotion;
  if(!UITourFolder.IsEmpty()&&FParse::Param(FCommandLine::Get(),TEXT("EnigmaModelTour"))){UITourIndex=30;UITourNext=1;}
@@ -75,7 +84,7 @@ void AEnigmaCampaignMode::Tick(float Dt){
  if(ModelPreview)ModelPreview->SetActive(Page==TEXT("reference")&&Selected==TEXT("hajun")&&Reference3D);
  if(!UITourFolder.IsEmpty())TickUITour();
  if(!SceneryTourFolder.IsEmpty())TickSceneryTour();
- if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaSceneryPreview"))&&Clock<1&&Page==TEXT("home"))Action(TEXT("scenery"));
+ if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaSceneryPreview"))&&Clock<1&&Page==TEXT("home")){if(FParse::Param(FCommandLine::Get(),TEXT("EnigmaForestPreview")))SceneryIndex=1;Action(TEXT("scenery"));}
  if(!HomeTourFolder.IsEmpty())TickHomeTour();
  if(!ChronicleTourFolder.IsEmpty())TickChronicleTour();
  if(!MouseTourFolder.IsEmpty())TickMouseTour();
@@ -220,7 +229,7 @@ void AEnigmaCampaignHUD::DrawHUD(){
  auto State=Mode->DisplayState();auto Save=O(State,TEXT("save"));auto Catalog=O(State,TEXT("catalog"));auto Inventory=O(Save,TEXT("Inventory"));
  auto HeroName=[&](const FString& Id){const FString Name=S(Find(A(Catalog,TEXT("Characters")),Id),TEXT("Name"));return Name.IsEmpty()?Id:Name;};
  const FString Page=Mode->Page;
- if(Page==TEXT("scenery")){DrawEnvironmentPreview();return;}
+ if(Page==TEXT("scenery")){if(!FParse::Param(FCommandLine::Get(),TEXT("EnigmaEnvironmentPhoto")))DrawEnvironmentPreview();return;}
  if(Page==TEXT("home")||Page==TEXT("extras")){DrawHome();return;}
  if(Page!=TEXT("battle"))DrawMenuFrame(Page);
  Text(TEXT("REALITY OF ENIGMA"),40,24,FLinearColor(.83f,.62f,.32f),1.5f);

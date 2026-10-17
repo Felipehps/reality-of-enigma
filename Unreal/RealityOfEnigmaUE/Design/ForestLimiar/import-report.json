@@ -1,0 +1,55 @@
+{
+  "LimiarTree": {
+    "extent": [
+      145.08135986328125,
+      212.15886688232422,
+      228.85560429096222
+    ],
+    "origin": [
+      14.05047607421875,
+      76.31891632080078,
+      226.3098315000534
+    ],
+    "slots": [
+      "TreeBranch",
+      "TreeLeaves",
+      "TreeTrunk"
+    ]
+  },
+  "LimiarFern": {
+    "extent": [
+      49.487369537353516,
+      44.684486389160156,
+      21.38473641872406
+    ],
+    "origin": [
+      -3.3268890380859375,
+      2.4970359802246094,
+      18.33370840549469
+    ],
+    "slots": [
+      "ForestFern"
+    ]
+  },
+  "LimiarClearing": {
+    "extent": [
+      5000.00048828125,
+      5000.00048828125,
+      640.8363647460938
+    ],
+    "origin": [
+      0.0,
+      1800.0,
+      367.00543212890625
+    ],
+    "slots": [
+      "ForestStone",
+      "ForestMoss",
+      "ForestWood",
+      "ForestCrystal",
+      "ForestGround",
+      "ForestWater",
+      "ForestGrass"
+    ]
+  }
+}
